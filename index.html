@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Homework M.113 - V.1.58</title>
+<title>Homework M.113 - V.1.54</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -29,29 +29,19 @@
 
 <!-- LOGIN -->
 <div id="login-page" class="w-full max-w-sm bg-white/85 backdrop-blur-2xl rounded-3xl p-8 border border-white/60 shadow-xl relative z-10">
-  <div class="text-center mb-6">
+  <div class="text-center mb-8">
     <div class="w-14 h-14 bg-gradient-to-br from-[#FF75BC] via-purple-500 to-[#50D8FF] rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
       <i class="fa-solid fa-book-open-reader text-2xl text-white"></i>
     </div>
     <h1 class="text-2xl font-extrabold text-slate-800">Homework M.113</h1>
-    <p class="text-xs text-slate-400 mt-1 font-semibold text-pink-600">ระบบการบ้านห้อง M.113 (V.1.58)</p>
+    <p class="text-xs text-slate-400 mt-1 font-semibold text-pink-600">ระบบการบ้านห้อง M.113 (V.1.54)</p>
   </div>
-  
-  <div class="space-y-3 mb-6">
-    <div>
-      <label class="block text-[11px] font-bold text-slate-600 mb-1">ชื่อผู้ใช้งาน (USERNAME)</label>
-      <input type="text" id="username" placeholder="พิมพ์ชื่อผู้ใช้งานของคุณ"
-        onkeydown="if(event.key==='Enter')login()"
-        class="w-full px-4 py-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-semibold outline-none focus:border-[#FF75BC]">
-    </div>
-    <div>
-      <label class="block text-[11px] font-bold text-slate-600 mb-1">รหัสผ่าน (PASSWORD - เฉพาะ Admin)</label>
-      <input type="password" id="password" placeholder="กรอกรหัสผ่าน (ถ้ามี)"
-        onkeydown="if(event.key==='Enter')login()"
-        class="w-full px-4 py-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-semibold outline-none focus:border-[#FF75BC]">
-    </div>
+  <div class="space-y-1.5 mb-6">
+    <label class="block text-[11px] font-bold text-slate-600">ชื่อผู้ใช้งาน (USERNAME)</label>
+    <input type="text" id="username" placeholder="พิมพ์ชื่อผู้ใช้งานของคุณ"
+      onkeydown="if(event.key==='Enter')login()"
+      class="w-full px-4 py-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-semibold outline-none focus:border-[#FF75BC]">
   </div>
-
   <button id="login-btn" onclick="login()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#FF75BC] to-rose-400 text-white font-bold text-xs shadow-lg">
     เข้าสู่ระบบ
   </button>
@@ -74,9 +64,11 @@
   </div>
 
   <div class="space-y-2 mb-4">
-    <div class="flex bg-slate-100 p-1 rounded-2xl text-center text-xs font-bold gap-1">
+    <!-- เมנו 3 ปุ่มด้านบน -->
+    <div class="flex bg-slate-100 p-1 rounded-2xl text-center text-[11px] font-bold gap-1">
       <button id="tab-pending" onclick="switchTab('pending')" class="flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white">งานค้าง</button>
       <button id="tab-calendar" onclick="switchTab('calendar')" class="flex-1 py-2.5 rounded-xl text-slate-500">ปฏิทินงาน</button>
+      <button id="tab-tracking" onclick="switchTab('tracking')" class="flex-1 py-2.5 rounded-xl text-slate-500">ติดตามงานค้าง</button>
     </div>
     <div id="creator-action-buttons" class="grid grid-cols-2 gap-2">
       <button onclick="toggleAddForm()" class="py-2.5 rounded-2xl bg-[#FF75BC] text-white font-bold text-xs"><i class="fa-solid fa-plus"></i> เพิ่มงานค้าง</button>
@@ -84,18 +76,9 @@
     </div>
   </div>
 
-  <!-- เปลี่ยนแถบ NOTICE เป็นระบบติดตามงานค้างและตัวกรองสถานะ -->
-  <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm space-y-2 mb-4">
-    <div class="flex items-center justify-between text-xs">
-      <span class="bg-[#FF75BC] text-white text-[10px] font-bold px-2.5 py-1 rounded-xl"><i class="fa-solid fa-list-check"></i> ติดตามงานค้าง</span>
-      <span id="notice-summary" class="text-slate-500 text-[11px] font-semibold">ทั้งหมด 0 รายการ</span>
-    </div>
-    <div class="flex items-center gap-1 overflow-x-auto pt-1">
-      <button onclick="setFilter('all')" id="filter-all" class="flex-1 py-1.5 rounded-xl text-[10px] font-bold bg-[#FF75BC] text-white transition">ทั้งหมด</button>
-      <button onclick="setFilter('pending')" id="filter-pending" class="flex-1 py-1.5 rounded-xl text-[10px] font-bold bg-slate-100 text-slate-600 transition">รอดำเนินการ</button>
-      <button onclick="setFilter('doing')" id="filter-doing" class="flex-1 py-1.5 rounded-xl text-[10px] font-bold bg-slate-100 text-slate-600 transition">กำลังทำ</button>
-      <button onclick="setFilter('done')" id="filter-done" class="flex-1 py-1.5 rounded-xl text-[10px] font-bold bg-slate-100 text-slate-600 transition">ส่งแล้ว</button>
-    </div>
+  <div class="bg-slate-100 p-2.5 rounded-2xl flex items-center justify-between mb-4 text-xs">
+    <span class="bg-[#FF75BC] text-white text-[10px] font-bold px-2.5 py-1 rounded-xl">NOTICE</span>
+    <span id="notice-text" class="text-slate-500 text-[11px]">แสดงรายการการบ้านทั้งหมด</span>
   </div>
 
   <!-- CALENDAR -->
@@ -130,6 +113,17 @@
     </div>
   </div>
 
+  <!-- TRACKING VIEW -->
+  <div id="view-tracking" class="hidden space-y-4">
+    <div class="bg-white rounded-3xl p-4 border shadow-sm space-y-3">
+      <div class="flex justify-between items-center">
+        <span class="text-xs font-extrabold text-slate-800"><i class="fa-solid fa-list-check text-pink-500"></i> ติดตามงานค้างทั้งหมด</span>
+        <span id="tracking-count" class="bg-pink-100 text-pink-700 text-[10px] font-bold px-2 py-0.5 rounded-full">0 ITEMS</span>
+      </div>
+      <div id="tracking-task-list" class="space-y-2.5 max-h-[350px] overflow-y-auto"></div>
+    </div>
+  </div>
+
   <!-- TASKS -->
   <div id="view-tasks" class="space-y-4">
     <div id="admin-form" class="hidden bg-slate-50 p-4 rounded-2xl border space-y-3">
@@ -141,29 +135,21 @@
         <datalist id="subject-options"></datalist>
       </div>
       <input id="task-detail" placeholder="รายละเอียดการบ้าน" class="w-full p-2.5 text-xs bg-white rounded-xl border">
-      
-      <div class="grid grid-cols-1 gap-2">
-        <label class="block text-[11px] font-bold text-slate-600">สถานะงานเริ่มต้น:</label>
-        <select id="task-status-input" class="w-full p-2.5 text-xs bg-white rounded-xl border font-bold text-slate-700">
-          <option value="pending">🔴 รอดำเนินการ</option>
-          <option value="doing">🟡 กำลังทำ</option>
-          <option value="done">🟢 ส่งแล้ว / เสร็จสิ้น</option>
-        </select>
-      </div>
-
       <div class="grid grid-cols-2 gap-2">
         <label class="flex items-center bg-white border rounded-xl px-2 py-2"><span class="text-[11px] mr-1">วันสั่ง:</span><input type="date" id="assign-date-input" class="w-full text-xs"></label>
         <label class="flex items-center bg-white border rounded-xl px-2 py-2"><span class="text-[11px] mr-1 text-rose-500">วันส่ง:</span><input type="date" id="due-date-input" class="w-full text-xs"></label>
       </div>
       <button id="add-task-btn" onclick="addTask()" class="w-full py-2.5 bg-[#FF75BC] text-white font-bold rounded-xl text-xs">บันทึกข้อมูล</button>
     </div>
-
     <div class="bg-amber-50 border border-amber-100 rounded-3xl p-4 space-y-3">
       <div class="flex items-center gap-2 text-amber-800 text-xs font-bold"><i class="fa-solid fa-thumbtack text-amber-500"></i> ปักหมุดไว้</div>
       <div id="pinned-list" class="space-y-2.5"></div>
     </div>
-
     <div class="space-y-2.5">
+      <div class="flex justify-between items-center">
+        <span class="text-xs font-extrabold text-slate-400">รายการงานค้าง</span>
+        <span id="task-count" class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full">0 ITEMS</span>
+      </div>
       <div id="task-list" class="space-y-2.5 max-h-[300px] overflow-y-auto"></div>
     </div>
   </div>
@@ -228,13 +214,12 @@
   </div>
 </div>
 
-<!-- FULL JAVASCRIPT SYSTEM -->
+<!-- JAVASCRIPT SYSTEM -->
 <script>
 'use strict';
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwIlacaSbd6ZVh5jRd_s7uU1lmK6bmg_31yzUywjknR7xPZ7BDD_RlAYgQHtGfvPRu/exec';
 let currentRole = 'member', currentUsername = '', currentTab = 'pending', currentDateTime = new Date(), selectedDateStr = getFormattedDate(new Date());
 let tasks = [], dailyEvents = {}, codes = [], subjects = [], allowedUsersList = [];
-let currentFilter = 'all';
 let lastActivityTime = Date.now();
 const IDLE_TIMEOUT_MS = 7 * 60 * 1000;
 
@@ -283,7 +268,7 @@ async function fetchAllData(showAlert=false) {
       fetchJSON(`${SCRIPT_URL}?action=getOptions&t=${Date.now()}`)
     ]);
     if (tasksRes.status === 'fulfilled' && Array.isArray(tasksRes.value)) {
-      tasks = tasksRes.value.map(t => ({...t, id:String(t.id), status: t.status || 'pending', isPinned:String(t.isPinned) === 'true'}));
+      tasks = tasksRes.value.map(t => ({...t, id:String(t.id), isPinned:String(t.isPinned) === 'true'}));
       cacheTasks();
     }
     if (usersRes.status === 'fulfilled' && Array.isArray(usersRes.value)) {
@@ -308,25 +293,7 @@ async function fetchAllData(showAlert=false) {
 
 async function login() {
   const raw = document.getElementById('username').value.trim().toLowerCase();
-  const pwd = document.getElementById('password').value.trim();
   if (!raw) { alert('กรุณากรอกชื่อผู้ใช้งาน'); return; }
-
-  if (raw === 'admin') {
-    if (pwd === '1234') {
-      currentRole = 'admin';
-      currentUsername = raw;
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('userRole', currentRole);
-      localStorage.setItem('usernameKey', currentUsername);
-      localStorage.setItem('userName', 'Administrator');
-      openDashboard('Administrator');
-      return;
-    } else {
-      alert('รหัสผ่าน Admin ไม่ถูกต้อง');
-      return;
-    }
-  }
-
   showLoading('กำลังตรวจสอบชื่อในระบบ...');
   const btn = document.getElementById('login-btn'); btn.disabled = true;
   await fetchAllData(false);
@@ -365,37 +332,26 @@ function switchTab(tab) {
   currentTab = tab;
   document.getElementById('tab-pending').className = tab === 'pending' ? 'flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white' : 'flex-1 py-2.5 rounded-xl text-slate-500';
   document.getElementById('tab-calendar').className = tab === 'calendar' ? 'flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white' : 'flex-1 py-2.5 rounded-xl text-slate-500';
+  document.getElementById('tab-tracking').className = tab === 'tracking' ? 'flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white' : 'flex-1 py-2.5 rounded-xl text-slate-500';
+  
   document.getElementById('view-tasks').classList.toggle('hidden', tab !== 'pending');
   document.getElementById('view-calendar').classList.toggle('hidden', tab !== 'calendar');
-}
-
-function setFilter(status) {
-  currentFilter = status;
-  ['all', 'pending', 'doing', 'done'].forEach(s => {
-    const btn = document.getElementById(`filter-${s}`);
-    if (s === status) {
-      btn.className = "flex-1 py-1.5 rounded-xl text-[10px] font-bold bg-[#FF75BC] text-white transition";
-    } else {
-      btn.className = "flex-1 py-1.5 rounded-xl text-[10px] font-bold bg-slate-100 text-slate-600 transition";
-    }
-  });
-  renderTasks();
+  document.getElementById('view-tracking').classList.toggle('hidden', tab !== 'tracking');
 }
 
 function renderTasks() {
   const listEl = document.getElementById('task-list');
   const pinnedEl = document.getElementById('pinned-list');
-  const summaryEl = document.getElementById('notice-summary');
-  listEl.innerHTML = ''; pinnedEl.innerHTML = '';
+  const countEl = document.getElementById('task-count');
+  const trackingListEl = document.getElementById('tracking-task-list');
+  const trackingCountEl = document.getElementById('tracking-count');
+
+  listEl.innerHTML = ''; pinnedEl.innerHTML = ''; trackingListEl.innerHTML = '';
   
   const pinned = tasks.filter(t => t.isPinned);
-  let active = tasks.filter(t => !t.isPinned);
-
-  if (currentFilter !== 'all') {
-    active = active.filter(t => (t.status || 'pending') === currentFilter);
-  }
-
-  summaryEl.textContent = `ทั้งหมด ${tasks.length} รายการ`;
+  const active = tasks.filter(t => !t.isPinned);
+  countEl.textContent = `${tasks.length} ITEMS`;
+  trackingCountEl.textContent = `${tasks.length} ITEMS`;
 
   if (pinned.length === 0) {
     pinnedEl.innerHTML = '<p class="text-[11px] text-amber-600">ไม่มีรายการปักหมุด</p>';
@@ -404,46 +360,26 @@ function renderTasks() {
   }
 
   if (active.length === 0) {
-    listEl.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">ไม่พบรายการงานตามเงื่อนไข</div>';
+    listEl.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">ไม่มีงานค้างในระบบ เยี่ยมมาก!</div>';
   } else {
     active.forEach(t => { listEl.appendChild(createTaskCard(t)); });
   }
-}
 
-function toggleTaskStatus(id) {
-  const task = tasks.find(t => t.id === id);
-  if (!task) return;
-  
-  const statuses = ['pending', 'doing', 'done'];
-  let nextIndex = (statuses.indexOf(task.status || 'pending') + 1) % statuses.length;
-  task.status = statuses[nextIndex];
-  
-  cacheTasks();
-  renderTasks();
-  selectDate(selectedDateStr);
+  if (tasks.length === 0) {
+    trackingListEl.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">ไม่มีรายการติดตามงานค้าง</div>';
+  } else {
+    tasks.forEach(t => { trackingListEl.appendChild(createTaskCard(t)); });
+  }
 }
 
 function createTaskCard(t) {
   const div = document.createElement('div');
   div.className = "bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm flex items-start justify-between gap-2";
-  
-  let statusBadge = '';
-  if (t.status === 'done') {
-    statusBadge = `<button onclick="toggleTaskStatus('${t.id}')" class="bg-emerald-100 text-emerald-700 text-[10px] font-extrabold px-2 py-0.5 rounded-md hover:opacity-80">✓ ส่งแล้ว</button>`;
-  } else if (t.status === 'doing') {
-    statusBadge = `<button onclick="toggleTaskStatus('${t.id}')" class="bg-amber-100 text-amber-700 text-[10px] font-extrabold px-2 py-0.5 rounded-md hover:opacity-80">⏳ กำลังทำ</button>`;
-  } else {
-    statusBadge = `<button onclick="toggleTaskStatus('${t.id}')" class="bg-rose-100 text-rose-700 text-[10px] font-extrabold px-2 py-0.5 rounded-md hover:opacity-80">📌 รอดำเนินการ</button>`;
-  }
-
   div.innerHTML = `
-    <div class="space-y-1 w-full">
-      <div class="flex items-center justify-between gap-1.5">
-        <div class="flex items-center gap-1.5">
-          <span class="bg-pink-100 text-pink-700 text-[10px] font-bold px-2 py-0.5 rounded-md">${escapeHtml(t.code)}</span>
-          <span class="text-xs font-bold text-slate-800">${escapeHtml(t.subject)}</span>
-        </div>
-        ${statusBadge}
+    <div class="space-y-1">
+      <div class="flex items-center gap-1.5">
+        <span class="bg-pink-100 text-pink-700 text-[10px] font-bold px-2 py-0.5 rounded-md">${escapeHtml(t.code)}</span>
+        <span class="text-xs font-bold text-slate-800">${escapeHtml(t.subject)}</span>
       </div>
       <p class="text-xs text-slate-600">${escapeHtml(t.detail)}</p>
       <p class="text-[10px] text-slate-400">กำหนดส่ง: <span class="text-rose-500 font-bold">${formatThaiShortDate(t.dueDate)}</span></p>
@@ -539,12 +475,11 @@ async function addTask() {
   const code = document.getElementById('task-code').value.trim();
   const subject = document.getElementById('task-subject').value.trim();
   const detail = document.getElementById('task-detail').value.trim();
-  const status = document.getElementById('task-status-input').value;
   const assignDate = document.getElementById('assign-date-input').value;
   const dueDate = document.getElementById('due-date-input').value;
   if (!code || !subject || !detail || !dueDate) { alert('กรุณากรอกข้อมูลให้ครบถ้วน'); return; }
   
-  const newTask = { id: String(Date.now()), code, subject, detail, status, assignDate, dueDate, isPinned: false };
+  const newTask = { id: String(Date.now()), code, subject, detail, assignDate, dueDate, isPinned: false };
   tasks.unshift(newTask);
   cacheTasks();
   renderTasks();
@@ -563,7 +498,7 @@ function updateDatalists() {
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 function openLogsModal() { document.getElementById('logs-modal').classList.remove('hidden'); loadLogs(); }
 function openManageModal() { document.getElementById('manage-modal').classList.remove('hidden'); }
-function clearLogs() { document.getElementById('logs-status').textContent = 'ไม่มีประวัติการใช้งาน'; }
+function clearLogs() { alert('ล้างประวัติเรียบร้อย'); }
 function loadLogs() { document.getElementById('logs-status').textContent = 'ไม่มีประวัติการใช้งาน'; }
 function loadOptions() { document.getElementById('manage-status').textContent = 'โหลดตัวเลือกสำเร็จ'; }
 </script>
