@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Homework M.113 - V.1.55</title>
+<title>Homework M.113 - V.1.56</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -34,7 +34,7 @@
       <i class="fa-solid fa-book-open-reader text-2xl text-white"></i>
     </div>
     <h1 class="text-2xl font-extrabold text-slate-800">Homework M.113</h1>
-    <p class="text-xs text-slate-400 mt-1 font-semibold text-pink-600">ระบบการบ้านห้อง M.113 (V.1.55)</p>
+    <p class="text-xs text-slate-400 mt-1 font-semibold text-pink-600">ระบบการบ้านห้อง M.113 (V.1.56)</p>
   </div>
   
   <div class="space-y-3 mb-6">
@@ -132,6 +132,17 @@
         <datalist id="subject-options"></datalist>
       </div>
       <input id="task-detail" placeholder="รายละเอียดการบ้าน" class="w-full p-2.5 text-xs bg-white rounded-xl border">
+      
+      <!-- เพิ่มตัวเลือกสถานะในฟอร์ม -->
+      <div class="grid grid-cols-1 gap-2">
+        <label class="block text-[11px] font-bold text-slate-600">สถานะงานเริ่มต้น:</label>
+        <select id="task-status-input" class="w-full p-2.5 text-xs bg-white rounded-xl border font-bold text-slate-700">
+          <option value="pending">🔴 รอดำเนินการ</option>
+          <option value="doing">🟡 กำลังทำ</option>
+          <option value="done">🟢 ส่งแล้ว / เสร็จสิ้น</option>
+        </select>
+      </div>
+
       <div class="grid grid-cols-2 gap-2">
         <label class="flex items-center bg-white border rounded-xl px-2 py-2"><span class="text-[11px] mr-1">วันสั่ง:</span><input type="date" id="assign-date-input" class="w-full text-xs"></label>
         <label class="flex items-center bg-white border rounded-xl px-2 py-2"><span class="text-[11px] mr-1 text-rose-500">วันส่ง:</span><input type="date" id="due-date-input" class="w-full text-xs"></label>
@@ -265,7 +276,7 @@ async function fetchAllData(showAlert=false) {
       fetchJSON(`${SCRIPT_URL}?action=getOptions&t=${Date.now()}`)
     ]);
     if (tasksRes.status === 'fulfilled' && Array.isArray(tasksRes.value)) {
-      tasks = tasksRes.value.map(t => ({...t, id:String(t.id), isPinned:String(t.isPinned) === 'true'}));
+      tasks = tasksRes.value.map(t => ({...t, id:String(t.id), status: t.status || 'pending', isPinned:String(t.isPinned) === 'true'}));
       cacheTasks();
     }
     if (usersRes.status === 'fulfilled' && Array.isArray(usersRes.value)) {
@@ -293,9 +304,8 @@ async function login() {
   const pwd = document.getElementById('password').value.trim();
   if (!raw) { alert('กรุณากรอกชื่อผู้ใช้งาน'); return; }
 
-  // ถ้าพิมพ์ admin เข้าสู่ระบบโดยใช้รหัสผ่านแบบไม่ต้องซิงค์
   if (raw === 'admin') {
-    if (pwd === '1234') { // กำหนดรหัสผ่านแอดมินตรงนี้ (สามารถเปลี่ยนเป็นรหัสที่ต้องการได้)
+    if (pwd === '1234') {
       currentRole = 'admin';
       currentUsername = raw;
       localStorage.setItem('isLoggedIn', 'true');
@@ -310,7 +320,6 @@ async function login() {
     }
   }
 
-  // สำหรับผู้ใช้ทั่วไป (Member) ใช้ระบบเดิมตามปกติ
   showLoading('กำลังตรวจสอบชื่อในระบบ...');
   const btn = document.getElementById('login-btn'); btn.disabled = true;
   await fetchAllData(false);
@@ -376,14 +385,40 @@ function renderTasks() {
   }
 }
 
+function toggleTaskStatus(id) {
+  const task = tasks.find(t => t.id === id);
+  if (!task) return;
+  
+  const statuses = ['pending', 'doing', 'done'];
+  let nextIndex = (statuses.indexOf(task.status || 'pending') + 1) % statuses.length;
+  task.status = statuses[nextIndex];
+  
+  cacheTasks();
+  renderTasks();
+  selectDate(selectedDateStr);
+}
+
 function createTaskCard(t) {
   const div = document.createElement('div');
   div.className = "bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm flex items-start justify-between gap-2";
+  
+  let statusBadge = '';
+  if (t.status === 'done') {
+    statusBadge = `<button onclick="toggleTaskStatus('${t.id}')" class="bg-emerald-100 text-emerald-700 text-[10px] font-extrabold px-2 py-0.5 rounded-md hover:opacity-80">✓ ส่งแล้ว</button>`;
+  } else if (t.status === 'doing') {
+    statusBadge = `<button onclick="toggleTaskStatus('${t.id}')" class="bg-amber-100 text-amber-700 text-[10px] font-extrabold px-2 py-0.5 rounded-md hover:opacity-80">⏳ กำลังทำ</button>`;
+  } else {
+    statusBadge = `<button onclick="toggleTaskStatus('${t.id}')" class="bg-rose-100 text-rose-700 text-[10px] font-extrabold px-2 py-0.5 rounded-md hover:opacity-80">📌 รอดำเนินการ</button>`;
+  }
+
   div.innerHTML = `
-    <div class="space-y-1">
-      <div class="flex items-center gap-1.5">
-        <span class="bg-pink-100 text-pink-700 text-[10px] font-bold px-2 py-0.5 rounded-md">${escapeHtml(t.code)}</span>
-        <span class="text-xs font-bold text-slate-800">${escapeHtml(t.subject)}</span>
+    <div class="space-y-1 w-full">
+      <div class="flex items-center justify-between gap-1.5">
+        <div class="flex items-center gap-1.5">
+          <span class="bg-pink-100 text-pink-700 text-[10px] font-bold px-2 py-0.5 rounded-md">${escapeHtml(t.code)}</span>
+          <span class="text-xs font-bold text-slate-800">${escapeHtml(t.subject)}</span>
+        </div>
+        ${statusBadge}
       </div>
       <p class="text-xs text-slate-600">${escapeHtml(t.detail)}</p>
       <p class="text-[10px] text-slate-400">กำหนดส่ง: <span class="text-rose-500 font-bold">${formatThaiShortDate(t.dueDate)}</span></p>
@@ -479,11 +514,12 @@ async function addTask() {
   const code = document.getElementById('task-code').value.trim();
   const subject = document.getElementById('task-subject').value.trim();
   const detail = document.getElementById('task-detail').value.trim();
+  const status = document.getElementById('task-status-input').value;
   const assignDate = document.getElementById('assign-date-input').value;
   const dueDate = document.getElementById('due-date-input').value;
   if (!code || !subject || !detail || !dueDate) { alert('กรุณากรอกข้อมูลให้ครบถ้วน'); return; }
   
-  const newTask = { id: String(Date.now()), code, subject, detail, assignDate, dueDate, isPinned: false };
+  const newTask = { id: String(Date.now()), code, subject, detail, status, assignDate, dueDate, isPinned: false };
   tasks.unshift(newTask);
   cacheTasks();
   renderTasks();
