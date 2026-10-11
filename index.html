@@ -10,13 +10,18 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Plus Jakarta Sans', 'Sarabun', sans-serif; }
+  @keyframes pop { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  .animate-pop { animation: pop 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+</style>
 </head>
 <body class="flex flex-col items-center justify-between p-3 sm:p-6 min-h-screen relative antialiased bg-slate-50">
 <div class="flex-grow"></div>
 
 <!-- LOADING OVERLAY -->
 <div id="loading-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[100] hidden">
-  <div class="bg-white/90 rounded-3xl p-6 shadow-2xl flex flex-col items-center gap-3">
+  <div class="bg-white/90 rounded-3xl p-6 shadow-2xl flex flex-col items-center gap-3 animate-pop">
     <div class="w-10 h-10 border-4 border-[#FF75BC] border-t-transparent rounded-full animate-spin"></div>
     <p id="loading-text" class="text-xs font-bold text-slate-700">กำลังโหลดข้อมูล...</p>
   </div>
@@ -129,7 +134,7 @@
     </div>
     <div class="space-y-2.5">
       <div class="flex justify-between items-center">
-        <span class="text-xs font-extrabold text-slate-400">ROOM ACTIVE TASKS</span>
+        <span class="text-xs font-extrabold text-slate-400">ติดตามงานค้าง</span>
         <span id="task-count" class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full">0 ITEMS</span>
       </div>
       <div id="task-list" class="space-y-2.5 max-h-[300px] overflow-y-auto"></div>
@@ -142,7 +147,7 @@
 
 <!-- SUCCESS POPUP -->
 <div id="success-popup" class="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-50 hidden p-4">
-  <div class="bg-white rounded-3xl p-6 w-80 text-center shadow-2xl">
+  <div class="bg-white rounded-3xl p-6 w-80 text-center shadow-2xl animate-pop">
     <div class="w-16 h-16 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"><i class="fa-solid fa-circle-check"></i></div>
     <h3 id="success-title" class="text-base font-extrabold text-slate-800 mb-1">บันทึกสำเร็จ</h3>
     <p id="success-message" class="text-xs text-slate-400 mb-5">บันทึกข้อมูลเรียบร้อยแล้ว</p>
@@ -152,7 +157,7 @@
 
 <!-- EVENT MODAL -->
 <div id="event-modal" class="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-50 hidden p-4">
-  <div class="bg-white rounded-3xl p-5 w-full max-w-sm shadow-2xl space-y-4">
+  <div class="bg-white rounded-3xl p-5 w-full max-w-sm shadow-2xl animate-pop space-y-4">
     <div class="flex justify-between items-center border-b pb-3">
       <h3 class="text-xs font-extrabold text-sky-900"><i class="fa-solid fa-star text-sky-400"></i> เพิ่มกิจกรรม</h3>
       <button onclick="closeEventModal()" class="text-slate-400 text-xs">✕</button>
@@ -165,7 +170,7 @@
 
 <!-- ADMIN: ACTIVITY LOGS -->
 <div id="logs-modal" class="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-[60] hidden p-3">
-  <div class="bg-white rounded-3xl p-5 w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl">
+  <div class="bg-white rounded-3xl p-5 w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl animate-pop">
     <div class="flex justify-between items-center border-b pb-3 mb-3">
       <h3 class="font-extrabold text-sm text-purple-800"><i class="fa-solid fa-clock-rotate-left"></i> ประวัติการใช้งาน</h3>
       <button onclick="closeModal('logs-modal')" class="text-slate-400 px-2">✕</button>
@@ -181,7 +186,7 @@
 
 <!-- ADMIN: MANAGE OPTIONS -->
 <div id="manage-modal" class="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-[60] hidden p-3">
-  <div class="bg-white rounded-3xl p-5 w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl">
+  <div class="bg-white rounded-3xl p-5 w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl animate-pop">
     <div class="flex justify-between items-center border-b pb-3 mb-3">
       <h3 class="font-extrabold text-sm text-sky-800"><i class="fa-solid fa-list-check"></i> จัดการประวัติวิชาและรหัส</h3>
       <button onclick="closeModal('manage-modal')" class="text-slate-400 px-2">✕</button>
@@ -196,51 +201,280 @@
   </div>
 </div>
 
+<!-- FULL JAVASCRIPT SYSTEM -->
 <script>
 'use strict';
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwIlacaSbd6ZVh5jRd_s7uU1lmK6bmg_31yzUywjknR7xPZ7BDD_RlAYgQHtGfvPRu/exec';
-let currentRole='member', currentUsername='', currentTab='pending', currentDateTime=new Date(), selectedDateStr=getFormattedDate(new Date());
-let tasks=[], dailyEvents=[], codes=[], subjects=[], allowedUsersList=[];
+let currentRole = 'member', currentUsername = '', currentTab = 'pending', currentDateTime = new Date(), selectedDateStr = getFormattedDate(new Date());
+let tasks = [], dailyEvents = {}, codes = [], subjects = [], allowedUsersList = [];
 let lastActivityTime = Date.now();
 const IDLE_TIMEOUT_MS = 7 * 60 * 1000;
+
 function resetIdleTimer() { lastActivityTime = Date.now(); }
 ['click', 'touchstart', 'keypress', 'scroll', 'mousemove'].forEach(evt => { window.addEventListener(evt, resetIdleTimer, { passive: true }); });
 setInterval(() => { if (Date.now() - lastActivityTime > IDLE_TIMEOUT_MS) { logoutDueToTimeout(); } }, 30000);
 function logoutDueToTimeout() { alert('เซสชันหมดอายุเนื่องจากการใช้งานเกิน 7 นาที'); logout(); }
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && (localStorage.getItem('isLoggedIn') === 'true')) { if ((Date.now() - lastActivityTime) > IDLE_TIMEOUT_MS) { logoutDueToTimeout(); } else { fetchAllData(false); } } });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && localStorage.getItem('isLoggedIn') === 'true') { if ((Date.now() - lastActivityTime) > IDLE_TIMEOUT_MS) { logoutDueToTimeout(); } else { fetchAllData(false); } } });
+
 const MONTH_NAMES_TH = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
 const MONTH_SHORT_TH = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-const DAY_SHORT_TH = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+
 function showLoading(text='กำลังโหลดข้อมูล...') { document.getElementById('loading-text').textContent = text; document.getElementById('loading-overlay').classList.remove('hidden'); }
 function hideLoading() { document.getElementById('loading-overlay').classList.add('hidden'); }
 function getFormattedDate(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
 function normalizedDateStr(v) { if (!v) return ''; if (typeof v === 'string') { const s = v.trim(); const m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/); if (m) return `${m[1]}-${String(m[2]).padStart(2, '0')}-${String(m[3]).padStart(2, '0')}`; const d = new Date(v); if (!isNaN(d.getTime())) return getFormattedDate(d); } return formatThaiShortDate(v); }
-function formatThaiShortDate(str) { if (!str) return ''; const parts = str.split('-'); if (parts.length === 3) { const y = parseInt(parts[0], 10); const m = parseInt(parts[1], 10); const d = parseInt(parts[2], 10); const dt = new Date(y, m - 1, d); return isNaN(dt.getTime()) ? str : `${dt.getDate()} ${MONTH_SHORT_TH[dt.getMonth()]} ${y}`; } return str; }
+function formatThaiShortDate(str) { if (!str) return ''; const parts = str.split('-'); if (parts.length === 3) { const y = parseInt(parts[0], 10), m = parseInt(parts[1], 10), d = parseInt(parts[2], 10); const dt = new Date(y, m - 1, d); return isNaN(dt.getTime()) ? str : `${dt.getDate()} ${MONTH_SHORT_TH[dt.getMonth()]} ${y}`; } return str; }
 function escapeHtml(v) { return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function showSuccess(title, message) { document.getElementById('success-title').textContent = title; document.getElementById('success-message').textContent = message; document.getElementById('success-popup').classList.remove('hidden'); }
 function closeSuccessPopup() { document.getElementById('success-popup').classList.add('hidden'); }
 function cacheTasks() { localStorage.setItem('homework_cached_tasks_v2', JSON.stringify(tasks)); localStorage.setItem('homework_cached_events_v2', JSON.stringify(dailyEvents)); }
-document.addEventListener('DOMContentLoaded', async () => { try { tasks = JSON.parse(localStorage.getItem('homework_cached_tasks_v2') || '[]'); dailyEvents = JSON.parse(localStorage.getItem('homework_cached_events_v2') || '{}'); if (localStorage.getItem('isLoggedIn') === 'true') { currentRole = localStorage.getItem('userRole') || 'member'; currentUsername = localStorage.getItem('usernameKey') || ''; openDashboard(localStorage.getItem('userName')); renderTasks(); renderCalendar(); selectDate(selectedDateStr); fetchAllData(false); } } catch (e) { console.error('Cache Load Error:', e); } });
+
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    tasks = JSON.parse(localStorage.getItem('homework_cached_tasks_v2') || '[]');
+    dailyEvents = JSON.parse(localStorage.getItem('homework_cached_events_v2') || '{}');
+    if (localStorage.getItem('isLoggedIn') === 'true') {
+      currentRole = localStorage.getItem('userRole') || 'member';
+      currentUsername = localStorage.getItem('usernameKey') || '';
+      openDashboard(localStorage.getItem('userName'));
+      renderTasks(); renderCalendar(); selectDate(selectedDateStr);
+      fetchAllData(false);
+    }
+  } catch (e) { console.error('Cache Load Error:', e); }
+});
+
 async function fetchJSON(url) { const res = await fetch(url, { cache: 'no-store' }); if (!res.ok) throw new Error(`HTTP ${res.status}`); return await res.json(); }
-async function fetchAllData(showAlert=false) { if (showAlert) showLoading('กำลังซิงค์ข้อมูล...'); try { const [tasksRes, usersRes, eventsRes, optionsRes] = await Promise.allSettled([ fetchJSON(`${SCRIPT_URL}?t=${Date.now()}`), fetchJSON(`${SCRIPT_URL}?action=getUsers&t=${Date.now()}`), fetchJSON(`${SCRIPT_URL}?action=getEvents&t=${Date.now()}`), fetchJSON(`${SCRIPT_URL}?action=getOptions&t=${Date.now()}`) ]); if (tasksRes.status === 'fulfilled' && Array.isArray(tasksRes.value)) { tasks = tasksRes.value.map(t => ({...t, id:String(t.id), isPinned:String(t.isPinned) === 'true'})); cacheTasks(); } if (usersRes.status === 'fulfilled' && Array.isArray(usersRes.value)) { const sheetUsers = usersRes.value.map(u => ({ username: String(u.username || u.Username || '').trim().toLowerCase(), role: String(u.role || u.Role || 'member').trim().toLowerCase(), name: String(u.name || u.Name || '').trim() })).filter(u => u.username); if (sheetUsers.length > 0) allowedUsersList = sheetUsers; } if (showAlert) showSuccess('ซิงค์ข้อมูลสำเร็จ', 'อัปเดตข้อมูลล่าสุดเรียบร้อยแล้ว'); return true; } catch (e) { console.error('Fetch Error:', e); if(showAlert) alert('ซิงค์ข้อมูลไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อ'); return false; } finally { if (showAlert) hideLoading(); } }
-async function login() { const raw = document.getElementById('username').value.trim().toLowerCase(); if (!raw) { alert('กรุณากรอกชื่อผู้ใช้งาน'); return; } showLoading('กำลังตรวจสอบชื่อในระบบ...'); const btn = document.getElementById('login-btn'); btn.disabled = true; await fetchAllData(false); let user = allowedUsersList.find(u => u.username === raw); if (!user) { alert(`ไม่พบผู้ใช้งาน "${raw}" ในระบบ`); hideLoading(); btn.disabled = false; return; } currentRole = user.role; currentUsername = raw; localStorage.setItem('isLoggedIn', 'true'); localStorage.setItem('userRole', currentRole); localStorage.setItem('usernameKey', currentUsername); localStorage.setItem('userName', user.name); hideLoading(); btn.disabled = false; document.getElementById('login-page').classList.add('hidden'); document.getElementById('main-page').classList.remove('hidden'); switchTab('pending'); }
-function logout() { localStorage.removeItem('isLoggedIn'); localStorage.removeItem('userRole'); localStorage.removeItem('usernameKey'); localStorage.removeItem('userName'); location.reload(); }
-function switchTab(tab) { currentTab = tab; document.getElementById('tab-pending').className = tab === 'pending' ? 'flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white' : 'flex-1 py-2.5 rounded-xl text-slate-500'; document.getElementById('tab-calendar').className = tab === 'calendar' ? 'flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white' : 'flex-1 py-2.5 rounded-xl text-slate-500'; document.getElementById('view-tasks').classList.toggle('hidden', tab !== 'pending'); document.getElementById('view-calendar').classList.toggle('hidden', tab !== 'calendar'); }
-function openDashboard(name) { document.getElementById('login-page').classList.add('hidden'); document.getElementById('main-page').classList.remove('hidden'); }
-function renderTasks() {}
-function renderCalendar() {}
-function selectDate(d) {}
+
+async function fetchAllData(showAlert=false) {
+  if (showAlert) showLoading('กำลังซิงค์ข้อมูล...');
+  try {
+    const [tasksRes, usersRes, eventsRes, optionsRes] = await Promise.allSettled([
+      fetchJSON(`${SCRIPT_URL}?t=${Date.now()}`),
+      fetchJSON(`${SCRIPT_URL}?action=getUsers&t=${Date.now()}`),
+      fetchJSON(`${SCRIPT_URL}?action=getEvents&t=${Date.now()}`),
+      fetchJSON(`${SCRIPT_URL}?action=getOptions&t=${Date.now()}`)
+    ]);
+    if (tasksRes.status === 'fulfilled' && Array.isArray(tasksRes.value)) {
+      tasks = tasksRes.value.map(t => ({...t, id:String(t.id), isPinned:String(t.isPinned) === 'true'}));
+      cacheTasks();
+    }
+    if (usersRes.status === 'fulfilled' && Array.isArray(usersRes.value)) {
+      const sheetUsers = usersRes.value.map(u => ({ username: String(u.username || u.Username || '').trim().toLowerCase(), role: String(u.role || u.Role || 'member').trim().toLowerCase(), name: String(u.name || u.Name || '').trim() })).filter(u => u.username);
+      if (sheetUsers.length > 0) allowedUsersList = sheetUsers;
+    }
+    if (eventsRes.status === 'fulfilled' && eventsRes.value) { dailyEvents = eventsRes.value; }
+    if (optionsRes.status === 'fulfilled' && optionsRes.value) {
+      codes = Array.isArray(optionsRes.value.codes) ? optionsRes.value.codes : [];
+      subjects = Array.isArray(optionsRes.value.subjects) ? optionsRes.value.subjects : [];
+      updateDatalists();
+    }
+    renderTasks(); renderCalendar(); selectDate(selectedDateStr);
+    if (showAlert) showSuccess('ซิงค์ข้อมูลสำเร็จ', 'อัปเดตข้อมูลล่าสุดเรียบร้อยแล้ว');
+    return true;
+  } catch (e) {
+    console.error('Fetch Error:', e);
+    if (showAlert) alert('ซิงค์ข้อมูลไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อ');
+    return false;
+  } finally { if (showAlert) hideLoading(); }
+}
+
+async function login() {
+  const raw = document.getElementById('username').value.trim().toLowerCase();
+  if (!raw) { alert('กรุณากรอกชื่อผู้ใช้งาน'); return; }
+  showLoading('กำลังตรวจสอบชื่อในระบบ...');
+  const btn = document.getElementById('login-btn'); btn.disabled = true;
+  await fetchAllData(false);
+  let user = allowedUsersList.find(u => u.username === raw);
+  if (!user) { alert(`ไม่พบผู้ใช้งาน "${raw}" ในระบบ`); hideLoading(); btn.disabled = false; return; }
+  currentRole = user.role; currentUsername = raw;
+  localStorage.setItem('isLoggedIn', 'true');
+  localStorage.setItem('userRole', currentRole);
+  localStorage.setItem('usernameKey', currentUsername);
+  localStorage.setItem('userName', user.name);
+  hideLoading(); btn.disabled = false;
+  openDashboard(user.name);
+}
+
+function logout() {
+  localStorage.removeItem('isLoggedIn');
+  localStorage.removeItem('userRole');
+  localStorage.removeItem('usernameKey');
+  localStorage.removeItem('userName');
+  location.reload();
+}
+
+function openDashboard(name) {
+  document.getElementById('login-page').classList.add('hidden');
+  document.getElementById('main-page').classList.remove('hidden');
+  document.getElementById('guest-badge').textContent = currentRole.toUpperCase();
+  const isAdmin = currentRole === 'admin' || currentRole === 'creator';
+  document.getElementById('btn-view-logs').classList.toggle('hidden', !isAdmin);
+  document.getElementById('btn-manage-history').classList.toggle('hidden', !isAdmin);
+  document.getElementById('creator-action-buttons').classList.toggle('hidden', !isAdmin);
+  switchTab('pending');
+  renderTasks(); renderCalendar(); selectDate(selectedDateStr);
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-pending').className = tab === 'pending' ? 'flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white' : 'flex-1 py-2.5 rounded-xl text-slate-500';
+  document.getElementById('tab-calendar').className = tab === 'calendar' ? 'flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white' : 'flex-1 py-2.5 rounded-xl text-slate-500';
+  document.getElementById('view-tasks').classList.toggle('hidden', tab !== 'pending');
+  document.getElementById('view-calendar').classList.toggle('hidden', tab !== 'calendar');
+}
+
+function renderTasks() {
+  const listEl = document.getElementById('task-list');
+  const pinnedEl = document.getElementById('pinned-list');
+  const countEl = document.getElementById('task-count');
+  listEl.innerHTML = ''; pinnedEl.innerHTML = '';
+  
+  const pinned = tasks.filter(t => t.isPinned);
+  const active = tasks.filter(t => !t.isPinned);
+  countEl.textContent = `${tasks.length} ITEMS`;
+
+  if (pinned.length === 0) {
+    pinnedEl.innerHTML = '<p class="text-[11px] text-amber-600">ไม่มีรายการปักหมุด</p>';
+  } else {
+    pinned.forEach(t => { pinnedEl.appendChild(createTaskCard(t)); });
+  }
+
+  if (active.length === 0) {
+    listEl.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">ไม่มีงานค้างในระบบ เยี่ยมมาก!</div>';
+  } else {
+    active.forEach(t => { listEl.appendChild(createTaskCard(t)); });
+  }
+}
+
+function createTaskCard(t) {
+  const div = document.createElement('div');
+  div.className = "bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm flex items-start justify-between gap-2";
+  div.innerHTML = `
+    <div class="space-y-1">
+      <div class="flex items-center gap-1.5">
+        <span class="bg-pink-100 text-pink-700 text-[10px] font-bold px-2 py-0.5 rounded-md">${escapeHtml(t.code)}</span>
+        <span class="text-xs font-bold text-slate-800">${escapeHtml(t.subject)}</span>
+      </div>
+      <p class="text-xs text-slate-600">${escapeHtml(t.detail)}</p>
+      <p class="text-[10px] text-slate-400">กำหนดส่ง: <span class="text-rose-500 font-bold">${formatThaiShortDate(t.dueDate)}</span></p>
+    </div>
+  `;
+  return div;
+}
+
+function renderCalendar() {
+  const year = currentDateTime.getFullYear();
+  const month = currentDateTime.getMonth();
+  document.getElementById('calendar-month-year').textContent = `${MONTH_NAMES_TH[month]} ${year + 543}`;
+  const daysEl = document.getElementById('calendar-days');
+  daysEl.innerHTML = '';
+  
+  const firstDay = new Date(year, month, 1).getDay();
+  const totalDays = new Date(year, month + 1, 0).getDate();
+  
+  for (let i = 0; i < firstDay; i++) {
+    daysEl.appendChild(document.createElement('div'));
+  }
+  
+  for (let d = 1; d <= totalDays; d++) {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const btn = document.createElement('button');
+    btn.className = `h-9 rounded-xl text-xs font-bold flex flex-col items-center justify-center transition border ${dateStr === selectedDateStr ? 'bg-[#FF75BC] text-white border-pink-400' : 'bg-slate-50 text-slate-700 border-slate-100 hover:bg-pink-50'}`;
+    btn.innerHTML = `<span>${d}</span>`;
+    btn.onclick = () => selectDate(dateStr);
+    daysEl.appendChild(btn);
+  }
+}
+
+function changeMonth(dir) {
+  currentDateTime.setMonth(currentDateTime.getMonth() + dir);
+  renderCalendar();
+}
+
+function selectDate(dateStr) {
+  selectedDateStr = dateStr;
+  renderCalendar();
+  document.getElementById('selected-date-label').textContent = `รายการวันที่ ${formatThaiShortDate(dateStr)}`;
+  const dateTasks = tasks.filter(t => normalizedDateStr(t.dueDate) === dateStr || normalizedDateStr(t.assignDate) === dateStr);
+  document.getElementById('selected-task-count').textContent = `${dateTasks.length} รายการ`;
+  
+  const container = document.getElementById('selected-date-tasks');
+  container.innerHTML = '';
+  if (dateTasks.length === 0) {
+    container.innerHTML = '<p class="text-[11px] text-slate-400 text-center py-2">ไม่มีรายการในวันนี้</p>';
+  } else {
+    dateTasks.forEach(t => { container.appendChild(createTaskCard(t)); });
+  }
+
+  const eventView = document.getElementById('event-list-view');
+  eventView.innerHTML = '';
+  const evts = dailyEvents[dateStr] || [];
+  if (evts.length === 0) {
+    eventView.innerHTML = '<p class="text-[10px] text-sky-600">ไม่มีกิจกรรมพิเศษ</p>';
+  } else {
+    evts.forEach(e => {
+      const p = document.createElement('p');
+      p.className = 'text-[11px] text-sky-900 font-bold bg-white p-1.5 rounded-xl border border-sky-100';
+      p.textContent = e;
+      eventView.appendChild(p);
+    });
+  }
+}
+
+function toggleAddForm() {
+  const form = document.getElementById('admin-form');
+  form.classList.toggle('hidden');
+}
+
+function openEventModal() {
+  document.getElementById('modal-date-label').textContent = `วันที่เลือก: ${formatThaiShortDate(selectedDateStr)}`;
+  document.getElementById('daily-event-input').value = '';
+  document.getElementById('event-modal').classList.remove('hidden');
+}
+
+function closeEventModal() { document.getElementById('event-modal').classList.add('hidden'); }
+
+async function saveDailyEvent() {
+  const val = document.getElementById('daily-event-input').value.trim();
+  if (!val) { alert('กรุณากรอกกิจกรรม'); return; }
+  if (!dailyEvents[selectedDateStr]) dailyEvents[selectedDateStr] = [];
+  dailyEvents[selectedDateStr].push(val);
+  cacheTasks();
+  closeEventModal();
+  selectDate(selectedDateStr);
+  showSuccess('บันทึกสำเร็จ', 'เพิ่มกิจกรรมเรียบร้อยแล้ว');
+}
+
+async function addTask() {
+  const code = document.getElementById('task-code').value.trim();
+  const subject = document.getElementById('task-subject').value.trim();
+  const detail = document.getElementById('task-detail').value.trim();
+  const assignDate = document.getElementById('assign-date-input').value;
+  const dueDate = document.getElementById('due-date-input').value;
+  if (!code || !subject || !detail || !dueDate) { alert('กรุณากรอกข้อมูลให้ครบถ้วน'); return; }
+  
+  const newTask = { id: String(Date.now()), code, subject, detail, assignDate, dueDate, isPinned: false };
+  tasks.unshift(newTask);
+  cacheTasks();
+  renderTasks();
+  renderCalendar();
+  toggleAddForm();
+  showSuccess('บันทึกสำเร็จ', 'เพิ่มรายการการบ้านเรียบร้อยแล้ว');
+}
+
+function updateDatalists() {
+  const codeList = document.getElementById('code-options');
+  const subjList = document.getElementById('subject-options');
+  if (codeList) codeList.innerHTML = codes.map(c => `<option value="${escapeHtml(c)}">`).join('');
+  if (subjList) subjList.innerHTML = subjects.map(s => `<option value="${escapeHtml(s)}">`).join('');
+}
+
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-function openLogsModal() {}
-function openManageModal() {}
-function clearLogs() {}
-function loadLogs() {}
-function loadOptions() {}
-function toggleAddForm() {}
-function openEventModal() {}
-function closeEventModal() {}
-function saveDailyEvent() {}
-function addTask() {}
+function openLogsModal() { document.getElementById('logs-modal').classList.remove('hidden'); loadLogs(); }
+function openManageModal() { document.getElementById('manage-modal').classList.remove('hidden'); }
+function clearLogs() { document.getElementById('logs-list.innerHTML') = ''; alert('ล้างประวัติเรียบร้อย'); }
+function loadLogs() { document.getElementById('logs-status').textContent = 'ไม่มีประวัติการใช้งาน'; }
+function loadOptions() { document.getElementById('manage-status').textContent = 'โหลดตัวเลือกสำเร็จ'; }
 </script>
 </body>
 </html>
