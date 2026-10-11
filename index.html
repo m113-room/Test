@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Homework M.113 - V.1.56</title>
+<title>Homework M.113 - V.1.58</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -34,7 +34,7 @@
       <i class="fa-solid fa-book-open-reader text-2xl text-white"></i>
     </div>
     <h1 class="text-2xl font-extrabold text-slate-800">Homework M.113</h1>
-    <p class="text-xs text-slate-400 mt-1 font-semibold text-pink-600">ระบบการบ้านห้อง M.113 (V.1.56)</p>
+    <p class="text-xs text-slate-400 mt-1 font-semibold text-pink-600">ระบบการบ้านห้อง M.113 (V.1.58)</p>
   </div>
   
   <div class="space-y-3 mb-6">
@@ -84,9 +84,18 @@
     </div>
   </div>
 
-  <div class="bg-slate-100 p-2.5 rounded-2xl flex items-center justify-between mb-4 text-xs">
-    <span class="bg-[#FF75BC] text-white text-[10px] font-bold px-2.5 py-1 rounded-xl">NOTICE</span>
-    <span id="notice-text" class="text-slate-500 text-[11px]">แสดงรายการการบ้านทั้งหมด</span>
+  <!-- เปลี่ยนแถบ NOTICE เป็นระบบติดตามงานค้างและตัวกรองสถานะ -->
+  <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm space-y-2 mb-4">
+    <div class="flex items-center justify-between text-xs">
+      <span class="bg-[#FF75BC] text-white text-[10px] font-bold px-2.5 py-1 rounded-xl"><i class="fa-solid fa-list-check"></i> ติดตามงานค้าง</span>
+      <span id="notice-summary" class="text-slate-500 text-[11px] font-semibold">ทั้งหมด 0 รายการ</span>
+    </div>
+    <div class="flex items-center gap-1 overflow-x-auto pt-1">
+      <button onclick="setFilter('all')" id="filter-all" class="flex-1 py-1.5 rounded-xl text-[10px] font-bold bg-[#FF75BC] text-white transition">ทั้งหมด</button>
+      <button onclick="setFilter('pending')" id="filter-pending" class="flex-1 py-1.5 rounded-xl text-[10px] font-bold bg-slate-100 text-slate-600 transition">รอดำเนินการ</button>
+      <button onclick="setFilter('doing')" id="filter-doing" class="flex-1 py-1.5 rounded-xl text-[10px] font-bold bg-slate-100 text-slate-600 transition">กำลังทำ</button>
+      <button onclick="setFilter('done')" id="filter-done" class="flex-1 py-1.5 rounded-xl text-[10px] font-bold bg-slate-100 text-slate-600 transition">ส่งแล้ว</button>
+    </div>
   </div>
 
   <!-- CALENDAR -->
@@ -133,7 +142,6 @@
       </div>
       <input id="task-detail" placeholder="รายละเอียดการบ้าน" class="w-full p-2.5 text-xs bg-white rounded-xl border">
       
-      <!-- เพิ่มตัวเลือกสถานะในฟอร์ม -->
       <div class="grid grid-cols-1 gap-2">
         <label class="block text-[11px] font-bold text-slate-600">สถานะงานเริ่มต้น:</label>
         <select id="task-status-input" class="w-full p-2.5 text-xs bg-white rounded-xl border font-bold text-slate-700">
@@ -149,15 +157,13 @@
       </div>
       <button id="add-task-btn" onclick="addTask()" class="w-full py-2.5 bg-[#FF75BC] text-white font-bold rounded-xl text-xs">บันทึกข้อมูล</button>
     </div>
+
     <div class="bg-amber-50 border border-amber-100 rounded-3xl p-4 space-y-3">
       <div class="flex items-center gap-2 text-amber-800 text-xs font-bold"><i class="fa-solid fa-thumbtack text-amber-500"></i> ปักหมุดไว้</div>
       <div id="pinned-list" class="space-y-2.5"></div>
     </div>
+
     <div class="space-y-2.5">
-      <div class="flex justify-between items-center">
-        <span class="text-xs font-extrabold text-slate-400">ติดตามงานค้าง</span>
-        <span id="task-count" class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full">0 ITEMS</span>
-      </div>
       <div id="task-list" class="space-y-2.5 max-h-[300px] overflow-y-auto"></div>
     </div>
   </div>
@@ -228,6 +234,7 @@
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwIlacaSbd6ZVh5jRd_s7uU1lmK6bmg_31yzUywjknR7xPZ7BDD_RlAYgQHtGfvPRu/exec';
 let currentRole = 'member', currentUsername = '', currentTab = 'pending', currentDateTime = new Date(), selectedDateStr = getFormattedDate(new Date());
 let tasks = [], dailyEvents = {}, codes = [], subjects = [], allowedUsersList = [];
+let currentFilter = 'all';
 let lastActivityTime = Date.now();
 const IDLE_TIMEOUT_MS = 7 * 60 * 1000;
 
@@ -362,15 +369,33 @@ function switchTab(tab) {
   document.getElementById('view-calendar').classList.toggle('hidden', tab !== 'calendar');
 }
 
+function setFilter(status) {
+  currentFilter = status;
+  ['all', 'pending', 'doing', 'done'].forEach(s => {
+    const btn = document.getElementById(`filter-${s}`);
+    if (s === status) {
+      btn.className = "flex-1 py-1.5 rounded-xl text-[10px] font-bold bg-[#FF75BC] text-white transition";
+    } else {
+      btn.className = "flex-1 py-1.5 rounded-xl text-[10px] font-bold bg-slate-100 text-slate-600 transition";
+    }
+  });
+  renderTasks();
+}
+
 function renderTasks() {
   const listEl = document.getElementById('task-list');
   const pinnedEl = document.getElementById('pinned-list');
-  const countEl = document.getElementById('task-count');
+  const summaryEl = document.getElementById('notice-summary');
   listEl.innerHTML = ''; pinnedEl.innerHTML = '';
   
   const pinned = tasks.filter(t => t.isPinned);
-  const active = tasks.filter(t => !t.isPinned);
-  countEl.textContent = `${tasks.length} ITEMS`;
+  let active = tasks.filter(t => !t.isPinned);
+
+  if (currentFilter !== 'all') {
+    active = active.filter(t => (t.status || 'pending') === currentFilter);
+  }
+
+  summaryEl.textContent = `ทั้งหมด ${tasks.length} รายการ`;
 
   if (pinned.length === 0) {
     pinnedEl.innerHTML = '<p class="text-[11px] text-amber-600">ไม่มีรายการปักหมุด</p>';
@@ -379,7 +404,7 @@ function renderTasks() {
   }
 
   if (active.length === 0) {
-    listEl.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">ไม่มีงานค้างในระบบ เยี่ยมมาก!</div>';
+    listEl.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">ไม่พบรายการงานตามเงื่อนไข</div>';
   } else {
     active.forEach(t => { listEl.appendChild(createTaskCard(t)); });
   }
