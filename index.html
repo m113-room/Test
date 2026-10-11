@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Homework M.113 - V.1.54</title>
+<title>Homework M.113 - V.1.55</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -29,19 +29,29 @@
 
 <!-- LOGIN -->
 <div id="login-page" class="w-full max-w-sm bg-white/85 backdrop-blur-2xl rounded-3xl p-8 border border-white/60 shadow-xl relative z-10">
-  <div class="text-center mb-8">
+  <div class="text-center mb-6">
     <div class="w-14 h-14 bg-gradient-to-br from-[#FF75BC] via-purple-500 to-[#50D8FF] rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
       <i class="fa-solid fa-book-open-reader text-2xl text-white"></i>
     </div>
     <h1 class="text-2xl font-extrabold text-slate-800">Homework M.113</h1>
-    <p class="text-xs text-slate-400 mt-1 font-semibold text-pink-600">ระบบการบ้านห้อง M.113 (V.1.54)</p>
+    <p class="text-xs text-slate-400 mt-1 font-semibold text-pink-600">ระบบการบ้านห้อง M.113 (V.1.55)</p>
   </div>
-  <div class="space-y-1.5 mb-6">
-    <label class="block text-[11px] font-bold text-slate-600">ชื่อผู้ใช้งาน (USERNAME)</label>
-    <input type="text" id="username" placeholder="พิมพ์ชื่อผู้ใช้งานของคุณ"
-      onkeydown="if(event.key==='Enter')login()"
-      class="w-full px-4 py-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-semibold outline-none focus:border-[#FF75BC]">
+  
+  <div class="space-y-3 mb-6">
+    <div>
+      <label class="block text-[11px] font-bold text-slate-600 mb-1">ชื่อผู้ใช้งาน (USERNAME)</label>
+      <input type="text" id="username" placeholder="พิมพ์ชื่อผู้ใช้งานของคุณ"
+        onkeydown="if(event.key==='Enter')login()"
+        class="w-full px-4 py-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-semibold outline-none focus:border-[#FF75BC]">
+    </div>
+    <div>
+      <label class="block text-[11px] font-bold text-slate-600 mb-1">รหัสผ่าน (PASSWORD - เฉพาะ Admin)</label>
+      <input type="password" id="password" placeholder="กรอกรหัสผ่าน (ถ้ามี)"
+        onkeydown="if(event.key==='Enter')login()"
+        class="w-full px-4 py-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-semibold outline-none focus:border-[#FF75BC]">
+    </div>
   </div>
+
   <button id="login-btn" onclick="login()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#FF75BC] to-rose-400 text-white font-bold text-xs shadow-lg">
     เข้าสู่ระบบ
   </button>
@@ -280,7 +290,27 @@ async function fetchAllData(showAlert=false) {
 
 async function login() {
   const raw = document.getElementById('username').value.trim().toLowerCase();
+  const pwd = document.getElementById('password').value.trim();
   if (!raw) { alert('กรุณากรอกชื่อผู้ใช้งาน'); return; }
+
+  // ถ้าพิมพ์ admin เข้าสู่ระบบโดยใช้รหัสผ่านแบบไม่ต้องซิงค์
+  if (raw === 'admin') {
+    if (pwd === '1234') { // กำหนดรหัสผ่านแอดมินตรงนี้ (สามารถเปลี่ยนเป็นรหัสที่ต้องการได้)
+      currentRole = 'admin';
+      currentUsername = raw;
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('userRole', currentRole);
+      localStorage.setItem('usernameKey', currentUsername);
+      localStorage.setItem('userName', 'Administrator');
+      openDashboard('Administrator');
+      return;
+    } else {
+      alert('รหัสผ่าน Admin ไม่ถูกต้อง');
+      return;
+    }
+  }
+
+  // สำหรับผู้ใช้ทั่วไป (Member) ใช้ระบบเดิมตามปกติ
   showLoading('กำลังตรวจสอบชื่อในระบบ...');
   const btn = document.getElementById('login-btn'); btn.disabled = true;
   await fetchAllData(false);
@@ -472,7 +502,7 @@ function updateDatalists() {
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 function openLogsModal() { document.getElementById('logs-modal').classList.remove('hidden'); loadLogs(); }
 function openManageModal() { document.getElementById('manage-modal').classList.remove('hidden'); }
-function clearLogs() { document.getElementById('logs-list.innerHTML') = ''; alert('ล้างประวัติเรียบร้อย'); }
+function clearLogs() { document.getElementById('logs-status').textContent = 'ไม่มีประวัติการใช้งาน'; }
 function loadLogs() { document.getElementById('logs-status').textContent = 'ไม่มีประวัติการใช้งาน'; }
 function loadOptions() { document.getElementById('manage-status').textContent = 'โหลดตัวเลือกสำเร็จ'; }
 </script>
