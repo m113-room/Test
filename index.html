@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Homework M.113 - V.1.57 (Turbo)</title>
+<title>Homework M.113 - V.1.58 (Turbo)</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -34,7 +34,7 @@
       <i class="fa-solid fa-book-open-reader text-2xl text-white"></i>
     </div>
     <h1 class="text-2xl font-extrabold text-slate-800">Homework M.113</h1>
-    <p class="text-xs text-slate-400 mt-1 font-semibold text-pink-600">ระบบการบ้านห้อง M.113 (V.1.57 Turbo)</p>
+    <p class="text-xs text-slate-400 mt-1 font-semibold text-pink-600">ระบบการบ้านห้อง M.113 (V.1.58 Turbo)</p>
   </div>
   <div class="space-y-1.5 mb-6">
     <label class="block text-[11px] font-bold text-slate-600">ชื่อผู้ใช้งาน (USERNAME)</label>
@@ -56,10 +56,11 @@
       <span id="guest-badge" class="bg-pink-100 text-pink-700 text-[10px] font-bold px-2.5 py-1 rounded-xl">MEMBER</span>
     </div>
     <div class="flex items-center gap-1.5">
-      <button onclick="openLogsModal()" id="btn-view-logs" title="ประวัติ" class="hidden text-xs bg-purple-100 text-purple-700 px-2.5 py-1.5 rounded-xl"><i class="fa-solid fa-clock-rotate-left"></i></button>
-      <button onclick="openManageModal()" id="btn-manage-history" title="จัดการตัวเลือก" class="hidden text-xs bg-sky-100 text-sky-700 px-2.5 py-1.5 rounded-xl"><i class="fa-solid fa-list-check"></i></button>
-      <button onclick="fetchAllData(true)" title="ซิงค์ข้อมูล" class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1.5 rounded-xl"><i class="fa-solid fa-rotate"></i></button>
-      <button onclick="logout()" class="text-xs bg-rose-50 text-rose-500 px-3 py-1.5 rounded-xl font-bold">LOGOUT</button>
+      <!-- 3 ปุ่มหลักตามรูป -->
+      <button onclick="openLogsModal()" id="btn-view-logs" title="ประวัติการใช้งาน" class="text-xs bg-purple-100 text-purple-700 px-3 py-2 rounded-2xl hover:bg-purple-200 transition"><i class="fa-solid fa-clock-rotate-left"></i></button>
+      <button onclick="openManageModal()" id="btn-manage-history" title="จัดการตัวเลือกวิชา" class="text-xs bg-sky-100 text-sky-700 px-3 py-2 rounded-2xl hover:bg-sky-200 transition"><i class="fa-solid fa-list-check"></i></button>
+      <button onclick="fetchAllData(true)" title="ซิงค์ข้อมูลล่าสุด" class="text-xs bg-slate-100 text-slate-600 px-3 py-2 rounded-2xl hover:bg-slate-200 transition"><i class="fa-solid fa-rotate"></i></button>
+      <button onclick="logout()" class="text-xs bg-rose-50 text-rose-500 px-3 py-2 rounded-2xl font-bold hover:bg-rose-100 transition">LOGOUT</button>
     </div>
   </div>
 
@@ -196,36 +197,35 @@
   </div>
 </div>
 
-<!-- ADMIN: ACTIVITY LOGS -->
+<!-- ACTIVITY LOGS MODAL -->
 <div id="logs-modal" class="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-[60] hidden p-3">
-  <div class="bg-white rounded-3xl p-5 w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl animate-pop">
-    <div class="flex justify-between items-center border-b pb-3 mb-3">
+  <div class="bg-white rounded-3xl p-5 w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl animate-pop space-y-3">
+    <div class="flex justify-between items-center border-b pb-3">
       <h3 class="font-extrabold text-sm text-purple-800"><i class="fa-solid fa-clock-rotate-left"></i> ประวัติการใช้งาน</h3>
-      <button onclick="closeModal('logs-modal')" class="text-slate-400 px-2">✕</button>
+      <button onclick="closeModal('logs-modal')" class="text-slate-400 px-2 font-bold">✕</button>
     </div>
-    <div class="grid grid-cols-2 gap-2 mb-3">
+    <div class="grid grid-cols-2 gap-2">
       <button onclick="clearLogs()" class="py-2.5 bg-rose-50 text-rose-600 rounded-xl text-xs font-bold"><i class="fa-solid fa-trash-can"></i> ล้างประวัติทั้งหมด</button>
       <button onclick="loadLogs()" class="py-2.5 bg-purple-100 text-purple-700 rounded-xl text-xs font-bold"><i class="fa-solid fa-rotate"></i> โหลดใหม่</button>
     </div>
-    <p id="logs-status" class="text-xs text-slate-500 mb-3">ไม่มีประวัติการใช้งาน</p>
-    <div id="logs-list" class="space-y-2"></div>
+    <p id="logs-status" class="text-xs text-slate-500">กำลังโหลด...</p>
+    <div id="logs-list" class="space-y-2 max-h-[300px] overflow-y-auto pr-1"></div>
   </div>
 </div>
 
-<!-- ADMIN: MANAGE OPTIONS -->
+<!-- MANAGE OPTIONS MODAL -->
 <div id="manage-modal" class="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-[60] hidden p-3">
-  <div class="bg-white rounded-3xl p-5 w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl animate-pop">
-    <div class="flex justify-between items-center border-b pb-3 mb-3">
+  <div class="bg-white rounded-3xl p-5 w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl animate-pop space-y-3">
+    <div class="flex justify-between items-center border-b pb-3">
       <h3 class="font-extrabold text-sm text-sky-800"><i class="fa-solid fa-list-check"></i> จัดการประวัติวิชาและรหัส</h3>
-      <button onclick="closeModal('manage-modal')" class="text-slate-400 px-2">✕</button>
+      <button onclick="closeModal('manage-modal')" class="text-slate-400 px-2 font-bold">✕</button>
     </div>
-    <p class="text-[11px] text-slate-500 mb-3">ปิดตัวเลือกเพื่อซ่อนจากรายการแนะนำ โดยไม่ลบการบ้านเก่าออกจากชีต</p>
+    <p class="text-[11px] text-slate-500">รายการรหัสวิชาและชื่อวิชาทั้งหมดที่มีในระบบปัจจุบัน</p>
     <div class="grid grid-cols-2 gap-3">
-      <div><h4 class="text-xs font-extrabold text-slate-700 mb-2">รหัสวิชา</h4><div id="manage-codes" class="space-y-2"></div></div>
-      <div><h4 class="text-xs font-extrabold text-slate-700 mb-2">ชื่อวิชา</h4><div id="manage-subjects" class="space-y-2"></div></div>
+      <div class="bg-slate-50 p-3 rounded-2xl border"><h4 class="text-xs font-extrabold text-slate-700 mb-2">รหัสวิชา</h4><div id="manage-codes" class="space-y-1"></div></div>
+      <div class="bg-slate-50 p-3 rounded-2xl border"><h4 class="text-xs font-extrabold text-slate-700 mb-2">ชื่อวิชา</h4><div id="manage-subjects" class="space-y-1"></div></div>
     </div>
-    <p id="manage-status" class="text-xs text-slate-500 mt-3"></p>
-    <button onclick="loadOptions()" class="mt-3 w-full py-2 bg-sky-100 text-sky-700 rounded-xl text-xs font-bold">โหลดตัวเลือกใหม่</button>
+    <button onclick="loadOptions()" class="w-full py-2.5 bg-sky-100 text-sky-700 rounded-xl text-xs font-bold">รีเฟรชรายการตัวเลือก</button>
   </div>
 </div>
 
@@ -313,52 +313,31 @@ async function fetchAllData(showAlert=false) {
   } finally { if (showAlert) hideLoading(); }
 }
 
-// ⚡ TURBO LOGIN: ดึงข้อมูลจาก Google Sheets ตรวจสอบผู้ใช้ทันทีด้วยความเร็วสูง
 async function login() {
   const raw = document.getElementById('username').value.trim().toLowerCase();
   if (!raw) { alert('กรุณากรอกชื่อผู้ใช้งาน'); return; }
-  
   showLoading('กำลังตรวจสอบชื่อในระบบ...');
-  const btn = document.getElementById('login-btn'); 
-  btn.disabled = true;
-
+  const btn = document.getElementById('login-btn'); btn.disabled = true;
   try {
-    // โหลดรายชื่อผู้ใช้งานสดๆ จาก Google Sheets เดี๋ยวนั้นเลย
     const usersRes = await fetchJSON(`${SCRIPT_URL}?action=getUsers&t=${Date.now()}`);
     if (Array.isArray(usersRes) && usersRes.length > 0) {
-      allowedUsersList = usersRes.map(u => ({
-        username: String(u.username || u.Username || '').trim().toLowerCase(),
-        role: String(u.role || u.Role || 'member').trim().toLowerCase(),
-        name: String(u.name || u.Name || '').trim()
-      })).filter(u => u.username);
+      allowedUsersList = usersRes.map(u => ({ username: String(u.username || u.Username || '').trim().toLowerCase(), role: String(u.role || u.Role || 'member').trim().toLowerCase(), name: String(u.name || u.Name || '').trim() })).filter(u => u.username);
     }
-
     let user = allowedUsersList.find(u => u.username === raw);
-    if (!user) { 
-      alert(`ไม่พบผู้ใช้งาน "${raw}" ในระบบ`); 
-      hideLoading(); 
-      btn.disabled = false; 
-      return; 
-    }
-
-    currentRole = user.role; 
-    currentUsername = raw;
+    if (!user) { alert(`ไม่พบผู้ใช้งาน "${raw}" ในระบบ`); hideLoading(); btn.disabled = false; return; }
+    currentRole = user.role; currentUsername = raw;
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('userRole', currentRole);
     localStorage.setItem('usernameKey', currentUsername);
     localStorage.setItem('userName', user.name);
-
-    hideLoading(); 
-    btn.disabled = false;
+    hideLoading(); btn.disabled = false;
     openDashboard(user.name);
-    
-    // โหลดข้อมูลส่วนที่เหลือเบื้องหลังแบบไม่ให้ผู้ใช้ต้องรอ
+    logActivity('เข้าสู่ระบบ', `ผู้ใช้งาน ${user.name} เข้าสู่ระบบ`);
     fetchAllData(false);
   } catch (e) {
     console.error('Login Error:', e);
     alert('ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง');
-    hideLoading();
-    btn.disabled = false;
+    hideLoading(); btn.disabled = false;
   }
 }
 
@@ -374,9 +353,6 @@ function openDashboard(name) {
   document.getElementById('login-page').classList.add('hidden');
   document.getElementById('main-page').classList.remove('hidden');
   document.getElementById('guest-badge').textContent = name || currentRole.toUpperCase();
-  const isAdmin = currentRole === 'admin' || currentRole === 'creator';
-  document.getElementById('btn-view-logs').classList.toggle('hidden', !isAdmin);
-  document.getElementById('btn-manage-history').classList.toggle('hidden', !isAdmin);
   switchTab('pending');
   renderTasks(); renderCalendar(); selectDate(selectedDateStr);
 }
@@ -491,7 +467,6 @@ function createTaskCard(t, showUnsubmittedIfOverdue = false) {
         <p class="text-[10px] text-slate-400">กำหนดส่ง: <span class="text-rose-500 font-bold">${formatThaiShortDate(t.dueDate)}</span></p>
       </div>
       <div class="flex items-center gap-1 shrink-0">
-        <!-- เปิดให้ Member สามารถปักหมุดได้ -->
         <button onclick="togglePin('${t.id}')" title="ปักหมุด" class="text-xs px-2.5 py-1.5 rounded-xl ${t.isPinned ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-600'}"><i class="fa-solid fa-thumbtack"></i></button>
         ${isAdmin ? `<button onclick="deleteTask('${t.id}')" title="ลบงาน" class="text-xs bg-rose-50 text-rose-500 px-2.5 py-1.5 rounded-xl"><i class="fa-solid fa-trash-can"></i></button>` : ''}
       </div>
@@ -591,6 +566,7 @@ function toggleStudentSubmit(taskId, numStr) {
   renderTasks();
   selectDate(selectedDateStr);
   syncTasksToSheet();
+  logActivity('อัปเดตส่งงาน', `เปลี่ยนสถานะเลขที่ ${numStr} ในงาน: ${task.subject}`);
 }
 
 function toggleTrackingAddForm() {
@@ -623,6 +599,7 @@ function addTrackingTask() {
   toggleTrackingAddForm();
   showSuccess('บันทึกสำเร็จ', 'เพิ่มรายการการบ้านเรียบร้อยแล้ว');
   syncTasksToSheet();
+  logActivity('เพิ่มการบ้าน', `${code} - ${subject} (${detail})`);
 }
 
 function submitExtraStudent() {
@@ -643,6 +620,7 @@ function submitExtraStudent() {
     toggleTrackingAddStudentForm();
     showSuccess('สำเร็จ', 'เพิ่มรายชื่อคนค้างงานเรียบร้อยแล้ว');
     syncTasksToSheet();
+    logActivity('เพิ่มคนค้างงาน', `เลขที่ ${numInput} ในวิชา ${task.subject}`);
   } else {
     alert('มีเลขที่นี้ในรายการค้างงานเพิ่มแล้ว');
   }
@@ -662,12 +640,12 @@ function togglePin(id) {
   const task = tasks.find(t => String(t.id) === String(id));
   if (task) {
     task.isPinned = !task.isPinned;
-    
     renderTasks();
     renderCalendar();
     selectDate(selectedDateStr);
     showSuccess('สำเร็จ', task.isPinned ? 'ปักหมุดงานเรียบร้อยแล้ว' : 'ยกเลิกปักหมุดเรียบร้อยแล้ว');
     syncTasksToSheet();
+    logActivity('ปักหมุดงาน', `${task.subject} (${task.detail}) -> ${task.isPinned ? 'ปักหมุด' : 'ยกเลิกปักหมุด'}`);
   }
 }
 
@@ -678,6 +656,7 @@ function deleteTask(id) {
     return;
   }
   if (!confirm('คุณต้องการลบรายการการบ้านนี้ใช่หรือไม่?')) return;
+  const task = tasks.find(t => String(t.id) === String(id));
   tasks = tasks.filter(t => String(t.id) !== String(id));
   
   renderTasks();
@@ -685,6 +664,7 @@ function deleteTask(id) {
   selectDate(selectedDateStr);
   showSuccess('ลบสำเร็จ', 'ลบรายการการบ้านเรียบร้อยแล้ว');
   syncTasksToSheet();
+  if (task) logActivity('ลบการบ้าน', `${task.subject} (${task.detail})`);
 }
 
 function renderCalendar() {
@@ -763,6 +743,16 @@ async function saveDailyEvent() {
   closeEventModal();
   selectDate(selectedDateStr);
   showSuccess('บันทึกสำเร็จ', 'เพิ่มกิจกรรมเรียบร้อยแล้ว');
+  
+  // ซิงค์ Events ไปชีต
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'saveEvents', events: dailyEvents })
+  }).catch(e => console.error('Sync Events Error:', e));
+  
+  logActivity('เพิ่มกิจกรรม', `วันที่ ${selectedDateStr}: ${val}`);
 }
 
 function updateDatalists() {
@@ -773,11 +763,96 @@ function updateDatalists() {
 }
 
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-function openLogsModal() { document.getElementById('logs-modal').classList.remove('hidden'); loadLogs(); }
-function openManageModal() { document.getElementById('manage-modal').classList.add('hidden'); }
-function clearLogs() { alert('ล้างประวัติเรียบร้อย'); }
-function loadLogs() { document.getElementById('logs-status').textContent = 'ไม่มีประวัติการใช้งาน'; }
-function loadOptions() { document.getElementById('manage-status').textContent = 'โหลดตัวเลือกสำเร็จ'; }
+
+// ----------------- ปุ่มที่ 1: ACTIVITY LOGS -----------------
+function openLogsModal() {
+  document.getElementById('logs-modal').classList.remove('hidden');
+  loadLogs();
+}
+
+async function loadLogs() {
+  const statusEl = document.getElementById('logs-status');
+  const listEl = document.getElementById('logs-list');
+  statusEl.textContent = 'กำลังโหลดประวัติ...';
+  listEl.innerHTML = '';
+  
+  try {
+    const res = await fetch(`${SCRIPT_URL}?action=getLogs&t=${Date.now()}`);
+    const logs = await res.json();
+    if (!Array.isArray(logs) || logs.length === 0) {
+      statusEl.textContent = 'ไม่มีประวัติการใช้งาน';
+      return;
+    }
+    statusEl.textContent = `พบประวัติทั้งหมด ${logs.length} รายการ`;
+    logs.forEach(l => {
+      const div = document.createElement('div');
+      div.className = 'bg-slate-50 p-2.5 rounded-xl border text-[11px] space-y-0.5';
+      const timeStr = l.timestamp ? new Date(l.timestamp).toLocaleString('th-TH') : '-';
+      div.innerHTML = `
+        <div class="flex justify-between font-bold text-purple-700">
+          <span><i class="fa-solid fa-user"></i> ${escapeHtml(l.username)}</span>
+          <span class="text-[10px] text-slate-400">${timeStr}</span>
+        </div>
+        <div class="font-semibold text-slate-800">${escapeHtml(l.action)}</div>
+        <div class="text-slate-500">${escapeHtml(l.details)}</div>
+      `;
+      listEl.appendChild(div);
+    });
+  } catch (e) {
+    console.error('Load Logs Error:', e);
+    statusEl.textContent = 'โหลดประวัติไม่สำเร็จ';
+  }
+}
+
+async function clearLogs() {
+  if (!confirm('คุณต้องการลบประวัติการใช้งานทั้งหมดใช่หรือไม่?')) return;
+  showLoading('กำลังล้างประวัติ...');
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'clearLogs' })
+    });
+    hideLoading();
+    loadLogs();
+    showSuccess('สำเร็จ', 'ล้างประวัติการใช้งานเรียบร้อยแล้ว');
+  } catch (e) {
+    hideLoading();
+    alert('ล้างประวัติไม่สำเร็จ');
+  }
+}
+
+function logActivity(actionText, details) {
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'saveLog', username: currentUsername || 'Unknown', actionText, details })
+  }).catch(e => console.error('Log Error:', e));
+}
+
+// ----------------- ปุ่มที่ 2: MANAGE OPTIONS -----------------
+function openManageModal() {
+  document.getElementById('manage-modal').classList.remove('hidden');
+  loadOptionsModal();
+}
+
+function loadOptionsModal() {
+  const codesEl = document.getElementById('manage-codes');
+  const subjectsEl = document.getElementById('manage-subjects');
+  codesEl.innerHTML = codes.length ? codes.map(c => `<div class="bg-white p-2 rounded-xl border text-xs font-bold text-slate-700">${escapeHtml(c)}</div>`).join('') : '<p class="text-[11px] text-slate-400">ไม่มีข้อมูล</p>';
+  subjectsEl.innerHTML = subjects.length ? subjects.map(s => `<div class="bg-white p-2 rounded-xl border text-xs font-bold text-slate-700">${escapeHtml(s)}</div>`).join('') : '<p class="text-[11px] text-slate-400">ไม่มีข้อมูล</p>';
+}
+
+function loadOptions() {
+  fetchAllData(true);
+  setTimeout(() => { loadOptionsModal(); }, 1000);
+}
+
+// ----------------- ปุ่มที่ 3: SYNC / REFRESH -----------------
+// (ใช้ฟังก์ชัน fetchAllData(true) ที่มีอยู่แล้ว ซึ่งผูกไว้กับปุ่มรีเฟรชแล้ว)
+
 function syncTasksToSheet() {
   cacheTasks();
   fetch(SCRIPT_URL, {
