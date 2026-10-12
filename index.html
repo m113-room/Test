@@ -109,7 +109,7 @@
     </div>
   </div>
 
-  <!-- TRACKING VIEW (ช่องสุดท้าย "งานค้าง" มีฟังก์ชัน 1. เพิ่มงานค้าง, 2. เช็คงานค้าง) -->
+  <!-- TRACKING VIEW (แท็บ "งานค้าง": มีปุ่มเพิ่มงาน + เช็คงานค้าง) -->
   <div id="view-tracking" class="hidden space-y-4">
     <!-- ฟังก์ชันที่ 1: เพิ่มงานค้าง (เฉพาะ Admin) -->
     <div id="creator-add-tracking-container" class="hidden">
@@ -123,7 +123,9 @@
       <h3 class="text-xs font-bold text-slate-700"><i class="fa-solid fa-plus text-purple-600"></i> เพิ่มรายการงานค้าง</h3>
       <div class="grid grid-cols-3 gap-2">
         <input id="tracking-task-code" list="code-options" placeholder="รหัสวิชา" class="w-full p-2.5 text-xs bg-white rounded-xl border">
+        <datalist id="code-options"></datalist>
         <input id="tracking-task-subject" list="subject-options" placeholder="ชื่อวิชา" class="col-span-2 w-full p-2.5 text-xs bg-white rounded-xl border">
+        <datalist id="subject-options"></datalist>
       </div>
       <input id="tracking-task-detail" placeholder="รายละเอียดการบ้าน" class="w-full p-2.5 text-xs bg-white rounded-xl border">
       <div class="grid grid-cols-2 gap-2">
@@ -143,30 +145,8 @@
     </div>
   </div>
 
-  <!-- TASKS (ภาพรวมงานค้าง) -->
+  <!-- TASKS (ภาพรวมงานค้าง - เอาปุ่มและฟอร์มเพิ่มงานออกแล้ว) -->
   <div id="view-tasks" class="space-y-4">
-    <div id="creator-add-task-container" class="hidden">
-      <button onclick="toggleAddForm()" class="w-full py-2.5 rounded-2xl bg-[#FF75BC] text-white font-bold text-xs shadow-sm">
-        <i class="fa-solid fa-plus"></i> เพิ่มงานค้าง
-      </button>
-    </div>
-
-    <div id="admin-form" class="hidden bg-slate-50 p-4 rounded-2xl border space-y-3">
-      <h3 class="text-xs font-bold text-slate-700"><i class="fa-solid fa-plus text-pink-500"></i> เพิ่มรายการการบ้าน</h3>
-      <div class="grid grid-cols-3 gap-2">
-        <input id="task-code" list="code-options" placeholder="รหัสวิชา" class="w-full p-2.5 text-xs bg-white rounded-xl border">
-        <datalist id="code-options"></datalist>
-        <input id="task-subject" list="subject-options" placeholder="ชื่อวิชา" class="col-span-2 w-full p-2.5 text-xs bg-white rounded-xl border">
-        <datalist id="subject-options"></datalist>
-      </div>
-      <input id="task-detail" placeholder="รายละเอียดการบ้าน" class="w-full p-2.5 text-xs bg-white rounded-xl border">
-      <div class="grid grid-cols-2 gap-2">
-        <label class="flex items-center bg-white border rounded-xl px-2 py-2"><span class="text-[11px] mr-1">วันสั่ง:</span><input type="date" id="assign-date-input" class="w-full text-xs"></label>
-        <label class="flex items-center bg-white border rounded-xl px-2 py-2"><span class="text-[11px] mr-1 text-rose-500">วันส่ง:</span><input type="date" id="due-date-input" class="w-full text-xs"></label>
-      </div>
-      <button id="add-task-btn" onclick="addTask()" class="w-full py-2.5 bg-[#FF75BC] text-white font-bold rounded-xl text-xs">บันทึกข้อมูล</button>
-    </div>
-
     <div class="bg-amber-50 border border-amber-100 rounded-3xl p-4 space-y-3">
       <div class="flex items-center gap-2 text-amber-800 text-xs font-bold"><i class="fa-solid fa-thumbtack text-amber-500"></i> ปักหมุดไว้</div>
       <div id="pinned-list" class="space-y-2.5"></div>
@@ -176,7 +156,7 @@
         <span class="text-xs font-extrabold text-[#FF75BC]">ภาพรวมงานค้าง</span>
         <span id="task-count" class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full">0 ITEMS</span>
       </div>
-      <div id="task-list" class="space-y-2.5 max-h-[300px] overflow-y-auto"></div>
+      <div id="task-list" class="space-y-2.5 max-h-[350px] overflow-y-auto"></div>
     </div>
   </div>
 </div>
@@ -355,7 +335,6 @@ function openDashboard(name) {
   const isAdmin = currentRole === 'admin' || currentRole === 'creator';
   document.getElementById('btn-view-logs').classList.toggle('hidden', !isAdmin);
   document.getElementById('btn-manage-history').classList.toggle('hidden', !isAdmin);
-  document.getElementById('creator-add-task-container').classList.toggle('hidden', !isAdmin);
   document.getElementById('creator-add-event-container').classList.toggle('hidden', !isAdmin);
   document.getElementById('creator-add-tracking-container').classList.toggle('hidden', !isAdmin);
   switchTab('pending');
@@ -615,11 +594,6 @@ function selectDate(dateStr) {
   }
 }
 
-function toggleAddForm() {
-  const form = document.getElementById('admin-form');
-  form.classList.toggle('hidden');
-}
-
 function openEventModal() {
   document.getElementById('modal-date-label').textContent = `วันที่เลือก: ${formatThaiShortDate(selectedDateStr)}`;
   document.getElementById('daily-event-input').value = '';
@@ -637,23 +611,6 @@ async function saveDailyEvent() {
   closeEventModal();
   selectDate(selectedDateStr);
   showSuccess('บันทึกสำเร็จ', 'เพิ่มกิจกรรมเรียบร้อยแล้ว');
-}
-
-async function addTask() {
-  const code = document.getElementById('task-code').value.trim();
-  const subject = document.getElementById('task-subject').value.trim();
-  const detail = document.getElementById('task-detail').value.trim();
-  const assignDate = document.getElementById('assign-date-input').value;
-  const dueDate = document.getElementById('due-date-input').value;
-  if (!code || !subject || !detail || !dueDate) { alert('กรุณากรอกข้อมูลให้ครบถ้วน'); return; }
-  
-  const newTask = { id: String(Date.now()), code, subject, detail, assignDate, dueDate, isPinned: false, submitted: [] };
-  tasks.unshift(newTask);
-  cacheTasks();
-  renderTasks();
-  renderCalendar();
-  toggleAddForm();
-  showSuccess('บันทึกสำเร็จ', 'เพิ่มรายการการบ้านเรียบร้อยแล้ว');
 }
 
 function updateDatalists() {
