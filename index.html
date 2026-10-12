@@ -111,39 +111,39 @@
 
   <!-- TRACKING VIEW (แท็บ "งานค้าง") -->
   <div id="view-tracking" class="hidden space-y-4">
-    <!-- ส่วนย่อยที่ 1: เพิ่มการบ้าน (เฉพาะ Admin) -->
-    <div id="creator-section-add-task" class="hidden space-y-2">
-      <button onclick="toggleTrackingAddForm()" class="w-full py-2.5 rounded-2xl bg-purple-600 text-white font-bold text-xs shadow-sm">
+    <!-- 2 ปุ่มบรรทัดเดียวกัน แบ่งครึ่ง (เฉพาะ Admin) -->
+    <div id="creator-buttons-container" class="hidden grid grid-cols-2 gap-2">
+      <button onclick="toggleTrackingAddForm()" class="py-2.5 rounded-2xl bg-purple-600 text-white font-bold text-xs shadow-sm">
         <i class="fa-solid fa-plus"></i> เพิ่มการบ้าน
       </button>
-      <div id="tracking-admin-form" class="hidden bg-slate-50 p-4 rounded-2xl border space-y-3">
-        <h3 class="text-xs font-bold text-slate-700"><i class="fa-solid fa-plus text-purple-600"></i> ฟอร์มเพิ่มรายการการบ้าน</h3>
-        <div class="grid grid-cols-3 gap-2">
-          <input id="tracking-task-code" list="code-options" placeholder="รหัสวิชา" class="w-full p-2.5 text-xs bg-white rounded-xl border">
-          <datalist id="code-options"></datalist>
-          <input id="tracking-task-subject" list="subject-options" placeholder="ชื่อวิชา" class="col-span-2 w-full p-2.5 text-xs bg-white rounded-xl border">
-          <datalist id="subject-options"></datalist>
-        </div>
-        <input id="tracking-task-detail" placeholder="รายละเอียดการบ้าน" class="w-full p-2.5 text-xs bg-white rounded-xl border">
-        <div class="grid grid-cols-2 gap-2">
-          <label class="flex items-center bg-white border rounded-xl px-2 py-2"><span class="text-[11px] mr-1">วันสั่ง:</span><input type="date" id="tracking-assign-date" class="w-full text-xs"></label>
-          <label class="flex items-center bg-white border rounded-xl px-2 py-2"><span class="text-[11px] mr-1 text-rose-500">วันส่ง:</span><input type="date" id="tracking-due-date" class="w-full text-xs"></label>
-        </div>
-        <button onclick="addTrackingTask()" class="w-full py-2.5 bg-purple-600 text-white font-bold rounded-xl text-xs">บันทึกข้อมูลการบ้าน</button>
-      </div>
+      <button onclick="toggleTrackingAddStudentForm()" class="py-2.5 rounded-2xl bg-indigo-600 text-white font-bold text-xs shadow-sm">
+        <i class="fa-solid fa-user-plus"></i> เพิ่มรายชื่อคนค้าง
+      </button>
     </div>
 
-    <!-- ส่วนย่อยที่ 2: เพิ่มรายชื่อคนค้างงาน (เฉพาะ Admin) -->
-    <div id="creator-section-add-student" class="hidden space-y-2">
-      <button onclick="toggleTrackingAddStudentForm()" class="w-full py-2.5 rounded-2xl bg-indigo-600 text-white font-bold text-xs shadow-sm">
-        <i class="fa-solid fa-user-plus"></i> เพิ่มรายชื่อคนค้างงาน
-      </button>
-      <div id="tracking-student-form" class="hidden bg-slate-50 p-4 rounded-2xl border space-y-3">
-        <h3 class="text-xs font-bold text-slate-700"><i class="fa-solid fa-user-plus text-indigo-600"></i> ฟอร์มเพิ่มชื่อ/เลขที่คนค้างงาน</h3>
-        <select id="select-target-task" class="w-full p-2.5 text-xs bg-white rounded-xl border font-semibold text-slate-700"></select>
-        <input id="extra-student-name" placeholder="ระบุชื่อ หรือเลขที่นักเรียนที่ค้างงานเพิ่ม" class="w-full p-2.5 text-xs bg-white rounded-xl border">
-        <button onclick="submitExtraStudent()" class="w-full py-2.5 bg-indigo-600 text-white font-bold rounded-xl text-xs">บันทึกรายชื่อคนค้างงาน</button>
+    <!-- ส่วนย่อยที่ 1: เพิ่มการบ้าน -->
+    <div id="tracking-admin-form" class="hidden bg-slate-50 p-4 rounded-2xl border space-y-3">
+      <h3 class="text-xs font-bold text-slate-700"><i class="fa-solid fa-plus text-purple-600"></i> ฟอร์มเพิ่มรายการการบ้าน</h3>
+      <div class="grid grid-cols-3 gap-2">
+        <input id="tracking-task-code" list="code-options" placeholder="รหัสวิชา" class="w-full p-2.5 text-xs bg-white rounded-xl border">
+        <datalist id="code-options"></datalist>
+        <input id="tracking-task-subject" list="subject-options" placeholder="ชื่อวิชา" class="col-span-2 w-full p-2.5 text-xs bg-white rounded-xl border">
+        <datalist id="subject-options"></datalist>
       </div>
+      <input id="tracking-task-detail" placeholder="รายละเอียดการบ้าน" class="w-full p-2.5 text-xs bg-white rounded-xl border">
+      <div class="grid grid-cols-2 gap-2">
+        <label class="flex items-center bg-white border rounded-xl px-2 py-2"><span class="text-[11px] mr-1">วันสั่ง:</span><input type="date" id="tracking-assign-date" class="w-full text-xs"></label>
+        <label class="flex items-center bg-white border rounded-xl px-2 py-2"><span class="text-[11px] mr-1 text-rose-500">วันส่ง:</span><input type="date" id="tracking-due-date" class="w-full text-xs"></label>
+      </div>
+      <button onclick="addTrackingTask()" class="w-full py-2.5 bg-purple-600 text-white font-bold rounded-xl text-xs">บันทึกข้อมูลการบ้าน</button>
+    </div>
+
+    <!-- ส่วนย่อยที่ 2: เพิ่มรายชื่อคนค้างงาน -->
+    <div id="tracking-student-form" class="hidden bg-slate-50 p-4 rounded-2xl border space-y-3">
+      <h3 class="text-xs font-bold text-slate-700"><i class="fa-solid fa-user-plus text-indigo-600"></i> ฟอร์มเพิ่มชื่อ/เลขที่คนค้างงาน</h3>
+      <select id="select-target-task" class="w-full p-2.5 text-xs bg-white rounded-xl border font-semibold text-slate-700"></select>
+      <input id="extra-student-name" placeholder="ระบุชื่อ หรือเลขที่นักเรียนที่ค้างงานเพิ่ม" class="w-full p-2.5 text-xs bg-white rounded-xl border">
+      <button onclick="submitExtraStudent()" class="w-full py-2.5 bg-indigo-600 text-white font-bold rounded-xl text-xs">บันทึกรายชื่อคนค้างงาน</button>
     </div>
 
     <!-- ระบบเช็คงานค้าง -->
@@ -348,8 +348,7 @@ function openDashboard(name) {
   document.getElementById('btn-view-logs').classList.toggle('hidden', !isAdmin);
   document.getElementById('btn-manage-history').classList.toggle('hidden', !isAdmin);
   document.getElementById('creator-add-event-container').classList.toggle('hidden', !isAdmin);
-  document.getElementById('creator-section-add-task').classList.toggle('hidden', !isAdmin);
-  document.getElementById('creator-section-add-student').classList.toggle('hidden', !isAdmin);
+  document.getElementById('creator-buttons-container').classList.toggle('hidden', !isAdmin);
   switchTab('pending');
   renderTasks(); renderCalendar(); selectDate(selectedDateStr);
 }
@@ -525,11 +524,15 @@ function toggleStudentSubmit(taskId, numStr) {
 
 function toggleTrackingAddForm() {
   const form = document.getElementById('tracking-admin-form');
+  const studentForm = document.getElementById('tracking-student-form');
+  studentForm.classList.add('hidden');
   form.classList.toggle('hidden');
 }
 
 function toggleTrackingAddStudentForm() {
   const form = document.getElementById('tracking-student-form');
+  const adminForm = document.getElementById('tracking-admin-form');
+  adminForm.classList.add('hidden');
   form.classList.toggle('hidden');
 }
 
