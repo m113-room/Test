@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Homework M.113 - V.1.60</title>
+<title>Homework M.113 - V.1.54</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -16,7 +16,7 @@
   .animate-pop { animation: pop 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 </style>
 </head>
-<body class="flex flex-col items-center justify-between p-3 sm:p-6 min-h-screen relative antialiased bg-slate-50">
+<body class="flex flex-col items-center justify-between p-2 sm:p-4 min-h-screen relative antialiased bg-slate-50">
 <div class="flex-grow"></div>
 
 <!-- LOADING OVERLAY -->
@@ -28,147 +28,136 @@
 </div>
 
 <!-- LOGIN -->
-<div id="login-page" class="w-full max-w-sm bg-white/85 backdrop-blur-2xl rounded-3xl p-8 border border-white/60 shadow-xl relative z-10">
+<div id="login-page" class="w-full max-w-sm bg-white/85 backdrop-blur-2xl rounded-3xl p-6 border border-white/60 shadow-xl relative z-10">
   <div class="text-center mb-6">
     <div class="w-14 h-14 bg-gradient-to-br from-[#FF75BC] via-purple-500 to-[#50D8FF] rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
       <i class="fa-solid fa-book-open-reader text-2xl text-white"></i>
     </div>
     <h1 class="text-2xl font-extrabold text-slate-800">Homework M.113</h1>
-    <p class="text-xs text-slate-400 mt-1 font-semibold text-pink-600">ระบบการบ้านห้อง M.113 (V.1.60)</p>
+    <p class="text-xs text-slate-400 mt-1 font-semibold text-pink-600">ระบบการบ้านห้อง M.113 (V.1.54)</p>
   </div>
-  
-  <div class="space-y-3 mb-6">
-    <div>
-      <label class="block text-[11px] font-bold text-slate-600 mb-1">ชื่อผู้ใช้งาน (USERNAME)</label>
-      <input type="text" id="username" placeholder="พิมพ์ชื่อผู้ใช้งานของคุณ"
-        onkeydown="if(event.key==='Enter')login()"
-        class="w-full px-4 py-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-semibold outline-none focus:border-[#FF75BC]">
-    </div>
-    <div>
-      <label class="block text-[11px] font-bold text-slate-600 mb-1">รหัสผ่าน (PASSWORD - เฉพาะ Admin)</label>
-      <input type="password" id="password" placeholder="กรอกรหัสผ่าน (ถ้ามี)"
-        onkeydown="if(event.key==='Enter')login()"
-        class="w-full px-4 py-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-semibold outline-none focus:border-[#FF75BC]">
-    </div>
+  <div class="space-y-1.5 mb-5">
+    <label class="block text-[11px] font-bold text-slate-600">ชื่อผู้ใช้งาน (USERNAME)</label>
+    <input type="text" id="username" placeholder="พิมพ์ชื่อผู้ใช้งานของคุณ"
+      onkeydown="if(event.key==='Enter')login()"
+      class="w-full px-4 py-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-semibold outline-none focus:border-[#FF75BC]">
   </div>
-
   <button id="login-btn" onclick="login()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#FF75BC] to-rose-400 text-white font-bold text-xs shadow-lg">
     เข้าสู่ระบบ
   </button>
 </div>
 
 <!-- DASHBOARD -->
-<div id="main-page" class="hidden w-full max-w-md bg-white/85 backdrop-blur-2xl rounded-3xl p-5 border border-white/80 shadow-2xl relative z-10">
-  <div class="flex justify-between items-center pb-4 border-b border-slate-100 mb-4 gap-2">
+<div id="main-page" class="hidden w-full max-w-md bg-white/85 backdrop-blur-2xl rounded-3xl p-4 border border-white/80 shadow-2xl relative z-10 space-y-3">
+  <div class="flex justify-between items-center pb-3 border-b border-slate-100 gap-1">
     <div class="flex items-center gap-1.5 flex-wrap">
-      <span class="font-extrabold text-[#FF75BC] text-lg">HOMEWORK</span>
-      <span class="bg-slate-800 text-white text-[10px] font-bold px-2 py-0.5 rounded-md">M113</span>
-      <span id="guest-badge" class="bg-pink-100 text-pink-700 text-[10px] font-bold px-2 py-0.5 rounded-md">MEMBER</span>
+      <span class="font-extrabold text-[#FF75BC] text-base">HOMEWORK</span>
+      <span class="bg-slate-800 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md">M113</span>
+      <span id="guest-badge" class="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.5 rounded-md">MEMBER</span>
     </div>
-    <div class="flex items-center gap-1.5">
-      <button onclick="openLogsModal()" id="btn-view-logs" title="ประวัติ" class="hidden text-xs bg-purple-100 text-purple-700 px-2.5 py-1.5 rounded-xl"><i class="fa-solid fa-clock-rotate-left"></i></button>
-      <button onclick="openManageModal()" id="btn-manage-history" title="จัดการตัวเลือก" class="hidden text-xs bg-sky-100 text-sky-700 px-2.5 py-1.5 rounded-xl"><i class="fa-solid fa-list-check"></i></button>
-      <button onclick="fetchAllData(true)" title="ซิงค์ข้อมูล" class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1.5 rounded-xl"><i class="fa-solid fa-rotate"></i></button>
-      <button onclick="logout()" class="text-xs bg-rose-50 text-rose-500 px-3 py-1.5 rounded-xl font-bold">LOGOUT</button>
+    <!-- ปุ่มด้านบนขวา: ธีมสีทอง (Amber/Gold) ตามต้องการ -->
+    <div class="flex items-center gap-1">
+      <button onclick="openLogsModal()" id="btn-view-logs" title="ประวัติ" class="hidden text-xs bg-amber-100 text-amber-700 px-2 py-1.5 rounded-xl"><i class="fa-solid fa-clock-rotate-left"></i></button>
+      <button onclick="openManageModal()" id="btn-manage-history" title="จัดการตัวเลือก" class="hidden text-xs bg-amber-100 text-amber-700 px-2 py-1.5 rounded-xl"><i class="fa-solid fa-list-check"></i></button>
+      <button onclick="fetchAllData(true)" title="ซิงค์ข้อมูล" class="text-xs bg-amber-100 text-amber-700 px-2 py-1.5 rounded-xl"><i class="fa-solid fa-rotate"></i></button>
+      <button onclick="logout()" class="text-xs bg-amber-50 text-amber-600 px-2.5 py-1.5 rounded-xl font-bold">LOGOUT</button>
     </div>
   </div>
 
-  <div class="space-y-2 mb-4">
-    <!-- เมนู 3 ปุ่มด้านบน -->
-    <div class="flex bg-slate-100 p-1 rounded-2xl text-center text-[11px] font-bold gap-1">
-      <button id="tab-pending" onclick="switchTab('pending')" class="flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white">งานค้าง</button>
-      <button id="tab-calendar" onclick="switchTab('calendar')" class="flex-1 py-2.5 rounded-xl text-slate-500">ปฏิทินงาน</button>
-      <button id="tab-tracking" onclick="switchTab('tracking')" class="flex-1 py-2.5 rounded-xl text-slate-500">ติดตามงานค้าง</button>
+  <div class="space-y-2">
+    <!-- เมนู 3 แท็บด้านบน ยุบกระชับ ไม่ให้ตกบรรทัด -->
+    <div class="flex bg-slate-100 p-1 rounded-2xl text-center text-[10px] sm:text-[11px] font-bold gap-1">
+      <button id="tab-pending" onclick="switchTab('pending')" class="flex-1 py-2 rounded-xl bg-[#FF75BC] text-white">งานค้าง</button>
+      <button id="tab-calendar" onclick="switchTab('calendar')" class="flex-1 py-2 rounded-xl text-slate-500">ปฏิทินงาน</button>
+      <button id="tab-tracking" onclick="switchTab('tracking')" class="flex-1 py-2 rounded-xl text-slate-500">ติดตามงานค้าง</button>
     </div>
-    
-    <!-- ปุ่มเพิ่มงานค้าง/สร้างกิจกรรม (จะถูกซ่อนอัตโนมัติเมื่อกดเลือกแท็บ ติดตามงานค้าง) -->
     <div id="creator-action-buttons" class="grid grid-cols-2 gap-2">
       <button onclick="toggleAddForm()" class="py-2.5 rounded-2xl bg-[#FF75BC] text-white font-bold text-xs"><i class="fa-solid fa-plus"></i> เพิ่มงานค้าง</button>
       <button onclick="openEventModal()" class="py-2.5 rounded-2xl bg-[#50D8FF] text-slate-900 font-extrabold text-xs"><i class="fa-solid fa-star"></i> สร้างกิจกรรม</button>
     </div>
   </div>
 
-  <div id="notice-box" class="bg-slate-100 p-2.5 rounded-2xl flex items-center justify-between mb-4 text-xs">
-    <span class="bg-[#FF75BC] text-white text-[10px] font-bold px-2.5 py-1 rounded-xl">NOTICE</span>
+  <div class="bg-slate-100 p-2 rounded-2xl flex items-center justify-between text-xs">
+    <span class="bg-[#FF75BC] text-white text-[10px] font-bold px-2 py-0.5 rounded-xl">NOTICE</span>
     <span id="notice-text" class="text-slate-500 text-[11px]">แสดงรายการการบ้านทั้งหมด</span>
   </div>
 
   <!-- CALENDAR -->
-  <div id="view-calendar" class="hidden space-y-4">
-    <div class="flex justify-between items-center bg-slate-50 p-3 rounded-2xl border">
+  <div id="view-calendar" class="hidden space-y-3">
+    <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-2xl border">
       <span class="text-xs font-extrabold text-slate-700">ปฏิทิน</span>
       <div class="flex gap-1">
-        <button onclick="changeMonth(-1)" class="px-2.5 py-1 text-[11px] font-bold bg-white rounded-lg border">PREV</button>
-        <button onclick="changeMonth(1)" class="px-2.5 py-1 text-[11px] font-bold bg-white rounded-lg border">NEXT</button>
+        <button onclick="changeMonth(-1)" class="px-2 py-1 text-[10px] font-bold bg-white rounded-lg border">PREV</button>
+        <button onclick="changeMonth(1)" class="px-2 py-1 text-[10px] font-bold bg-white rounded-lg border">NEXT</button>
       </div>
     </div>
-    <div class="bg-white rounded-3xl p-4 border shadow-sm">
-      <h3 id="calendar-month-year" class="text-xs font-bold text-slate-800 mb-3"></h3>
-      <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-extrabold mb-2">
+    <div class="bg-white rounded-3xl p-3 border shadow-sm">
+      <h3 id="calendar-month-year" class="text-xs font-bold text-slate-800 mb-2"></h3>
+      <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-extrabold mb-1">
         <span class="text-rose-500">SUN</span><span class="text-amber-500">MON</span><span class="text-pink-500">TUE</span><span class="text-emerald-500">WED</span><span class="text-orange-500">THU</span><span class="text-sky-500">FRI</span><span class="text-purple-500">SAT</span>
       </div>
       <div id="calendar-days" class="grid grid-cols-7 gap-1"></div>
     </div>
-    <div class="bg-slate-50 p-4 rounded-3xl border space-y-3">
+    <div class="bg-slate-50 p-3 rounded-3xl border space-y-2">
       <div class="flex items-center justify-between">
         <span id="selected-date-label" class="text-xs font-extrabold text-slate-700">รายการของวันที่เลือก</span>
-        <span id="selected-task-count" class="bg-sky-100 text-sky-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">0 รายการ</span>
+        <span id="selected-task-count" class="bg-sky-100 text-sky-800 text-[10px] font-bold px-2 py-0.5 rounded-full">0 รายการ</span>
       </div>
-      <div class="bg-sky-50 border border-sky-100 p-3 rounded-2xl space-y-2">
+      <div class="bg-sky-50 border border-sky-100 p-2.5 rounded-2xl space-y-1.5">
         <div class="flex items-center justify-between">
           <span class="text-[11px] font-extrabold text-sky-900"><i class="fa-solid fa-star"></i> กิจกรรมในวันนี้</span>
-          <button onclick="openEventModal()" class="text-[10px] bg-[#50D8FF] px-2.5 py-1 rounded-xl font-bold">+ เพิ่มกิจกรรม</button>
+          <button onclick="openEventModal()" class="text-[10px] bg-[#50D8FF] px-2 py-0.5 rounded-xl font-bold">+ เพิ่มกิจกรรม</button>
         </div>
-        <div id="event-list-view" class="space-y-1.5 max-h-[120px] overflow-y-auto"></div>
+        <div id="event-list-view" class="space-y-1 max-h-[100px] overflow-y-auto"></div>
       </div>
-      <div id="selected-date-tasks" class="space-y-2 max-h-[180px] overflow-y-auto"></div>
+      <div id="selected-date-tasks" class="space-y-1.5 max-h-[140px] overflow-y-auto"></div>
     </div>
   </div>
 
   <!-- TRACKING VIEW -->
-  <div id="view-tracking" class="hidden space-y-4">
-    <div class="bg-white rounded-3xl p-4 border shadow-sm space-y-3">
+  <div id="view-tracking" class="hidden space-y-3">
+    <div class="bg-white rounded-3xl p-3 border shadow-sm space-y-2">
       <div class="flex justify-between items-center">
-        <span class="text-xs font-extrabold text-slate-800"><i class="fa-solid fa-list-check text-pink-500"></i> ติดตามงานค้างทั้งหมด</span>
-        <span id="tracking-count" class="bg-pink-100 text-pink-700 text-[10px] font-bold px-2 py-0.5 rounded-full">0 ITEMS</span>
+        <span class="text-xs font-extrabold text-slate-800"><i class="fa-solid fa-list-check text-amber-500"></i> ติดตามงานค้างทั้งหมด</span>
+        <span id="tracking-count" class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">0 ITEMS</span>
       </div>
-      <div id="tracking-task-list" class="space-y-2.5 max-h-[350px] overflow-y-auto"></div>
+      <div id="tracking-task-list" class="space-y-2 max-h-[300px] overflow-y-auto"></div>
     </div>
   </div>
 
   <!-- TASKS -->
-  <div id="view-tasks" class="space-y-4">
-    <div id="admin-form" class="hidden bg-slate-50 p-4 rounded-2xl border space-y-3">
+  <div id="view-tasks" class="space-y-3">
+    <div id="admin-form" class="hidden bg-slate-50 p-3 rounded-2xl border space-y-2.5">
       <h3 class="text-xs font-bold text-slate-700"><i class="fa-solid fa-plus text-pink-500"></i> เพิ่มรายการการบ้าน</h3>
       <div class="grid grid-cols-3 gap-2">
-        <input id="task-code" list="code-options" placeholder="รหัสวิชา" class="w-full p-2.5 text-xs bg-white rounded-xl border">
+        <input id="task-code" list="code-options" placeholder="รหัสวิชา" class="w-full p-2 text-xs bg-white rounded-xl border">
         <datalist id="code-options"></datalist>
-        <input id="task-subject" list="subject-options" placeholder="ชื่อวิชา" class="col-span-2 w-full p-2.5 text-xs bg-white rounded-xl border">
+        <input id="task-subject" list="subject-options" placeholder="ชื่อวิชา" class="col-span-2 w-full p-2 text-xs bg-white rounded-xl border">
         <datalist id="subject-options"></datalist>
       </div>
-      <input id="task-detail" placeholder="รายละเอียดการบ้าน" class="w-full p-2.5 text-xs bg-white rounded-xl border">
+      <input id="task-detail" placeholder="รายละเอียดการบ้าน" class="w-full p-2 text-xs bg-white rounded-xl border">
       <div class="grid grid-cols-2 gap-2">
-        <label class="flex items-center bg-white border rounded-xl px-2 py-2"><span class="text-[11px] mr-1">วันสั่ง:</span><input type="date" id="assign-date-input" class="w-full text-xs"></label>
-        <label class="flex items-center bg-white border rounded-xl px-2 py-2"><span class="text-[11px] mr-1 text-rose-500">วันส่ง:</span><input type="date" id="due-date-input" class="w-full text-xs"></label>
+        <label class="flex items-center bg-white border rounded-xl px-2 py-1.5"><span class="text-[11px] mr-1">วันสั่ง:</span><input type="date" id="assign-date-input" class="w-full text-xs"></label>
+        <label class="flex items-center bg-white border rounded-xl px-2 py-1.5"><span class="text-[11px] mr-1 text-rose-500">วันส่ง:</span><input type="date" id="due-date-input" class="w-full text-xs"></label>
       </div>
-      <button id="add-task-btn" onclick="addTask()" class="w-full py-2.5 bg-[#FF75BC] text-white font-bold rounded-xl text-xs">บันทึกข้อมูล</button>
+      <button id="add-task-btn" onclick="addTask()" class="w-full py-2 bg-[#FF75BC] text-white font-bold rounded-xl text-xs">บันทึกข้อมูล</button>
     </div>
-    <div class="bg-amber-50 border border-amber-100 rounded-3xl p-4 space-y-3">
+    <div class="bg-amber-50 border border-amber-100 rounded-3xl p-3 space-y-2">
       <div class="flex items-center gap-2 text-amber-800 text-xs font-bold"><i class="fa-solid fa-thumbtack text-amber-500"></i> ปักหมุดไว้</div>
-      <div id="pinned-list" class="space-y-2.5"></div>
+      <div id="pinned-list" class="space-y-2"></div>
     </div>
-    <div class="space-y-2.5">
+    <div class="space-y-2">
       <div class="flex justify-between items-center">
         <span class="text-xs font-extrabold text-slate-400">รายการงานค้าง</span>
         <span id="task-count" class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full">0 ITEMS</span>
       </div>
-      <div id="task-list" class="space-y-2.5 max-h-[300px] overflow-y-auto"></div>
+      <div id="task-list" class="space-y-2 max-h-[260px] overflow-y-auto"></div>
     </div>
   </div>
 </div>
 
 <div class="flex-grow"></div>
-<footer class="py-4 text-center z-20 w-full"><span class="text-[11px] font-extrabold text-slate-500 bg-white/70 px-4 py-1.5 rounded-full border">การส่งการบ้าน</span></footer>
+<footer class="py-3 text-center z-20 w-full"><span class="text-[11px] font-extrabold text-slate-500 bg-white/70 px-4 py-1.5 rounded-full border">การส่งการบ้าน</span></footer>
 
 <!-- SUCCESS POPUP -->
 <div id="success-popup" class="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-50 hidden p-4">
@@ -182,47 +171,47 @@
 
 <!-- EVENT MODAL -->
 <div id="event-modal" class="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-50 hidden p-4">
-  <div class="bg-white rounded-3xl p-5 w-full max-w-sm shadow-2xl animate-pop space-y-4">
-    <div class="flex justify-between items-center border-b pb-3">
+  <div class="bg-white rounded-3xl p-5 w-full max-w-sm shadow-2xl animate-pop space-y-3">
+    <div class="flex justify-between items-center border-b pb-2">
       <h3 class="text-xs font-extrabold text-sky-900"><i class="fa-solid fa-star text-sky-400"></i> เพิ่มกิจกรรม</h3>
       <button onclick="closeEventModal()" class="text-slate-400 text-xs">✕</button>
     </div>
     <span id="modal-date-label" class="text-[11px] font-bold text-slate-500 block">วันที่เลือก: -</span>
-    <input type="text" id="daily-event-input" placeholder="ชื่อกิจกรรม หรือวันสำคัญ..." class="w-full p-3 text-xs bg-slate-50 rounded-2xl border">
-    <button id="save-event-btn" onclick="saveDailyEvent()" class="w-full py-2.5 bg-[#50D8FF] text-slate-900 font-extrabold text-xs rounded-xl">บันทึกกิจกรรม</button>
+    <input type="text" id="daily-event-input" placeholder="ชื่อกิจกรรม หรือวันสำคัญ..." class="w-full p-2.5 text-xs bg-slate-50 rounded-2xl border">
+    <button id="save-event-btn" onclick="saveDailyEvent()" class="w-full py-2 bg-[#50D8FF] text-slate-900 font-extrabold text-xs rounded-xl">บันทึกกิจกรรม</button>
   </div>
 </div>
 
 <!-- ADMIN: ACTIVITY LOGS -->
 <div id="logs-modal" class="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-[60] hidden p-3">
-  <div class="bg-white rounded-3xl p-5 w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl animate-pop">
-    <div class="flex justify-between items-center border-b pb-3 mb-3">
+  <div class="bg-white rounded-3xl p-4 w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl animate-pop">
+    <div class="flex justify-between items-center border-b pb-2 mb-2">
       <h3 class="font-extrabold text-sm text-purple-800"><i class="fa-solid fa-clock-rotate-left"></i> ประวัติการใช้งาน</h3>
       <button onclick="closeModal('logs-modal')" class="text-slate-400 px-2">✕</button>
     </div>
-    <div class="grid grid-cols-2 gap-2 mb-3">
-      <button onclick="clearLogs()" class="py-2.5 bg-rose-50 text-rose-600 rounded-xl text-xs font-bold"><i class="fa-solid fa-trash-can"></i> ล้างประวัติทั้งหมด</button>
-      <button onclick="loadLogs()" class="py-2.5 bg-purple-100 text-purple-700 rounded-xl text-xs font-bold"><i class="fa-solid fa-rotate"></i> โหลดใหม่</button>
+    <div class="grid grid-cols-2 gap-2 mb-2">
+      <button onclick="clearLogs()" class="py-2 bg-rose-50 text-rose-600 rounded-xl text-xs font-bold"><i class="fa-solid fa-trash-can"></i> ล้างประวัติทั้งหมด</button>
+      <button onclick="loadLogs()" class="py-2 bg-purple-100 text-purple-700 rounded-xl text-xs font-bold"><i class="fa-solid fa-rotate"></i> โหลดใหม่</button>
     </div>
-    <p id="logs-status" class="text-xs text-slate-500 mb-3">กำลังโหลด...</p>
-    <div id="logs-list" class="space-y-2"></div>
+    <p id="logs-status" class="text-xs text-slate-500 mb-2">กำลังโหลด...</p>
+    <div id="logs-list" class="space-y-1.5"></div>
   </div>
 </div>
 
 <!-- ADMIN: MANAGE OPTIONS -->
 <div id="manage-modal" class="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-[60] hidden p-3">
-  <div class="bg-white rounded-3xl p-5 w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl animate-pop">
-    <div class="flex justify-between items-center border-b pb-3 mb-3">
+  <div class="bg-white rounded-3xl p-4 w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl animate-pop">
+    <div class="flex justify-between items-center border-b pb-2 mb-2">
       <h3 class="font-extrabold text-sm text-sky-800"><i class="fa-solid fa-list-check"></i> จัดการประวัติวิชาและรหัส</h3>
       <button onclick="closeModal('manage-modal')" class="text-slate-400 px-2">✕</button>
     </div>
-    <p class="text-[11px] text-slate-500 mb-3">ปิดตัวเลือกเพื่อซ่อนจากรายการแนะนำ โดยไม่ลบการบ้านเก่าออกจากชีต</p>
-    <div class="grid grid-cols-2 gap-3">
-      <div><h4 class="text-xs font-extrabold text-slate-700 mb-2">รหัสวิชา</h4><div id="manage-codes" class="space-y-2"></div></div>
-      <div><h4 class="text-xs font-extrabold text-slate-700 mb-2">ชื่อวิชา</h4><div id="manage-subjects" class="space-y-2"></div></div>
+    <p class="text-[11px] text-slate-500 mb-2">ปิดตัวเลือกเพื่อซ่อนจากรายการแนะนำ โดยไม่ลบการบ้านเก่าออกจากชีต</p>
+    <div class="grid grid-cols-2 gap-2">
+      <div><h4 class="text-xs font-extrabold text-slate-700 mb-1">รหัสวิชา</h4><div id="manage-codes" class="space-y-1.5"></div></div>
+      <div><h4 class="text-xs font-extrabold text-slate-700 mb-1">ชื่อวิชา</h4><div id="manage-subjects" class="space-y-1.5"></div></div>
     </div>
-    <p id="manage-status" class="text-xs text-slate-500 mt-3"></p>
-    <button onclick="loadOptions()" class="mt-3 w-full py-2 bg-sky-100 text-sky-700 rounded-xl text-xs font-bold">โหลดตัวเลือกใหม่</button>
+    <p id="manage-status" class="text-xs text-slate-500 mt-2"></p>
+    <button onclick="loadOptions()" class="mt-2 w-full py-2 bg-sky-100 text-sky-700 rounded-xl text-xs font-bold">โหลดตัวเลือกใหม่</button>
   </div>
 </div>
 
@@ -305,25 +294,7 @@ async function fetchAllData(showAlert=false) {
 
 async function login() {
   const raw = document.getElementById('username').value.trim().toLowerCase();
-  const pwd = document.getElementById('password').value.trim();
   if (!raw) { alert('กรุณากรอกชื่อผู้ใช้งาน'); return; }
-
-  if (raw === 'admin') {
-    if (pwd === '1234') {
-      currentRole = 'admin';
-      currentUsername = raw;
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('userRole', currentRole);
-      localStorage.setItem('usernameKey', currentUsername);
-      localStorage.setItem('userName', 'Administrator');
-      openDashboard('Administrator');
-      return;
-    } else {
-      alert('รหัสผ่าน Admin ไม่ถูกต้อง');
-      return;
-    }
-  }
-
   showLoading('กำลังตรวจสอบชื่อในระบบ...');
   const btn = document.getElementById('login-btn'); btn.disabled = true;
   await fetchAllData(false);
@@ -353,25 +324,17 @@ function openDashboard(name) {
   const isAdmin = currentRole === 'admin' || currentRole === 'creator';
   document.getElementById('btn-view-logs').classList.toggle('hidden', !isAdmin);
   document.getElementById('btn-manage-history').classList.toggle('hidden', !isAdmin);
+  document.getElementById('creator-action-buttons').classList.toggle('hidden', !isAdmin);
   switchTab('pending');
   renderTasks(); renderCalendar(); selectDate(selectedDateStr);
 }
 
 function switchTab(tab) {
   currentTab = tab;
-  document.getElementById('tab-pending').className = tab === 'pending' ? 'flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white' : 'flex-1 py-2.5 rounded-xl text-slate-500';
-  document.getElementById('tab-calendar').className = tab === 'calendar' ? 'flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white' : 'flex-1 py-2.5 rounded-xl text-slate-500';
-  document.getElementById('tab-tracking').className = tab === 'tracking' ? 'flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white' : 'flex-1 py-2.5 rounded-xl text-slate-500';
+  document.getElementById('tab-pending').className = tab === 'pending' ? 'flex-1 py-2 rounded-xl bg-[#FF75BC] text-white' : 'flex-1 py-2 rounded-xl text-slate-500';
+  document.getElementById('tab-calendar').className = tab === 'calendar' ? 'flex-1 py-2 rounded-xl bg-[#FF75BC] text-white' : 'flex-1 py-2 rounded-xl text-slate-500';
+  document.getElementById('tab-tracking').className = tab === 'tracking' ? 'flex-1 py-2 rounded-xl bg-[#FF75BC] text-white' : 'flex-1 py-2 rounded-xl text-slate-500';
   
-  const isAdmin = currentRole === 'admin' || currentRole === 'creator';
-  
-  // ยุบ/ซ่อนแถบปุ่มสร้างกิจกรรมและเพิ่มงานค้าง เมื่อกดเข้ามาที่แท็บ "ติดตามงานค้าง" (tracking)
-  if (tab === 'tracking') {
-    document.getElementById('creator-action-buttons').classList.add('hidden');
-  } else {
-    document.getElementById('creator-action-buttons').classList.toggle('hidden', !isAdmin);
-  }
-
   document.getElementById('view-tasks').classList.toggle('hidden', tab !== 'pending');
   document.getElementById('view-calendar').classList.toggle('hidden', tab !== 'calendar');
   document.getElementById('view-tracking').classList.toggle('hidden', tab !== 'tracking');
@@ -398,13 +361,13 @@ function renderTasks() {
   }
 
   if (active.length === 0) {
-    listEl.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">ไม่มีงานค้างในระบบ เยี่ยมมาก!</div>';
+    listEl.innerHTML = '<div class="text-center py-4 text-slate-400 text-xs">ไม่มีงานค้างในระบบ เยี่ยมมาก!</div>';
   } else {
     active.forEach(t => { listEl.appendChild(createTaskCard(t)); });
   }
 
   if (tasks.length === 0) {
-    trackingListEl.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">ไม่มีรายการติดตามงานค้าง</div>';
+    trackingListEl.innerHTML = '<div class="text-center py-4 text-slate-400 text-xs">ไม่มีรายการติดตามงานค้าง</div>';
   } else {
     tasks.forEach(t => { trackingListEl.appendChild(createTaskCard(t)); });
   }
@@ -412,7 +375,7 @@ function renderTasks() {
 
 function createTaskCard(t) {
   const div = document.createElement('div');
-  div.className = "bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm flex items-start justify-between gap-2";
+  div.className = "bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-start justify-between gap-2";
   div.innerHTML = `
     <div class="space-y-1">
       <div class="flex items-center gap-1.5">
@@ -443,7 +406,7 @@ function renderCalendar() {
   for (let d = 1; d <= totalDays; d++) {
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
     const btn = document.createElement('button');
-    btn.className = `h-9 rounded-xl text-xs font-bold flex flex-col items-center justify-center transition border ${dateStr === selectedDateStr ? 'bg-[#FF75BC] text-white border-pink-400' : 'bg-slate-50 text-slate-700 border-slate-100 hover:bg-pink-50'}`;
+    btn.className = `h-8 rounded-xl text-xs font-bold flex flex-col items-center justify-center transition border ${dateStr === selectedDateStr ? 'bg-[#FF75BC] text-white border-pink-400' : 'bg-slate-50 text-slate-700 border-slate-100 hover:bg-pink-50'}`;
     btn.innerHTML = `<span>${d}</span>`;
     btn.onclick = () => selectDate(dateStr);
     daysEl.appendChild(btn);
@@ -465,7 +428,7 @@ function selectDate(dateStr) {
   const container = document.getElementById('selected-date-tasks');
   container.innerHTML = '';
   if (dateTasks.length === 0) {
-    container.innerHTML = '<p class="text-[11px] text-slate-400 text-center py-2">ไม่มีรายการในวันนี้</p>';
+    container.innerHTML = '<p class="text-[11px] text-slate-400 text-center py-1">ไม่มีรายการในวันนี้</p>';
   } else {
     dateTasks.forEach(t => { container.appendChild(createTaskCard(t)); });
   }
@@ -478,7 +441,7 @@ function selectDate(dateStr) {
   } else {
     evts.forEach(e => {
       const p = document.createElement('p');
-      p.className = 'text-[11px] text-sky-900 font-bold bg-white p-1.5 rounded-xl border border-sky-100';
+      p.className = 'text-[11px] text-sky-900 font-bold bg-white p-1 rounded-xl border border-sky-100';
       p.textContent = e;
       eventView.appendChild(p);
     });
