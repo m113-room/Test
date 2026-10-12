@@ -119,12 +119,12 @@
       </button>
     </div>
 
-    <div class="bg-white rounded-3xl p-4 border shadow-sm space-y-3">
-      <div class="flex justify-between items-center">
-        <span class="text-xs font-extrabold text-purple-600"><i class="fa-solid fa-list-check"></i> ติดตามงานค้างทั้งหมด</span>
-        <span id="tracking-count" class="bg-purple-100 text-purple-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full">0 ITEMS</span>
+    <div class="bg-[#0d1117] rounded-3xl p-4 border border-slate-800 shadow-sm space-y-3">
+      <div class="flex justify-between items-center px-1">
+        <span class="text-xs font-extrabold text-purple-400"><i class="fa-solid fa-list-check"></i> ติดตามงานค้างทั้งหมด</span>
+        <span id="tracking-count" class="bg-purple-950 text-purple-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-purple-800">0 ITEMS</span>
       </div>
-      <div id="tracking-task-list" class="space-y-2.5 max-h-[350px] overflow-y-auto"></div>
+      <div id="tracking-task-list" class="space-y-3 max-h-[420px] overflow-y-auto pr-1"></div>
     </div>
   </div>
 
@@ -383,7 +383,7 @@ function renderTasks() {
   if (tasks.length === 0) {
     trackingListEl.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">ไม่มีรายการติดตามงานค้าง</div>';
   } else {
-    tasks.forEach(t => { trackingListEl.appendChild(createTaskCard(t)); });
+    tasks.forEach(t => { trackingListEl.appendChild(createTrackingCard(t)); });
   }
 }
 
@@ -406,6 +406,63 @@ function createTaskCard(t) {
       <button onclick="togglePin('${t.id}')" title="ปักหมุด" class="text-xs px-2.5 py-1.5 rounded-xl ${t.isPinned ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-600'}"><i class="fa-solid fa-thumbtack"></i></button>
       <button onclick="deleteTask('${t.id}')" title="ลบงาน" class="text-xs bg-rose-50 text-rose-500 px-2.5 py-1.5 rounded-xl"><i class="fa-solid fa-trash-can"></i></button>
     </div>` : ''}
+  `;
+  return div;
+}
+
+function createTrackingCard(t) {
+  const div = document.createElement('div');
+  div.className = "bg-[#161b22] text-slate-100 p-4 rounded-3xl border border-slate-800 shadow-md space-y-3";
+  
+  const due = new Date(t.dueDate);
+  const now = new Date();
+  due.setHours(0,0,0,0);
+  now.setHours(0,0,0,0);
+  const diffTime = due - now;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  let badgeHtml = '';
+  if (diffDays > 0) {
+    badgeHtml = `<span class="bg-slate-800 text-slate-300 text-[10px] font-bold px-2.5 py-1 rounded-xl">เหลือ ${diffDays} วัน</span>`;
+  } else if (diffDays === 0) {
+    badgeHtml = `<span class="bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2.5 py-1 rounded-xl">กำหนดส่งวันนี้</span>`;
+  } else {
+    badgeHtml = `<span class="bg-rose-500/20 text-rose-400 text-[10px] font-bold px-2.5 py-1 rounded-xl">เลยกำหนด ${Math.abs(diffDays)} วัน</span>`;
+  }
+
+  const isAdmin = currentRole === 'admin' || currentRole === 'creator';
+  
+  div.innerHTML = `
+    <div class="flex justify-between items-start gap-2">
+      <div>
+        <span class="text-xs font-bold text-slate-400">${escapeHtml(t.subject)}</span>
+        <h4 class="text-xs sm:text-sm font-extrabold text-white mt-0.5">${escapeHtml(t.detail)}</h4>
+      </div>
+      <div class="flex items-center gap-1.5 shrink-0">
+        ${badgeHtml}
+        ${isAdmin ? `
+          <button onclick="togglePin('${t.id}')" title="ปักหมุด" class="text-xs px-2 py-1 rounded-lg ${t.isPinned ? 'bg-amber-500 text-white' : 'bg-slate-800 text-amber-400'}"><i class="fa-solid fa-thumbtack"></i></button>
+          <button onclick="deleteTask('${t.id}')" title="ลบงาน" class="text-xs bg-slate-800 text-rose-400 px-2 py-1 rounded-lg"><i class="fa-solid fa-trash-can"></i></button>
+        ` : ''}
+      </div>
+    </div>
+    
+    <div class="space-y-1.5">
+      <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+        <div class="bg-emerald-500 h-full rounded-full" style="width: 85%;"></div>
+      </div>
+      <div class="flex justify-between items-center text-[10px] text-slate-400 font-semibold">
+        <span>รหัสวิชา: <span class="text-pink-400">${escapeHtml(t.code)}</span></span>
+        <span class="text-emerald-400 font-bold">35/41 ส่งแล้ว</span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-1.5 flex-wrap pt-1 border-t border-slate-800/80">
+      <span class="text-[10px] text-slate-400 font-bold mr-1">ยังไม่ส่ง:</span>
+      <span class="bg-rose-500/20 text-rose-300 text-[10px] font-bold px-2 py-0.5 rounded-lg">5</span>
+      <span class="bg-rose-500/20 text-rose-300 text-[10px] font-bold px-2 py-0.5 rounded-lg">10</span>
+      <span class="bg-rose-500/20 text-rose-300 text-[10px] font-bold px-2 py-0.5 rounded-lg">41</span>
+    </div>
   `;
   return div;
 }
