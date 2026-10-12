@@ -64,7 +64,7 @@
   </div>
 
   <div class="space-y-2 mb-4">
-    <!-- 3 แท็บเมนูด้านบน (ติดตามงานค้างเป็นสีม่วง) -->
+    <!-- 3 แท็บเมนูด้านบน -->
     <div class="flex bg-slate-100 p-1 rounded-2xl text-center text-[10px] sm:text-xs font-bold gap-1">
       <button id="tab-pending" onclick="switchTab('pending')" class="flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white">งานค้าง</button>
       <button id="tab-calendar" onclick="switchTab('calendar')" class="flex-1 py-2.5 rounded-xl text-slate-500">ปฏิทินงาน</button>
@@ -74,10 +74,16 @@
 
   <!-- CALENDAR -->
   <div id="view-calendar" class="hidden space-y-4">
+    <!-- ปุ่มเพิ่มกิจกรรม สำหรับ Admin -->
+    <div id="creator-add-event-container" class="hidden">
+      <button onclick="openEventModal()" class="w-full py-2.5 rounded-2xl bg-[#FF75BC] text-white font-bold text-xs shadow-sm">
+        <i class="fa-solid fa-plus"></i> เพิ่มกิจกรรม
+      </button>
+    </div>
+
     <div class="flex justify-between items-center bg-slate-50 p-3 rounded-2xl border">
       <span class="text-xs font-extrabold text-slate-700">ปฏิทิน</span>
       <div class="flex items-center gap-1.5">
-        <button id="creator-calendar-event-btn" onclick="openEventModal()" class="hidden px-2.5 py-1.5 text-[11px] font-extrabold bg-[#50D8FF] text-slate-900 rounded-xl shadow-sm"><i class="fa-solid fa-star"></i> สร้างกิจกรรม</button>
         <button onclick="changeMonth(-1)" class="px-2.5 py-1 text-[11px] font-bold bg-white rounded-lg border">PREV</button>
         <button onclick="changeMonth(1)" class="px-2.5 py-1 text-[11px] font-bold bg-white rounded-lg border">NEXT</button>
       </div>
@@ -324,7 +330,7 @@ function openDashboard(name) {
   document.getElementById('btn-view-logs').classList.toggle('hidden', !isAdmin);
   document.getElementById('btn-manage-history').classList.toggle('hidden', !isAdmin);
   document.getElementById('creator-add-task-container').classList.toggle('hidden', !isAdmin);
-  document.getElementById('creator-calendar-event-btn').classList.toggle('hidden', !isAdmin);
+  document.getElementById('creator-add-event-container').classList.toggle('hidden', !isAdmin);
   switchTab('pending');
   renderTasks(); renderCalendar(); selectDate(selectedDateStr);
 }
