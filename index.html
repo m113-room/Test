@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Homework M.113 - V.1.56 (Turbo)</title>
+<title>Homework M.113 - V.1.57 (Turbo)</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -34,7 +34,7 @@
       <i class="fa-solid fa-book-open-reader text-2xl text-white"></i>
     </div>
     <h1 class="text-2xl font-extrabold text-slate-800">Homework M.113</h1>
-    <p class="text-xs text-slate-400 mt-1 font-semibold text-pink-600">ระบบการบ้านห้อง M.113 (V.1.56 Turbo)</p>
+    <p class="text-xs text-slate-400 mt-1 font-semibold text-pink-600">ระบบการบ้านห้อง M.113 (V.1.57 Turbo)</p>
   </div>
   <div class="space-y-1.5 mb-6">
     <label class="block text-[11px] font-bold text-slate-600">ชื่อผู้ใช้งาน (USERNAME)</label>
@@ -110,7 +110,6 @@
 
   <!-- TRACKING VIEW -->
   <div id="view-tracking" class="hidden space-y-4">
-    <!-- ปุ่มเพิ่มการบ้าน และเพิ่มรายชื่อคนค้าง เปิดให้ทุกคนใช้งาน -->
     <div class="grid grid-cols-2 gap-2">
       <button onclick="toggleTrackingAddForm()" class="py-2.5 rounded-2xl bg-purple-600 text-white font-bold text-xs shadow-sm">
         <i class="fa-solid fa-plus"></i> เพิ่มการบ้าน
@@ -314,31 +313,53 @@ async function fetchAllData(showAlert=false) {
   } finally { if (showAlert) hideLoading(); }
 }
 
-function syncTasksToSheet() {
-  cacheTasks();
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
-  }).catch(e => console.error('Background Sync Error:', e));
-}
-
+// ⚡ TURBO LOGIN: ดึงข้อมูลจาก Google Sheets ตรวจสอบผู้ใช้ทันทีด้วยความเร็วสูง
 async function login() {
   const raw = document.getElementById('username').value.trim().toLowerCase();
   if (!raw) { alert('กรุณากรอกชื่อผู้ใช้งาน'); return; }
+  
   showLoading('กำลังตรวจสอบชื่อในระบบ...');
-  const btn = document.getElementById('login-btn'); btn.disabled = true;
-  await fetchAllData(false);
-  let user = allowedUsersList.find(u => u.username === raw);
-  if (!user) { alert(`ไม่พบผู้ใช้งาน "${raw}" ในระบบ`); hideLoading(); btn.disabled = false; return; }
-  currentRole = user.role; currentUsername = raw;
-  localStorage.setItem('isLoggedIn', 'true');
-  localStorage.setItem('userRole', currentRole);
-  localStorage.setItem('usernameKey', currentUsername);
-  localStorage.setItem('userName', user.name);
-  hideLoading(); btn.disabled = false;
-  openDashboard(user.name);
+  const btn = document.getElementById('login-btn'); 
+  btn.disabled = true;
+
+  try {
+    // โหลดรายชื่อผู้ใช้งานสดๆ จาก Google Sheets เดี๋ยวนั้นเลย
+    const usersRes = await fetchJSON(`${SCRIPT_URL}?action=getUsers&t=${Date.now()}`);
+    if (Array.isArray(usersRes) && usersRes.length > 0) {
+      allowedUsersList = usersRes.map(u => ({
+        username: String(u.username || u.Username || '').trim().toLowerCase(),
+        role: String(u.role || u.Role || 'member').trim().toLowerCase(),
+        name: String(u.name || u.Name || '').trim()
+      })).filter(u => u.username);
+    }
+
+    let user = allowedUsersList.find(u => u.username === raw);
+    if (!user) { 
+      alert(`ไม่พบผู้ใช้งาน "${raw}" ในระบบ`); 
+      hideLoading(); 
+      btn.disabled = false; 
+      return; 
+    }
+
+    currentRole = user.role; 
+    currentUsername = raw;
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('userRole', currentRole);
+    localStorage.setItem('usernameKey', currentUsername);
+    localStorage.setItem('userName', user.name);
+
+    hideLoading(); 
+    btn.disabled = false;
+    openDashboard(user.name);
+    
+    // โหลดข้อมูลส่วนที่เหลือเบื้องหลังแบบไม่ให้ผู้ใช้ต้องรอ
+    fetchAllData(false);
+  } catch (e) {
+    console.error('Login Error:', e);
+    alert('ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง');
+    hideLoading();
+    btn.disabled = false;
+  }
 }
 
 function logout() {
@@ -470,7 +491,8 @@ function createTaskCard(t, showUnsubmittedIfOverdue = false) {
         <p class="text-[10px] text-slate-400">กำหนดส่ง: <span class="text-rose-500 font-bold">${formatThaiShortDate(t.dueDate)}</span></p>
       </div>
       <div class="flex items-center gap-1 shrink-0">
-        ${isAdmin ? `<button onclick="togglePin('${t.id}')" title="ปักหมุด" class="text-xs px-2.5 py-1.5 rounded-xl ${t.isPinned ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-600'}"><i class="fa-solid fa-thumbtack"></i></button>` : ''}
+        <!-- เปิดให้ Member สามารถปักหมุดได้ -->
+        <button onclick="togglePin('${t.id}')" title="ปักหมุด" class="text-xs px-2.5 py-1.5 rounded-xl ${t.isPinned ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-600'}"><i class="fa-solid fa-thumbtack"></i></button>
         ${isAdmin ? `<button onclick="deleteTask('${t.id}')" title="ลบงาน" class="text-xs bg-rose-50 text-rose-500 px-2.5 py-1.5 rounded-xl"><i class="fa-solid fa-trash-can"></i></button>` : ''}
       </div>
     </div>
@@ -756,6 +778,15 @@ function openManageModal() { document.getElementById('manage-modal').classList.a
 function clearLogs() { alert('ล้างประวัติเรียบร้อย'); }
 function loadLogs() { document.getElementById('logs-status').textContent = 'ไม่มีประวัติการใช้งาน'; }
 function loadOptions() { document.getElementById('manage-status').textContent = 'โหลดตัวเลือกสำเร็จ'; }
+function syncTasksToSheet() {
+  cacheTasks();
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
+  }).catch(e => console.error('Background Sync Error:', e));
+}
 </script>
 </body>
 </html>
