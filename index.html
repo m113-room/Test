@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Homework M.113 - V.1.54</title>
+<title>Homework M.113 - V.1.56 (Turbo)</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -34,7 +34,7 @@
       <i class="fa-solid fa-book-open-reader text-2xl text-white"></i>
     </div>
     <h1 class="text-2xl font-extrabold text-slate-800">Homework M.113</h1>
-    <p class="text-xs text-slate-400 mt-1 font-semibold text-pink-600">ระบบการบ้านห้อง M.113 (V.1.54)</p>
+    <p class="text-xs text-slate-400 mt-1 font-semibold text-pink-600">ระบบการบ้านห้อง M.113 (V.1.56 Turbo)</p>
   </div>
   <div class="space-y-1.5 mb-6">
     <label class="block text-[11px] font-bold text-slate-600">ชื่อผู้ใช้งาน (USERNAME)</label>
@@ -64,7 +64,6 @@
   </div>
 
   <div class="space-y-2 mb-4">
-    <!-- 3 แท็บเมนูด้านบน -->
     <div class="flex bg-slate-100 p-1 rounded-2xl text-center text-[10px] sm:text-xs font-bold gap-1">
       <button id="tab-pending" onclick="switchTab('pending')" class="flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white">ภาพรวมงานค้าง</button>
       <button id="tab-calendar" onclick="switchTab('calendar')" class="flex-1 py-2.5 rounded-xl text-slate-500">ปฏิทินงาน</button>
@@ -74,7 +73,7 @@
 
   <!-- CALENDAR -->
   <div id="view-calendar" class="hidden space-y-4">
-    <div id="creator-add-event-container" class="hidden">
+    <div>
       <button onclick="openEventModal()" class="w-full py-2.5 rounded-2xl bg-[#50D8FF] text-slate-900 font-bold text-xs shadow-sm">
         <i class="fa-solid fa-plus"></i> เพิ่มกิจกรรม
       </button>
@@ -109,10 +108,10 @@
     </div>
   </div>
 
-  <!-- TRACKING VIEW (แท็บ "งานค้าง") -->
+  <!-- TRACKING VIEW -->
   <div id="view-tracking" class="hidden space-y-4">
-    <!-- 2 ปุ่มบรรทัดเดียวกัน แบ่งครึ่ง (เฉพาะ Admin) -->
-    <div id="creator-buttons-container" class="hidden grid grid-cols-2 gap-2">
+    <!-- ปุ่มเพิ่มการบ้าน และเพิ่มรายชื่อคนค้าง เปิดให้ทุกคนใช้งาน -->
+    <div class="grid grid-cols-2 gap-2">
       <button onclick="toggleTrackingAddForm()" class="py-2.5 rounded-2xl bg-purple-600 text-white font-bold text-xs shadow-sm">
         <i class="fa-solid fa-plus"></i> เพิ่มการบ้าน
       </button>
@@ -156,7 +155,7 @@
     </div>
   </div>
 
-  <!-- TASKS (ภาพรวมงานค้าง) -->
+  <!-- TASKS -->
   <div id="view-tasks" class="space-y-4">
     <div class="bg-amber-50 border border-amber-100 rounded-3xl p-4 space-y-3">
       <div class="flex items-center gap-2 text-amber-800 text-xs font-bold"><i class="fa-solid fa-thumbtack text-amber-500"></i> ปักหมุดไว้</div>
@@ -209,7 +208,7 @@
       <button onclick="clearLogs()" class="py-2.5 bg-rose-50 text-rose-600 rounded-xl text-xs font-bold"><i class="fa-solid fa-trash-can"></i> ล้างประวัติทั้งหมด</button>
       <button onclick="loadLogs()" class="py-2.5 bg-purple-100 text-purple-700 rounded-xl text-xs font-bold"><i class="fa-solid fa-rotate"></i> โหลดใหม่</button>
     </div>
-    <p id="logs-status" class="text-xs text-slate-500 mb-3">กำลังโหลด...</p>
+    <p id="logs-status" class="text-xs text-slate-500 mb-3">ไม่มีประวัติการใช้งาน</p>
     <div id="logs-list" class="space-y-2"></div>
   </div>
 </div>
@@ -315,17 +314,14 @@ async function fetchAllData(showAlert=false) {
   } finally { if (showAlert) hideLoading(); }
 }
 
-async function syncTasksToSheet() {
-  try {
-    await fetch(SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
-    });
-  } catch (e) {
-    console.error('Sync to Sheet Error:', e);
-  }
+function syncTasksToSheet() {
+  cacheTasks();
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
+  }).catch(e => console.error('Background Sync Error:', e));
 }
 
 async function login() {
@@ -360,8 +356,6 @@ function openDashboard(name) {
   const isAdmin = currentRole === 'admin' || currentRole === 'creator';
   document.getElementById('btn-view-logs').classList.toggle('hidden', !isAdmin);
   document.getElementById('btn-manage-history').classList.toggle('hidden', !isAdmin);
-  document.getElementById('creator-add-event-container').classList.toggle('hidden', !isAdmin);
-  document.getElementById('creator-buttons-container').classList.toggle('hidden', !isAdmin);
   switchTab('pending');
   renderTasks(); renderCalendar(); selectDate(selectedDateStr);
 }
@@ -423,7 +417,7 @@ function renderTasks() {
 
 function createTaskCard(t, showUnsubmittedIfOverdue = false) {
   const div = document.createElement('div');
-  div.className = "bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-2";
+  div.className = "bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-2 transition-all";
   const isAdmin = currentRole === 'admin' || currentRole === 'creator';
   
   let overdueSection = '';
@@ -433,7 +427,6 @@ function createTaskCard(t, showUnsubmittedIfOverdue = false) {
     due.setHours(0,0,0,0);
     now.setHours(0,0,0,0);
     
-    // ถ้าเลยกำหนดส่งแล้ว
     if (due < now) {
       const submittedSet = new Set(Array.isArray(t.submitted) ? t.submitted.map(String) : []);
       const extraSet = new Set(Array.isArray(t.extraUnsubmitted) ? t.extraUnsubmitted.map(String) : []);
@@ -449,8 +442,8 @@ function createTaskCard(t, showUnsubmittedIfOverdue = false) {
       } else {
         badges = unsubmittedList.map(num => `
           <span class="inline-flex items-center gap-1 bg-rose-50 text-rose-600 text-[10px] font-bold px-1.5 py-0.5 rounded-md border border-rose-100">
-            <button ${isAdmin ? `onclick="toggleStudentSubmit('${t.id}', '${num}')"` : ''} title="${isAdmin ? 'คลิกเปลี่ยนเป็นส่งแล้ว' : ''}" class="${isAdmin ? 'hover:text-emerald-600 cursor-pointer' : ''}">${escapeHtml(num)}</button>
-            ${isAdmin && extraSet.has(num) ? `<button onclick="removeExtraUnsubmitted('${t.id}', '${num}')" class="text-rose-400 hover:text-rose-700 ml-0.5">×</button>` : ''}
+            <button onclick="toggleStudentSubmit('${t.id}', '${num}')" title="คลิกเปลี่ยนเป็นส่งแล้ว" class="hover:text-emerald-600 cursor-pointer">${escapeHtml(num)}</button>
+            ${extraSet.has(num) && isAdmin ? `<button onclick="removeExtraUnsubmitted('${t.id}', '${num}')" class="text-rose-400 hover:text-rose-700 ml-0.5">×</button>` : ''}
           </span>
         `).join('');
       }
@@ -476,11 +469,10 @@ function createTaskCard(t, showUnsubmittedIfOverdue = false) {
         <p class="text-xs text-slate-600">${escapeHtml(t.detail)}</p>
         <p class="text-[10px] text-slate-400">กำหนดส่ง: <span class="text-rose-500 font-bold">${formatThaiShortDate(t.dueDate)}</span></p>
       </div>
-      ${isAdmin ? `
       <div class="flex items-center gap-1 shrink-0">
-        <button onclick="togglePin('${t.id}')" title="ปักหมุด" class="text-xs px-2.5 py-1.5 rounded-xl ${t.isPinned ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-600'}"><i class="fa-solid fa-thumbtack"></i></button>
-        <button onclick="deleteTask('${t.id}')" title="ลบงาน" class="text-xs bg-rose-50 text-rose-500 px-2.5 py-1.5 rounded-xl"><i class="fa-solid fa-trash-can"></i></button>
-      </div>` : ''}
+        ${isAdmin ? `<button onclick="togglePin('${t.id}')" title="ปักหมุด" class="text-xs px-2.5 py-1.5 rounded-xl ${t.isPinned ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-600'}"><i class="fa-solid fa-thumbtack"></i></button>` : ''}
+        ${isAdmin ? `<button onclick="deleteTask('${t.id}')" title="ลบงาน" class="text-xs bg-rose-50 text-rose-500 px-2.5 py-1.5 rounded-xl"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+      </div>
     </div>
     ${overdueSection}
   `;
@@ -527,7 +519,7 @@ function createTrackingCard(t) {
   } else {
     unsubmittedBadges = unsubmittedList.map(num => `
       <span class="inline-flex items-center gap-1 bg-rose-50 text-rose-600 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-rose-100">
-        <button ${isAdmin ? `onclick="toggleStudentSubmit('${t.id}', '${num}')"` : ''} title="${isAdmin ? 'คลิกเปลี่ยนเป็นส่งแล้ว' : ''}" class="${isAdmin ? 'hover:text-emerald-600 cursor-pointer' : ''}">${escapeHtml(num)}</button>
+        <button onclick="toggleStudentSubmit('${t.id}', '${num}')" title="คลิกเปลี่ยนเป็นส่งแล้ว" class="hover:text-emerald-600 cursor-pointer">${escapeHtml(num)}</button>
         ${isAdmin && extraSet.has(num) ? `<button onclick="removeExtraUnsubmitted('${t.id}', '${num}')" class="text-rose-400 hover:text-rose-700 ml-0.5">×</button>` : ''}
       </span>
     `).join('');
@@ -573,7 +565,7 @@ function toggleStudentSubmit(taskId, numStr) {
   } else {
     task.submitted.push(numStr);
   }
-  cacheTasks();
+  
   renderTasks();
   selectDate(selectedDateStr);
   syncTasksToSheet();
@@ -593,7 +585,7 @@ function toggleTrackingAddStudentForm() {
   form.classList.toggle('hidden');
 }
 
-async function addTrackingTask() {
+function addTrackingTask() {
   const code = document.getElementById('tracking-task-code').value.trim();
   const subject = document.getElementById('tracking-task-subject').value.trim();
   const detail = document.getElementById('tracking-task-detail').value.trim();
@@ -603,7 +595,7 @@ async function addTrackingTask() {
   
   const newTask = { id: String(Date.now()), code, subject, detail, assignDate, dueDate, isPinned: false, submitted: [], extraUnsubmitted: [] };
   tasks.unshift(newTask);
-  cacheTasks();
+  
   renderTasks();
   renderCalendar();
   toggleTrackingAddForm();
@@ -622,7 +614,7 @@ function submitExtraStudent() {
   if (!Array.isArray(task.extraUnsubmitted)) task.extraUnsubmitted = [];
   if (!task.extraUnsubmitted.includes(numInput)) {
     task.extraUnsubmitted.push(numInput);
-    cacheTasks();
+    
     renderTasks();
     selectDate(selectedDateStr);
     document.getElementById('extra-student-name').value = '';
@@ -638,7 +630,7 @@ function removeExtraUnsubmitted(taskId, val) {
   const task = tasks.find(t => String(t.id) === String(taskId));
   if (!task || !Array.isArray(task.extraUnsubmitted)) return;
   task.extraUnsubmitted = task.extraUnsubmitted.filter(item => item !== val);
-  cacheTasks();
+  
   renderTasks();
   selectDate(selectedDateStr);
   syncTasksToSheet();
@@ -648,7 +640,7 @@ function togglePin(id) {
   const task = tasks.find(t => String(t.id) === String(id));
   if (task) {
     task.isPinned = !task.isPinned;
-    cacheTasks();
+    
     renderTasks();
     renderCalendar();
     selectDate(selectedDateStr);
@@ -665,7 +657,7 @@ function deleteTask(id) {
   }
   if (!confirm('คุณต้องการลบรายการการบ้านนี้ใช่หรือไม่?')) return;
   tasks = tasks.filter(t => String(t.id) !== String(id));
-  cacheTasks();
+  
   renderTasks();
   renderCalendar();
   selectDate(selectedDateStr);
