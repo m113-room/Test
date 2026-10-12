@@ -110,25 +110,18 @@
     </div>
   </div>
 
-  <!-- TRACKING VIEW -->
+  <!-- TRACKING VIEW (ติดตามงานค้าง - แยกอิสระพร้อมระบบเช็คเลขที่ส่งงาน) -->
   <div id="view-tracking" class="hidden space-y-4">
-    <!-- ปุ่มเพิ่มการตามงานค้าง สำหรับ Admin (สีม่วง) -->
-    <div id="creator-add-tracking-container" class="hidden">
-      <button onclick="switchTab('pending'); if(document.getElementById('admin-form').classList.contains('hidden')) toggleAddForm();" class="w-full py-2.5 rounded-2xl bg-purple-600 text-white font-bold text-xs shadow-sm">
-        <i class="fa-solid fa-plus"></i> เพิ่มการตามงานค้าง
-      </button>
-    </div>
-
     <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm space-y-3">
-      <div class="flex justify-between items-center px-1">
-        <span class="text-xs font-extrabold text-purple-600"><i class="fa-solid fa-list-check"></i> ติดตามงานค้างทั้งหมด</span>
+      <div class="flex justify-between items-center px-1 border-b pb-3">
+        <span class="text-xs font-extrabold text-purple-600"><i class="fa-solid fa-list-check"></i> ติดตามสถานะการส่งงานทั้งหมด</span>
         <span id="tracking-count" class="bg-purple-100 text-purple-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full">0 ITEMS</span>
       </div>
-      <div id="tracking-task-list" class="space-y-3 max-h-[420px] overflow-y-auto pr-1"></div>
+      <div id="tracking-task-list" class="space-y-3 max-h-[450px] overflow-y-auto pr-1"></div>
     </div>
   </div>
 
-  <!-- TASKS -->
+  <!-- TASKS (งานค้าง - จัดการการบ้าน) -->
   <div id="view-tasks" class="space-y-4">
     <!-- ปุ่มเพิ่มงานค้าง สำหรับ Admin -->
     <div id="creator-add-task-container" class="hidden">
@@ -235,6 +228,7 @@ let currentRole = 'member', currentUsername = '', currentTab = 'pending', curren
 let tasks = [], dailyEvents = {}, codes = [], subjects = [], allowedUsersList = [];
 let lastActivityTime = Date.now();
 const IDLE_TIMEOUT_MS = 7 * 60 * 1000;
+const TOTAL_STUDENTS = 41;
 
 function resetIdleTimer() { lastActivityTime = Date.now(); }
 ['click', 'touchstart', 'keypress', 'scroll', 'mousemove'].forEach(evt => { window.addEventListener(evt, resetIdleTimer, { passive: true }); });
@@ -281,7 +275,12 @@ async function fetchAllData(showAlert=false) {
       fetchJSON(`${SCRIPT_URL}?action=getOptions&t=${Date.now()}`)
     ]);
     if (tasksRes.status === 'fulfilled' && Array.isArray(tasksRes.value)) {
-      tasks = tasksRes.value.map(t => ({...t, id:String(t.id), isPinned:String(t.isPinned) === 'true'}));
+      tasks = tasksRes.value.map(t => ({
+        ...t,
+        id: String(t.id),
+        isPinned: String(t.isPinned) === 'true',
+        submitted: Array.isArray(t.submitted) ? t.submitted.map(Number) : []
+      }));
       cacheTasks();
     }
     if (usersRes.status === 'fulfilled' && Array.isArray(usersRes.value)) {
@@ -338,7 +337,6 @@ function openDashboard(name) {
   document.getElementById('btn-manage-history').classList.toggle('hidden', !isAdmin);
   document.getElementById('creator-add-task-container').classList.toggle('hidden', !isAdmin);
   document.getElementById('creator-add-event-container').classList.toggle('hidden', !isAdmin);
-  document.getElementById('creator-add-tracking-container').classList.toggle('hidden', !isAdmin);
   switchTab('pending');
   renderTasks(); renderCalendar(); selectDate(selectedDateStr);
 }
@@ -430,8 +428,24 @@ function createTrackingCard(t) {
     badgeHtml = `<span class="bg-rose-100 text-rose-600 text-[10px] font-bold px-2.5 py-1 rounded-xl">เลยกำหนด ${Math.abs(diffDays)} วัน</span>`;
   }
 
+  const submittedSet = new Set(Array.isArray(t.submitted) ? t.submitted.map(Number) : []);
+  const unsubmittedList = [];
+  for (let i = 1; i <= TOTAL_STUDENTS; i++) {
+    if (!submittedSet.has(i)) unsubmittedList.push(i);
+  }
+  const submittedCount = submittedSet.size;
+  const percent = Math.round((submittedCount / TOTAL_STUDENTS) * 100);
   const isAdmin = currentRole === 'admin' || currentRole === 'creator';
   
+  let unsubmittedBadges = '';
+  if (unsubmittedList.length === 0) {
+    unsubmittedBadges = '<span class="text-[11px] text-emerald-600 font-bold">ส่งครบทุกคนแล้ว! 🎉</span>';
+  } else {
+    unsubmittedBadges = unsubmittedList.map(num => `
+      <button ${isAdmin ? `onclick="toggleStudentSubmit('${t.id}',${num})"` : ''} title="${isAdmin ? 'คลิกเพื่อสลับสถานะส่งแล้ว' : ''}" class="bg-rose-50 text-rose-600 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-rose-100 ${isAdmin ? 'hover:bg-rose-100 cursor-pointer' : ''}">${num}</button>
+    `).join('');
+  }
+
   div.innerHTML = `
     <div class="flex justify-between items-start gap-2">
       <div>
@@ -440,31 +454,41 @@ function createTrackingCard(t) {
       </div>
       <div class="flex items-center gap-1.5 shrink-0">
         ${badgeHtml}
-        ${isAdmin ? `
-          <button onclick="togglePin('${t.id}')" title="ปักหมุด" class="text-xs px-2 py-1 rounded-lg ${t.isPinned ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-600'}"><i class="fa-solid fa-thumbtack"></i></button>
-          <button onclick="deleteTask('${t.id}')" title="ลบงาน" class="text-xs bg-rose-50 text-rose-500 px-2 py-1 rounded-lg"><i class="fa-solid fa-trash-can"></i></button>
-        ` : ''}
       </div>
     </div>
     
     <div class="space-y-1.5">
       <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-        <div class="bg-emerald-500 h-full rounded-full" style="width: 85%;"></div>
+        <div class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width: ${percent}%;"></div>
       </div>
       <div class="flex justify-between items-center text-[10px] text-slate-500 font-semibold">
         <span>รหัสวิชา: <span class="text-pink-600">${escapeHtml(t.code)}</span></span>
-        <span class="text-emerald-600 font-bold">35/41 ส่งแล้ว</span>
+        <span class="text-emerald-600 font-bold">${submittedCount}/${TOTAL_STUDENTS} ส่งแล้ว (${percent}%)</span>
       </div>
     </div>
 
     <div class="flex items-center gap-1.5 flex-wrap pt-1 border-t border-slate-100">
-      <span class="text-[10px] text-slate-400 font-bold mr-1">ยังไม่ส่ง:</span>
-      <span class="bg-rose-50 text-rose-600 text-[10px] font-bold px-2 py-0.5 rounded-lg">5</span>
-      <span class="bg-rose-50 text-rose-600 text-[10px] font-bold px-2 py-0.5 rounded-lg">10</span>
-      <span class="bg-rose-50 text-rose-600 text-[10px] font-bold px-2 py-0.5 rounded-lg">41</span>
+      <span class="text-[10px] text-slate-400 font-bold mr-1">ยังไม่ส่ง (${unsubmittedList.length}):</span>
+      ${unsubmittedBadges}
     </div>
   `;
   return div;
+}
+
+function toggleStudentSubmit(taskId, studentNum) {
+  const task = tasks.find(t => String(t.id) === String(taskId));
+  if (!task) return;
+  if (!Array.isArray(task.submitted)) task.submitted = [];
+  
+  const idx = task.submitted.indexOf(studentNum);
+  if (idx > -1) {
+    task.submitted.splice(idx, 1);
+  } else {
+    task.submitted.push(studentNum);
+  }
+  cacheTasks();
+  renderTasks();
+  selectDate(selectedDateStr);
 }
 
 function togglePin(id) {
@@ -580,7 +604,7 @@ async function addTask() {
   const dueDate = document.getElementById('due-date-input').value;
   if (!code || !subject || !detail || !dueDate) { alert('กรุณากรอกข้อมูลให้ครบถ้วน'); return; }
   
-  const newTask = { id: String(Date.now()), code, subject, detail, assignDate, dueDate, isPinned: false };
+  const newTask = { id: String(Date.now()), code, subject, detail, assignDate, dueDate, isPinned: false, submitted: [] };
   tasks.unshift(newTask);
   cacheTasks();
   renderTasks();
