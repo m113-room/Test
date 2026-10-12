@@ -315,6 +315,19 @@ async function fetchAllData(showAlert=false) {
   } finally { if (showAlert) hideLoading(); }
 }
 
+async function syncTasksToSheet() {
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
+    });
+  } catch (e) {
+    console.error('Sync to Sheet Error:', e);
+  }
+}
+
 async function login() {
   const raw = document.getElementById('username').value.trim().toLowerCase();
   if (!raw) { alert('กรุณากรอกชื่อผู้ใช้งาน'); return; }
@@ -520,6 +533,7 @@ function toggleStudentSubmit(taskId, numStr) {
   cacheTasks();
   renderTasks();
   selectDate(selectedDateStr);
+  syncTasksToSheet();
 }
 
 function toggleTrackingAddForm() {
@@ -551,6 +565,7 @@ async function addTrackingTask() {
   renderCalendar();
   toggleTrackingAddForm();
   showSuccess('บันทึกสำเร็จ', 'เพิ่มรายการการบ้านเรียบร้อยแล้ว');
+  syncTasksToSheet();
 }
 
 function submitExtraStudent() {
@@ -570,6 +585,7 @@ function submitExtraStudent() {
     document.getElementById('extra-student-name').value = '';
     toggleTrackingAddStudentForm();
     showSuccess('สำเร็จ', 'เพิ่มรายชื่อคนค้างงานเรียบร้อยแล้ว');
+    syncTasksToSheet();
   } else {
     alert('มีรายชื่อนี้อยู่แล้ว');
   }
@@ -582,6 +598,7 @@ function removeExtraUnsubmitted(taskId, val) {
   cacheTasks();
   renderTasks();
   selectDate(selectedDateStr);
+  syncTasksToSheet();
 }
 
 function togglePin(id) {
@@ -593,6 +610,7 @@ function togglePin(id) {
     renderCalendar();
     selectDate(selectedDateStr);
     showSuccess('สำเร็จ', task.isPinned ? 'ปักหมุดงานเรียบร้อยแล้ว' : 'ยกเลิกปักหมุดเรียบร้อยแล้ว');
+    syncTasksToSheet();
   }
 }
 
@@ -604,6 +622,7 @@ function deleteTask(id) {
   renderCalendar();
   selectDate(selectedDateStr);
   showSuccess('ลบสำเร็จ', 'ลบรายการการบ้านเรียบร้อยแล้ว');
+  syncTasksToSheet();
 }
 
 function renderCalendar() {
