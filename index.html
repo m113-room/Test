@@ -64,11 +64,11 @@
   </div>
 
   <div class="space-y-2 mb-4">
-    <!-- 3 แท็บเมนูด้านบนแยกอิสระ -->
+    <!-- 3 แท็บเมนูด้านบน -->
     <div class="flex bg-slate-100 p-1 rounded-2xl text-center text-[10px] sm:text-xs font-bold gap-1">
-      <button id="tab-pending" onclick="switchTab('pending')" class="flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white">งานค้าง</button>
+      <button id="tab-pending" onclick="switchTab('pending')" class="flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white">ภาพรวมงานค้าง</button>
       <button id="tab-calendar" onclick="switchTab('calendar')" class="flex-1 py-2.5 rounded-xl text-slate-500">ปฏิทินงาน</button>
-      <button id="tab-tracking" onclick="switchTab('tracking')" class="flex-1 py-2.5 rounded-xl text-slate-500">ติดตามงานค้าง</button>
+      <button id="tab-tracking" onclick="switchTab('tracking')" class="flex-1 py-2.5 rounded-xl text-slate-500">งานค้าง</button>
     </div>
   </div>
 
@@ -109,27 +109,48 @@
     </div>
   </div>
 
-  <!-- TRACKING VIEW (แท็บติดตามงานค้าง พร้อมระบบเช็คเลขที่ส่งงาน 41 คน) -->
+  <!-- TRACKING VIEW (ช่องสุดท้าย "งานค้าง" มีฟังก์ชัน 1. เพิ่มงานค้าง, 2. เช็คงานค้าง) -->
   <div id="view-tracking" class="hidden space-y-4">
+    <!-- ฟังก์ชันที่ 1: เพิ่มงานค้าง (เฉพาะ Admin) -->
+    <div id="creator-add-tracking-container" class="hidden">
+      <button onclick="toggleTrackingAddForm()" class="w-full py-2.5 rounded-2xl bg-purple-600 text-white font-bold text-xs shadow-sm">
+        <i class="fa-solid fa-plus"></i> เพิ่มงานค้าง
+      </button>
+    </div>
+
+    <!-- ฟอร์มเพิ่มงานค้างในแท็บนี้ -->
+    <div id="tracking-admin-form" class="hidden bg-slate-50 p-4 rounded-2xl border space-y-3">
+      <h3 class="text-xs font-bold text-slate-700"><i class="fa-solid fa-plus text-purple-600"></i> เพิ่มรายการงานค้าง</h3>
+      <div class="grid grid-cols-3 gap-2">
+        <input id="tracking-task-code" list="code-options" placeholder="รหัสวิชา" class="w-full p-2.5 text-xs bg-white rounded-xl border">
+        <input id="tracking-task-subject" list="subject-options" placeholder="ชื่อวิชา" class="col-span-2 w-full p-2.5 text-xs bg-white rounded-xl border">
+      </div>
+      <input id="tracking-task-detail" placeholder="รายละเอียดการบ้าน" class="w-full p-2.5 text-xs bg-white rounded-xl border">
+      <div class="grid grid-cols-2 gap-2">
+        <label class="flex items-center bg-white border rounded-xl px-2 py-2"><span class="text-[11px] mr-1">วันสั่ง:</span><input type="date" id="tracking-assign-date" class="w-full text-xs"></label>
+        <label class="flex items-center bg-white border rounded-xl px-2 py-2"><span class="text-[11px] mr-1 text-rose-500">วันส่ง:</span><input type="date" id="tracking-due-date" class="w-full text-xs"></label>
+      </div>
+      <button onclick="addTrackingTask()" class="w-full py-2.5 bg-purple-600 text-white font-bold rounded-xl text-xs">บันทึกข้อมูล</button>
+    </div>
+
+    <!-- ฟังก์ชันที่ 2: เช็คงานค้าง (ระบบเช็ครายชื่อนักเรียน 41 คน) -->
     <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm space-y-3">
       <div class="flex justify-between items-center px-1 border-b pb-3">
-        <span class="text-xs font-extrabold text-purple-600"><i class="fa-solid fa-list-check"></i> ติดตามสถานะการส่งงานทั้งหมด</span>
+        <span class="text-xs font-extrabold text-purple-600"><i class="fa-solid fa-list-check"></i> เช็คงานค้าง (สถานะการส่งงาน)</span>
         <span id="tracking-count" class="bg-purple-100 text-purple-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full">0 ITEMS</span>
       </div>
       <div id="tracking-task-list" class="space-y-3 max-h-[450px] overflow-y-auto pr-1"></div>
     </div>
   </div>
 
-  <!-- TASKS (แท็บงานค้าง: จัดการการบ้าน / ปักหมุด / ฟอร์มเพิ่มงาน) -->
+  <!-- TASKS (ภาพรวมงานค้าง) -->
   <div id="view-tasks" class="space-y-4">
-    <!-- ปุ่มเพิ่มงานค้าง สำหรับ Admin -->
     <div id="creator-add-task-container" class="hidden">
       <button onclick="toggleAddForm()" class="w-full py-2.5 rounded-2xl bg-[#FF75BC] text-white font-bold text-xs shadow-sm">
         <i class="fa-solid fa-plus"></i> เพิ่มงานค้าง
       </button>
     </div>
 
-    <!-- ฟอร์มเพิ่มงานค้าง -->
     <div id="admin-form" class="hidden bg-slate-50 p-4 rounded-2xl border space-y-3">
       <h3 class="text-xs font-bold text-slate-700"><i class="fa-solid fa-plus text-pink-500"></i> เพิ่มรายการการบ้าน</h3>
       <div class="grid grid-cols-3 gap-2">
@@ -152,7 +173,7 @@
     </div>
     <div class="space-y-2.5">
       <div class="flex justify-between items-center">
-        <span class="text-xs font-extrabold text-[#FF75BC]">รายการงานค้าง</span>
+        <span class="text-xs font-extrabold text-[#FF75BC]">ภาพรวมงานค้าง</span>
         <span id="task-count" class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full">0 ITEMS</span>
       </div>
       <div id="task-list" class="space-y-2.5 max-h-[300px] overflow-y-auto"></div>
@@ -336,6 +357,7 @@ function openDashboard(name) {
   document.getElementById('btn-manage-history').classList.toggle('hidden', !isAdmin);
   document.getElementById('creator-add-task-container').classList.toggle('hidden', !isAdmin);
   document.getElementById('creator-add-event-container').classList.toggle('hidden', !isAdmin);
+  document.getElementById('creator-add-tracking-container').classList.toggle('hidden', !isAdmin);
   switchTab('pending');
   renderTasks(); renderCalendar(); selectDate(selectedDateStr);
 }
@@ -378,7 +400,7 @@ function renderTasks() {
   }
 
   if (tasks.length === 0) {
-    trackingListEl.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">ไม่มีรายการติดตามงานค้าง</div>';
+    trackingListEl.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">ไม่มีรายการงานค้าง</div>';
   } else {
     tasks.forEach(t => { trackingListEl.appendChild(createTrackingCard(t)); });
   }
@@ -461,7 +483,7 @@ function createTrackingCard(t) {
         <div class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width: ${percent}%;"></div>
       </div>
       <div class="flex justify-between items-center text-[10px] text-slate-500 font-semibold">
-        <span>รหัสวิชา: <span class="text-pink-600">${escapeHtml(t.code)}</span></span>
+        <span>รหัสวิชา: <span class="text-purple-600">${escapeHtml(t.code)}</span></span>
         <span class="text-emerald-600 font-bold">${submittedCount}/${TOTAL_STUDENTS} ส่งแล้ว (${percent}%)</span>
       </div>
     </div>
@@ -488,6 +510,28 @@ function toggleStudentSubmit(taskId, studentNum) {
   cacheTasks();
   renderTasks();
   selectDate(selectedDateStr);
+}
+
+function toggleTrackingAddForm() {
+  const form = document.getElementById('tracking-admin-form');
+  form.classList.toggle('hidden');
+}
+
+async function addTrackingTask() {
+  const code = document.getElementById('tracking-task-code').value.trim();
+  const subject = document.getElementById('tracking-task-subject').value.trim();
+  const detail = document.getElementById('tracking-task-detail').value.trim();
+  const assignDate = document.getElementById('tracking-assign-date').value;
+  const dueDate = document.getElementById('tracking-due-date').value;
+  if (!code || !subject || !detail || !dueDate) { alert('กรุณากรอกข้อมูลให้ครบถ้วน'); return; }
+  
+  const newTask = { id: String(Date.now()), code, subject, detail, assignDate, dueDate, isPinned: false, submitted: [] };
+  tasks.unshift(newTask);
+  cacheTasks();
+  renderTasks();
+  renderCalendar();
+  toggleTrackingAddForm();
+  showSuccess('บันทึกสำเร็จ', 'เพิ่มรายการงานค้างเรียบร้อยแล้ว');
 }
 
 function togglePin(id) {
