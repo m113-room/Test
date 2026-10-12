@@ -64,9 +64,11 @@
   </div>
 
   <div class="space-y-2 mb-4">
-    <div class="flex bg-slate-100 p-1 rounded-2xl text-center text-xs font-bold gap-1">
+    <!-- 3 แท็บเมนูด้านบน -->
+    <div class="flex bg-slate-100 p-1 rounded-2xl text-center text-[10px] sm:text-xs font-bold gap-1">
       <button id="tab-pending" onclick="switchTab('pending')" class="flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white">งานค้าง</button>
       <button id="tab-calendar" onclick="switchTab('calendar')" class="flex-1 py-2.5 rounded-xl text-slate-500">ปฏิทินงาน</button>
+      <button id="tab-tracking" onclick="switchTab('tracking')" class="flex-1 py-2.5 rounded-xl text-slate-500">ติดตามงานค้าง</button>
     </div>
   </div>
 
@@ -104,6 +106,17 @@
         <div id="event-list-view" class="space-y-1.5 max-h-[120px] overflow-y-auto"></div>
       </div>
       <div id="selected-date-tasks" class="space-y-2 max-h-[180px] overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <!-- TRACKING VIEW -->
+  <div id="view-tracking" class="hidden space-y-4">
+    <div class="bg-white rounded-3xl p-4 border shadow-sm space-y-3">
+      <div class="flex justify-between items-center">
+        <span class="text-xs font-extrabold text-purple-600"><i class="fa-solid fa-list-check"></i> ติดตามงานค้างทั้งหมด</span>
+        <span id="tracking-count" class="bg-purple-100 text-purple-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full">0 ITEMS</span>
+      </div>
+      <div id="tracking-task-list" class="space-y-2.5 max-h-[350px] overflow-y-auto"></div>
     </div>
   </div>
 
@@ -325,19 +338,26 @@ function switchTab(tab) {
   currentTab = tab;
   document.getElementById('tab-pending').className = tab === 'pending' ? 'flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white' : 'flex-1 py-2.5 rounded-xl text-slate-500';
   document.getElementById('tab-calendar').className = tab === 'calendar' ? 'flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white' : 'flex-1 py-2.5 rounded-xl text-slate-500';
+  document.getElementById('tab-tracking').className = tab === 'tracking' ? 'flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white' : 'flex-1 py-2.5 rounded-xl text-slate-500';
+  
   document.getElementById('view-tasks').classList.toggle('hidden', tab !== 'pending');
   document.getElementById('view-calendar').classList.toggle('hidden', tab !== 'calendar');
+  document.getElementById('view-tracking').classList.toggle('hidden', tab !== 'tracking');
 }
 
 function renderTasks() {
   const listEl = document.getElementById('task-list');
   const pinnedEl = document.getElementById('pinned-list');
   const countEl = document.getElementById('task-count');
-  listEl.innerHTML = ''; pinnedEl.innerHTML = '';
+  const trackingListEl = document.getElementById('tracking-task-list');
+  const trackingCountEl = document.getElementById('tracking-count');
+
+  listEl.innerHTML = ''; pinnedEl.innerHTML = ''; trackingListEl.innerHTML = '';
   
   const pinned = tasks.filter(t => t.isPinned);
   const active = tasks.filter(t => !t.isPinned);
   countEl.textContent = `${tasks.length} ITEMS`;
+  trackingCountEl.textContent = `${tasks.length} ITEMS`;
 
   if (pinned.length === 0) {
     pinnedEl.innerHTML = '<p class="text-[11px] text-amber-600">ไม่มีรายการปักหมุด</p>';
@@ -349,6 +369,12 @@ function renderTasks() {
     listEl.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">ไม่มีงานค้างในระบบ เยี่ยมมาก!</div>';
   } else {
     active.forEach(t => { listEl.appendChild(createTaskCard(t)); });
+  }
+
+  if (tasks.length === 0) {
+    trackingListEl.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">ไม่มีรายการติดตามงานค้าง</div>';
+  } else {
+    tasks.forEach(t => { trackingListEl.appendChild(createTaskCard(t)); });
   }
 }
 
