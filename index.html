@@ -64,9 +64,9 @@
   </div>
 
   <div class="space-y-2 mb-4">
-    <!-- 3 แท็บเมนูด้านบน -->
+    <!-- 3 แท็บเมนูด้านบนแยกอิสระ -->
     <div class="flex bg-slate-100 p-1 rounded-2xl text-center text-[10px] sm:text-xs font-bold gap-1">
-      <button id="tab-pending" onclick="switchTab('pending')" class="flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white">ภาพรวมงานค้าง</button>
+      <button id="tab-pending" onclick="switchTab('pending')" class="flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white">งานค้าง</button>
       <button id="tab-calendar" onclick="switchTab('calendar')" class="flex-1 py-2.5 rounded-xl text-slate-500">ปฏิทินงาน</button>
       <button id="tab-tracking" onclick="switchTab('tracking')" class="flex-1 py-2.5 rounded-xl text-slate-500">ติดตามงานค้าง</button>
     </div>
@@ -74,7 +74,6 @@
 
   <!-- CALENDAR -->
   <div id="view-calendar" class="hidden space-y-4">
-    <!-- ปุ่มเพิ่มกิจกรรม สำหรับ Admin (สีฟ้า) -->
     <div id="creator-add-event-container" class="hidden">
       <button onclick="openEventModal()" class="w-full py-2.5 rounded-2xl bg-[#50D8FF] text-slate-900 font-bold text-xs shadow-sm">
         <i class="fa-solid fa-plus"></i> เพิ่มกิจกรรม
@@ -110,7 +109,7 @@
     </div>
   </div>
 
-  <!-- TRACKING VIEW -->
+  <!-- TRACKING VIEW (แท็บติดตามงานค้าง พร้อมระบบเช็คเลขที่ส่งงาน 41 คน) -->
   <div id="view-tracking" class="hidden space-y-4">
     <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm space-y-3">
       <div class="flex justify-between items-center px-1 border-b pb-3">
@@ -121,7 +120,7 @@
     </div>
   </div>
 
-  <!-- TASKS (ภาพรวมงานค้าง) -->
+  <!-- TASKS (แท็บงานค้าง: จัดการการบ้าน / ปักหมุด / ฟอร์มเพิ่มงาน) -->
   <div id="view-tasks" class="space-y-4">
     <!-- ปุ่มเพิ่มงานค้าง สำหรับ Admin -->
     <div id="creator-add-task-container" class="hidden">
@@ -153,7 +152,7 @@
     </div>
     <div class="space-y-2.5">
       <div class="flex justify-between items-center">
-        <span class="text-xs font-extrabold text-[#FF75BC]">ภาพรวมงานค้าง</span>
+        <span class="text-xs font-extrabold text-[#FF75BC]">รายการงานค้าง</span>
         <span id="task-count" class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full">0 ITEMS</span>
       </div>
       <div id="task-list" class="space-y-2.5 max-h-[300px] overflow-y-auto"></div>
