@@ -142,7 +142,7 @@
     <div id="tracking-student-form" class="hidden bg-slate-50 p-4 rounded-2xl border space-y-3">
       <h3 class="text-xs font-bold text-slate-700"><i class="fa-solid fa-user-plus text-indigo-600"></i> ฟอร์มเพิ่มชื่อ/เลขที่คนค้างงาน</h3>
       <select id="select-target-task" class="w-full p-2.5 text-xs bg-white rounded-xl border font-semibold text-slate-700"></select>
-      <input id="extra-student-name" placeholder="ระบุชื่อ หรือเลขที่นักเรียนที่ค้างงานเพิ่ม" class="w-full p-2.5 text-xs bg-white rounded-xl border">
+      <input type="number" id="extra-student-name" placeholder="ระบุเลขที่นักเรียนที่ค้างงานเพิ่ม (เช่น 41, 42)" min="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full p-2.5 text-xs bg-white rounded-xl border">
       <button onclick="submitExtraStudent()" class="w-full py-2.5 bg-indigo-600 text-white font-bold rounded-xl text-xs">บันทึกรายชื่อคนค้างงาน</button>
     </div>
 
@@ -239,7 +239,7 @@ let currentRole = 'member', currentUsername = '', currentTab = 'pending', curren
 let tasks = [], dailyEvents = {}, codes = [], subjects = [], allowedUsersList = [];
 let lastActivityTime = Date.now();
 const IDLE_TIMEOUT_MS = 7 * 60 * 1000;
-const TOTAL_STUDENTS = 40; // กำหนดจำนวนนักเรียนเป็น 40 คน
+const TOTAL_STUDENTS = 40;
 
 function resetIdleTimer() { lastActivityTime = Date.now(); }
 ['click', 'touchstart', 'keypress', 'scroll', 'mousemove'].forEach(evt => { window.addEventListener(evt, resetIdleTimer, { passive: true }); });
@@ -613,15 +613,15 @@ async function addTrackingTask() {
 
 function submitExtraStudent() {
   const taskId = document.getElementById('select-target-task').value;
-  const name = document.getElementById('extra-student-name').value.trim();
+  const numInput = document.getElementById('extra-student-name').value.trim();
   if (!taskId) { alert('กรุณาเลือกรายการการบ้าน'); return; }
-  if (!name) { alert('กรุณากรอกชื่อหรือเลขที่คนค้างงาน'); return; }
+  if (!numInput || isNaN(numInput)) { alert('กรุณากรอกเฉพาะเลขที่นักเรียนเป็นตัวเลขเท่านั้น'); return; }
   
   const task = tasks.find(t => String(t.id) === String(taskId));
   if (!task) return;
   if (!Array.isArray(task.extraUnsubmitted)) task.extraUnsubmitted = [];
-  if (!task.extraUnsubmitted.includes(name)) {
-    task.extraUnsubmitted.push(name);
+  if (!task.extraUnsubmitted.includes(numInput)) {
+    task.extraUnsubmitted.push(numInput);
     cacheTasks();
     renderTasks();
     selectDate(selectedDateStr);
@@ -630,7 +630,7 @@ function submitExtraStudent() {
     showSuccess('สำเร็จ', 'เพิ่มรายชื่อคนค้างงานเรียบร้อยแล้ว');
     syncTasksToSheet();
   } else {
-    alert('มีรายชื่อนี้อยู่แล้ว');
+    alert('มีเลขที่นี้ในรายการค้างงานเพิ่มแล้ว');
   }
 }
 
@@ -658,6 +658,11 @@ function togglePin(id) {
 }
 
 function deleteTask(id) {
+  const isAdmin = currentRole === 'admin' || currentRole === 'creator';
+  if (!isAdmin) {
+    alert('เฉพาะแอดมินเท่านั้นที่สามารถลบรายการการบ้านได้');
+    return;
+  }
   if (!confirm('คุณต้องการลบรายการการบ้านนี้ใช่หรือไม่?')) return;
   tasks = tasks.filter(t => String(t.id) !== String(id));
   cacheTasks();
