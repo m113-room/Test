@@ -109,33 +109,44 @@
     </div>
   </div>
 
-  <!-- TRACKING VIEW (แท็บ "งานค้าง": มีฟังก์ชัน 1. เพิ่มการบ้าน, 2. เช็คงานค้าง พร้อมเพิ่มรายชื่อคนค้างงาน) -->
+  <!-- TRACKING VIEW (แท็บ "งานค้าง") -->
   <div id="view-tracking" class="hidden space-y-4">
-    <!-- ปุ่มเพิ่มการบ้าน สำหรับ Admin -->
-    <div id="creator-add-tracking-container" class="hidden">
+    <!-- ส่วนย่อยที่ 1: เพิ่มการบ้าน (เฉพาะ Admin) -->
+    <div id="creator-section-add-task" class="hidden space-y-2">
       <button onclick="toggleTrackingAddForm()" class="w-full py-2.5 rounded-2xl bg-purple-600 text-white font-bold text-xs shadow-sm">
         <i class="fa-solid fa-plus"></i> เพิ่มการบ้าน
       </button>
+      <div id="tracking-admin-form" class="hidden bg-slate-50 p-4 rounded-2xl border space-y-3">
+        <h3 class="text-xs font-bold text-slate-700"><i class="fa-solid fa-plus text-purple-600"></i> ฟอร์มเพิ่มรายการการบ้าน</h3>
+        <div class="grid grid-cols-3 gap-2">
+          <input id="tracking-task-code" list="code-options" placeholder="รหัสวิชา" class="w-full p-2.5 text-xs bg-white rounded-xl border">
+          <datalist id="code-options"></datalist>
+          <input id="tracking-task-subject" list="subject-options" placeholder="ชื่อวิชา" class="col-span-2 w-full p-2.5 text-xs bg-white rounded-xl border">
+          <datalist id="subject-options"></datalist>
+        </div>
+        <input id="tracking-task-detail" placeholder="รายละเอียดการบ้าน" class="w-full p-2.5 text-xs bg-white rounded-xl border">
+        <div class="grid grid-cols-2 gap-2">
+          <label class="flex items-center bg-white border rounded-xl px-2 py-2"><span class="text-[11px] mr-1">วันสั่ง:</span><input type="date" id="tracking-assign-date" class="w-full text-xs"></label>
+          <label class="flex items-center bg-white border rounded-xl px-2 py-2"><span class="text-[11px] mr-1 text-rose-500">วันส่ง:</span><input type="date" id="tracking-due-date" class="w-full text-xs"></label>
+        </div>
+        <button onclick="addTrackingTask()" class="w-full py-2.5 bg-purple-600 text-white font-bold rounded-xl text-xs">บันทึกข้อมูลการบ้าน</button>
+      </div>
     </div>
 
-    <!-- ฟอร์มเพิ่มการบ้าน -->
-    <div id="tracking-admin-form" class="hidden bg-slate-50 p-4 rounded-2xl border space-y-3">
-      <h3 class="text-xs font-bold text-slate-700"><i class="fa-solid fa-plus text-purple-600"></i> เพิ่มรายการการบ้าน</h3>
-      <div class="grid grid-cols-3 gap-2">
-        <input id="tracking-task-code" list="code-options" placeholder="รหัสวิชา" class="w-full p-2.5 text-xs bg-white rounded-xl border">
-        <datalist id="code-options"></datalist>
-        <input id="tracking-task-subject" list="subject-options" placeholder="ชื่อวิชา" class="col-span-2 w-full p-2.5 text-xs bg-white rounded-xl border">
-        <datalist id="subject-options"></datalist>
+    <!-- ส่วนย่อยที่ 2: เพิ่มรายชื่อคนค้างงาน (เฉพาะ Admin) -->
+    <div id="creator-section-add-student" class="hidden space-y-2">
+      <button onclick="toggleTrackingAddStudentForm()" class="w-full py-2.5 rounded-2xl bg-indigo-600 text-white font-bold text-xs shadow-sm">
+        <i class="fa-solid fa-user-plus"></i> เพิ่มรายชื่อคนค้างงาน
+      </button>
+      <div id="tracking-student-form" class="hidden bg-slate-50 p-4 rounded-2xl border space-y-3">
+        <h3 class="text-xs font-bold text-slate-700"><i class="fa-solid fa-user-plus text-indigo-600"></i> ฟอร์มเพิ่มชื่อ/เลขที่คนค้างงาน</h3>
+        <select id="select-target-task" class="w-full p-2.5 text-xs bg-white rounded-xl border font-semibold text-slate-700"></select>
+        <input id="extra-student-name" placeholder="ระบุชื่อ หรือเลขที่นักเรียนที่ค้างงานเพิ่ม" class="w-full p-2.5 text-xs bg-white rounded-xl border">
+        <button onclick="submitExtraStudent()" class="w-full py-2.5 bg-indigo-600 text-white font-bold rounded-xl text-xs">บันทึกรายชื่อคนค้างงาน</button>
       </div>
-      <input id="tracking-task-detail" placeholder="รายละเอียดการบ้าน" class="w-full p-2.5 text-xs bg-white rounded-xl border">
-      <div class="grid grid-cols-2 gap-2">
-        <label class="flex items-center bg-white border rounded-xl px-2 py-2"><span class="text-[11px] mr-1">วันสั่ง:</span><input type="date" id="tracking-assign-date" class="w-full text-xs"></label>
-        <label class="flex items-center bg-white border rounded-xl px-2 py-2"><span class="text-[11px] mr-1 text-rose-500">วันส่ง:</span><input type="date" id="tracking-due-date" class="w-full text-xs"></label>
-      </div>
-      <button onclick="addTrackingTask()" class="w-full py-2.5 bg-purple-600 text-white font-bold rounded-xl text-xs">บันทึกข้อมูล</button>
     </div>
 
-    <!-- ระบบเช็คงานค้างและเพิ่มรายชื่อคนค้างงาน -->
+    <!-- ระบบเช็คงานค้าง -->
     <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm space-y-3">
       <div class="flex justify-between items-center px-1 border-b pb-3">
         <span class="text-xs font-extrabold text-purple-600"><i class="fa-solid fa-list-check"></i> เช็คงานค้าง (สถานะการส่งงาน)</span>
@@ -337,7 +348,8 @@ function openDashboard(name) {
   document.getElementById('btn-view-logs').classList.toggle('hidden', !isAdmin);
   document.getElementById('btn-manage-history').classList.toggle('hidden', !isAdmin);
   document.getElementById('creator-add-event-container').classList.toggle('hidden', !isAdmin);
-  document.getElementById('creator-add-tracking-container').classList.toggle('hidden', !isAdmin);
+  document.getElementById('creator-section-add-task').classList.toggle('hidden', !isAdmin);
+  document.getElementById('creator-section-add-student').classList.toggle('hidden', !isAdmin);
   switchTab('pending');
   renderTasks(); renderCalendar(); selectDate(selectedDateStr);
 }
@@ -359,8 +371,10 @@ function renderTasks() {
   const countEl = document.getElementById('task-count');
   const trackingListEl = document.getElementById('tracking-task-list');
   const trackingCountEl = document.getElementById('tracking-count');
+  const selectTaskEl = document.getElementById('select-target-task');
 
   listEl.innerHTML = ''; pinnedEl.innerHTML = ''; trackingListEl.innerHTML = '';
+  if (selectTaskEl) selectTaskEl.innerHTML = '';
   
   const pinned = tasks.filter(t => t.isPinned);
   const active = tasks.filter(t => !t.isPinned);
@@ -381,8 +395,17 @@ function renderTasks() {
 
   if (tasks.length === 0) {
     trackingListEl.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">ไม่มีรายการงานค้าง</div>';
+    if (selectTaskEl) selectTaskEl.innerHTML = '<option value="">ไม่มีรายการการบ้าน</option>';
   } else {
-    tasks.forEach(t => { trackingListEl.appendChild(createTrackingCard(t)); });
+    tasks.forEach(t => {
+      trackingListEl.appendChild(createTrackingCard(t));
+      if (selectTaskEl) {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.textContent = `${t.code} - ${t.subject} (${t.detail})`;
+        selectTaskEl.appendChild(opt);
+      }
+    });
   }
 }
 
@@ -479,7 +502,6 @@ function createTrackingCard(t) {
     <div class="flex items-center gap-1.5 flex-wrap pt-1 border-t border-slate-100">
       <span class="text-[10px] text-slate-400 font-bold mr-1">ยังไม่ส่ง (${unsubmittedList.length}):</span>
       ${unsubmittedBadges}
-      ${isAdmin ? `<button onclick="promptAddExtraUnsubmitted('${t.id}')" class="bg-purple-50 text-purple-600 hover:bg-purple-100 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-purple-200">+ เพิ่มชื่อคนค้าง</button>` : ''}
     </div>
   `;
   return div;
@@ -501,33 +523,13 @@ function toggleStudentSubmit(taskId, numStr) {
   selectDate(selectedDateStr);
 }
 
-function promptAddExtraUnsubmitted(taskId) {
-  const name = prompt('กรอกชื่อ หรือเลขที่ของคนที่ค้างงานเพิ่ม:');
-  if (!name || !name.trim()) return;
-  const task = tasks.find(t => String(t.id) === String(taskId));
-  if (!task) return;
-  if (!Array.isArray(task.extraUnsubmitted)) task.extraUnsubmitted = [];
-  const val = name.trim();
-  if (!task.extraUnsubmitted.includes(val)) {
-    task.extraUnsubmitted.push(val);
-    cacheTasks();
-    renderTasks();
-    selectDate(selectedDateStr);
-    showSuccess('สำเร็จ', 'เพิ่มรายชื่อคนค้างงานเรียบร้อยแล้ว');
-  }
-}
-
-function removeExtraUnsubmitted(taskId, val) {
-  const task = tasks.find(t => String(t.id) === String(taskId));
-  if (!task || !Array.isArray(task.extraUnsubmitted)) return;
-  task.extraUnsubmitted = task.extraUnsubmitted.filter(item => item !== val);
-  cacheTasks();
-  renderTasks();
-  selectDate(selectedDateStr);
-}
-
 function toggleTrackingAddForm() {
   const form = document.getElementById('tracking-admin-form');
+  form.classList.toggle('hidden');
+}
+
+function toggleTrackingAddStudentForm() {
+  const form = document.getElementById('tracking-student-form');
   form.classList.toggle('hidden');
 }
 
@@ -546,6 +548,37 @@ async function addTrackingTask() {
   renderCalendar();
   toggleTrackingAddForm();
   showSuccess('บันทึกสำเร็จ', 'เพิ่มรายการการบ้านเรียบร้อยแล้ว');
+}
+
+function submitExtraStudent() {
+  const taskId = document.getElementById('select-target-task').value;
+  const name = document.getElementById('extra-student-name').value.trim();
+  if (!taskId) { alert('กรุณาเลือกรายการการบ้าน'); return; }
+  if (!name) { alert('กรุณากรอกชื่อหรือเลขที่คนค้างงาน'); return; }
+  
+  const task = tasks.find(t => String(t.id) === String(taskId));
+  if (!task) return;
+  if (!Array.isArray(task.extraUnsubmitted)) task.extraUnsubmitted = [];
+  if (!task.extraUnsubmitted.includes(name)) {
+    task.extraUnsubmitted.push(name);
+    cacheTasks();
+    renderTasks();
+    selectDate(selectedDateStr);
+    document.getElementById('extra-student-name').value = '';
+    toggleTrackingAddStudentForm();
+    showSuccess('สำเร็จ', 'เพิ่มรายชื่อคนค้างงานเรียบร้อยแล้ว');
+  } else {
+    alert('มีรายชื่อนี้อยู่แล้ว');
+  }
+}
+
+function removeExtraUnsubmitted(taskId, val) {
+  const task = tasks.find(t => String(t.id) === String(taskId));
+  if (!task || !Array.isArray(task.extraUnsubmitted)) return;
+  task.extraUnsubmitted = task.extraUnsubmitted.filter(item => item !== val);
+  cacheTasks();
+  renderTasks();
+  selectDate(selectedDateStr);
 }
 
 function togglePin(id) {
