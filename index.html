@@ -64,7 +64,7 @@
   </div>
 
   <div class="space-y-2 mb-4">
-    <!-- 3 แท็บเมนูด้านบน -->
+    <!-- 3 แท็บเมนูด้านบน (ปฏิทินงานเป็นสีฟ้าเมื่อเลือก) -->
     <div class="flex bg-slate-100 p-1 rounded-2xl text-center text-[10px] sm:text-xs font-bold gap-1">
       <button id="tab-pending" onclick="switchTab('pending')" class="flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white">งานค้าง</button>
       <button id="tab-calendar" onclick="switchTab('calendar')" class="flex-1 py-2.5 rounded-xl text-slate-500">ปฏิทินงาน</button>
@@ -337,8 +337,8 @@ function openDashboard(name) {
 function switchTab(tab) {
   currentTab = tab;
   document.getElementById('tab-pending').className = tab === 'pending' ? 'flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white' : 'flex-1 py-2.5 rounded-xl text-slate-500';
-  document.getElementById('tab-calendar').className = tab === 'calendar' ? 'flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white' : 'flex-1 py-2.5 rounded-xl text-slate-500';
-  document.getElementById('tab-tracking').className = tab === 'tracking' ? 'flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white' : 'flex-1 py-2.5 rounded-xl text-slate-500';
+  document.getElementById('tab-calendar').className = tab === 'calendar' ? 'flex-1 py-2.5 rounded-xl bg-[#50D8FF] text-slate-900 font-extrabold shadow-sm' : 'flex-1 py-2.5 rounded-xl text-slate-500';
+  document.getElementById('tab-tracking').className = tab === 'tracking' ? 'flex-1 py-2.5 rounded-xl bg-purple-600 text-white' : 'flex-1 py-2.5 rounded-xl text-slate-500';
   
   document.getElementById('view-tasks').classList.toggle('hidden', tab !== 'pending');
   document.getElementById('view-calendar').classList.toggle('hidden', tab !== 'calendar');
@@ -411,7 +411,7 @@ function renderCalendar() {
   for (let d = 1; d <= totalDays; d++) {
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
     const btn = document.createElement('button');
-    btn.className = `h-9 rounded-xl text-xs font-bold flex flex-col items-center justify-center transition border ${dateStr === selectedDateStr ? 'bg-[#FF75BC] text-white border-pink-400' : 'bg-slate-50 text-slate-700 border-slate-100 hover:bg-pink-50'}`;
+    btn.className = `h-9 rounded-xl text-xs font-bold flex flex-col items-center justify-center transition border ${dateStr === selectedDateStr ? 'bg-[#50D8FF] text-slate-900 border-sky-300 font-extrabold' : 'bg-slate-50 text-slate-700 border-slate-100 hover:bg-sky-50'}`;
     btn.innerHTML = `<span>${d}</span>`;
     btn.onclick = () => selectDate(dateStr);
     daysEl.appendChild(btn);
