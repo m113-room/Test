@@ -1,928 +1,954 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<title>Homework M.113 - V.1.60 (Turbo)</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  body { font-family: 'Plus Jakarta Sans', 'Sarabun', sans-serif; }
-  @keyframes pop { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-  .animate-pop { animation: pop 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-</style>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homework M.113</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', 'Sarabun', sans-serif;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @keyframes pop {
+      from {
+        opacity: 0;
+        transform: scale(.94);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .animate-pop {
+      animation: pop .2s ease-out;
+    }
+
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    input, select {
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: #FF75BC;
+    }
+  </style>
 </head>
-<body class="flex flex-col items-center justify-between p-3 sm:p-6 min-h-screen relative antialiased bg-gradient-to-br from-[#FFC2E2] via-purple-200 to-[#B6F0FF]">
-<div class="flex-grow"></div>
 
-<!-- LOADING OVERLAY -->
-<div id="loading-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[100] hidden">
-  <div class="bg-white/90 rounded-3xl p-6 shadow-2xl flex flex-col items-center gap-3 animate-pop">
-    <div class="w-10 h-10 border-4 border-[#FF75BC] border-t-transparent rounded-full animate-spin"></div>
-    <p id="loading-text" class="text-xs font-bold text-slate-700">กำลังโหลดข้อมูล...</p>
-  </div>
-</div>
+<body class="min-h-screen bg-gradient-to-br from-[#FFC2E2] via-purple-200 to-[#B6F0FF] p-4 sm:p-6">
 
-<!-- LOGIN -->
-<div id="login-page" class="w-full max-w-sm bg-white/85 backdrop-blur-2xl rounded-3xl p-8 border border-white/60 shadow-xl relative z-10">
-  <div class="text-center mb-8">
-    <div class="w-14 h-14 bg-gradient-to-br from-[#FF75BC] via-purple-500 to-[#50D8FF] rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-      <i class="fa-solid fa-book-open-reader text-2xl text-white"></i>
-    </div>
-    <h1 class="text-2xl font-extrabold text-slate-800">Homework M.113</h1>
-    <p class="text-xs text-slate-400 mt-1 font-semibold text-pink-600">ระบบการบ้านห้อง M.113 (V.1.60 Turbo)</p>
-  </div>
-  <div class="space-y-1.5 mb-6">
-    <label class="block text-[11px] font-bold text-slate-600">ชื่อผู้ใช้งาน (USERNAME)</label>
-    <input type="text" id="username" placeholder="พิมพ์ชื่อผู้ใช้งานของคุณ"
-      onkeydown="if(event.key==='Enter')login()"
-      class="w-full px-4 py-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-semibold outline-none focus:border-[#FF75BC]">
-  </div>
-  <button id="login-btn" onclick="login()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#FF75BC] to-rose-400 text-white font-bold text-xs shadow-lg">
-    เข้าสู่ระบบ
-  </button>
-</div>
-
-<!-- DASHBOARD -->
-<div id="main-page" class="hidden w-full max-w-md bg-white/85 backdrop-blur-2xl rounded-3xl p-5 border border-white/80 shadow-2xl relative z-10">
-  <div class="flex justify-between items-center pb-4 border-b border-slate-100 mb-4 gap-2">
-    <div class="flex items-center gap-1.5 flex-wrap">
-      <span class="font-extrabold text-[#FF75BC] text-lg">HOMEWORK</span>
-      <span class="bg-slate-800 text-white text-[10px] font-bold px-2 py-0.5 rounded-md">M113</span>
-      <span id="guest-badge" class="bg-pink-100 text-pink-700 text-[10px] font-bold px-2.5 py-1 rounded-xl">MEMBER</span>
-    </div>
-    <div class="flex items-center gap-1.5">
-      <!-- 3 ปุ่มหลัก -->
-      <button onclick="openLogsModal()" id="btn-view-logs" title="ประวัติการใช้งาน" class="text-xs bg-purple-100 text-purple-700 px-3 py-2 rounded-2xl hover:bg-purple-200 transition"><i class="fa-solid fa-clock-rotate-left"></i></button>
-      <button onclick="openManageModal()" id="btn-manage-history" title="จัดการตัวเลือกวิชา" class="text-xs bg-sky-100 text-sky-700 px-3 py-2 rounded-2xl hover:bg-sky-200 transition"><i class="fa-solid fa-list-check"></i></button>
-      <button onclick="fetchAllData(true)" title="ซิงค์ข้อมูลล่าสุด" class="text-xs bg-slate-100 text-slate-600 px-3 py-2 rounded-2xl hover:bg-slate-200 transition"><i class="fa-solid fa-rotate"></i></button>
-      <button onclick="logout()" class="text-xs bg-rose-50 text-rose-500 px-3 py-2 rounded-2xl font-bold hover:bg-rose-100 transition">LOGOUT</button>
+  <div id="loading-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] hidden flex items-center justify-center">
+    <div class="bg-white rounded-3xl p-7 shadow-2xl text-center">
+      <div class="w-10 h-10 border-4 border-pink-400 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+      <p id="loading-text" class="text-xs font-bold text-slate-700">กำลังโหลด...</p>
     </div>
   </div>
 
-  <div class="space-y-2 mb-4">
-    <div class="flex bg-slate-100 p-1 rounded-2xl text-center text-[10px] sm:text-xs font-bold gap-1">
-      <button id="tab-pending" onclick="switchTab('pending')" class="flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white">ภาพรวมงานค้าง</button>
-      <button id="tab-calendar" onclick="switchTab('calendar')" class="flex-1 py-2.5 rounded-xl text-slate-500">ปฏิทินงาน</button>
-      <button id="tab-tracking" onclick="switchTab('tracking')" class="flex-1 py-2.5 rounded-xl text-slate-500">งานค้าง</button>
+  <div id="login-page" class="max-w-sm mx-auto mt-20 bg-white/85 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white">
+
+    <div class="text-center mb-8">
+      <div class="w-16 h-16 mx-auto bg-gradient-to-br from-pink-400 to-sky-400 rounded-2xl flex items-center justify-center text-white text-3xl mb-4">
+        <i class="fa-solid fa-book-open-reader"></i>
+      </div>
+
+      <h1 class="text-2xl font-extrabold text-slate-800">
+        Homework M.113
+      </h1>
     </div>
+
+    <label class="text-xs font-bold text-slate-600">
+      ชื่อผู้ใช้งาน
+    </label>
+
+    <input id="username" type="text" placeholder="Username"
+      class="w-full mt-2 p-3 rounded-2xl bg-slate-50 border text-sm"
+      onkeydown="if(event.key==='Enter')login()">
+
+    <button id="login-btn" onclick="login()"
+      class="w-full mt-5 py-3 bg-gradient-to-r from-pink-400 to-rose-400 text-white rounded-2xl font-bold">
+      เข้าสู่ระบบ
+    </button>
   </div>
 
-  <!-- CALENDAR -->
-  <div id="view-calendar" class="hidden space-y-4">
-    <div>
-      <button onclick="openEventModal()" class="w-full py-2.5 rounded-2xl bg-[#50D8FF] text-slate-900 font-bold text-xs shadow-sm">
-        <i class="fa-solid fa-plus"></i> เพิ่มกิจกรรม
+  <main id="main-page" class="hidden max-w-2xl mx-auto bg-white/85 backdrop-blur-xl rounded-3xl shadow-2xl p-5 sm:p-7 border border-white">
+
+    <header class="flex flex-wrap items-center justify-between gap-3 border-b pb-4 mb-5">
+      <div>
+        <h1 class="font-extrabold text-pink-500 text-xl">
+          HOMEWORK <span class="text-slate-800">M113</span>
+        </h1>
+        <p id="user-display" class="text-xs text-slate-500 mt-1"></p>
+      </div>
+
+      <div class="flex gap-2">
+        <button onclick="loadAllData(true)" class="bg-sky-100 text-sky-700 px-3 py-2 rounded-xl text-xs">
+          <i class="fa-solid fa-rotate"></i>
+        </button>
+
+        <button onclick="logout()" class="bg-rose-100 text-rose-600 px-3 py-2 rounded-xl text-xs font-bold">
+          LOGOUT
+        </button>
+      </div>
+    </header>
+
+    <div id="sync-status" class="bg-slate-100 text-slate-600 p-3 rounded-2xl text-xs font-bold mb-4">
+      <i class="fa-solid fa-circle-info"></i>
+      พร้อมใช้งาน
+    </div>
+
+    <nav class="grid grid-cols-3 gap-2 bg-slate-100 rounded-2xl p-1 mb-5">
+      <button id="tab-pending" onclick="switchTab('pending')" class="py-3 bg-pink-400 text-white rounded-xl text-xs font-bold">
+        ภาพรวม
       </button>
-    </div>
+      <button id="tab-calendar" onclick="switchTab('calendar')" class="py-3 text-slate-600 rounded-xl text-xs font-bold">
+        ปฏิทิน
+      </button>
+      <button id="tab-tracking" onclick="switchTab('tracking')" class="py-3 text-slate-600 rounded-xl text-xs font-bold">
+        งานค้าง
+      </button>
+    </nav>
 
-    <div class="flex justify-between items-center bg-slate-50 p-3 rounded-2xl border">
-      <span class="text-xs font-extrabold text-slate-700">ปฏิทิน</span>
-      <div class="flex items-center gap-1.5">
-        <button onclick="changeMonth(-1)" class="px-2.5 py-1 text-[11px] font-bold bg-white rounded-lg border">PREV</button>
-        <button onclick="changeMonth(1)" class="px-2.5 py-1 text-[11px] font-bold bg-white rounded-lg border">NEXT</button>
+    <section id="view-pending">
+      <h2 class="text-sm font-extrabold text-pink-500 mb-3">
+        <i class="fa-solid fa-thumbtack"></i> งานปักหมุด
+      </h2>
+      <div id="pinned-list" class="space-y-3 mb-5"></div>
+
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-sm font-extrabold text-slate-800">รายการการบ้าน</h2>
+        <span id="task-count" class="text-xs bg-slate-100 rounded-full px-3 py-1">0 รายการ</span>
       </div>
-    </div>
-    <div class="bg-white rounded-3xl p-4 border shadow-sm">
-      <h3 id="calendar-month-year" class="text-xs font-bold text-slate-800 mb-3"></h3>
-      <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-extrabold mb-2">
-        <span class="text-rose-500">SUN</span><span class="text-amber-500">MON</span><span class="text-pink-500">TUE</span><span class="text-emerald-500">WED</span><span class="text-orange-500">THU</span><span class="text-sky-500">FRI</span><span class="text-purple-500">SAT</span>
+
+      <div id="task-list" class="space-y-3"></div>
+    </section>
+
+    <section id="view-calendar" class="hidden">
+      <div class="flex justify-between items-center mb-4">
+        <button onclick="changeMonth(-1)" class="bg-white border rounded-xl px-3 py-2 text-xs">PREV</button>
+        <h2 id="calendar-month-year" class="text-sm font-bold"></h2>
+        <button onclick="changeMonth(1)" class="bg-white border rounded-xl px-3 py-2 text-xs">NEXT</button>
       </div>
-      <div id="calendar-days" class="grid grid-cols-7 gap-1"></div>
-    </div>
-    <div class="bg-slate-50 p-4 rounded-3xl border space-y-3">
-      <div class="flex items-center justify-between">
-        <span id="selected-date-label" class="text-xs font-extrabold text-slate-700">รายการของวันที่เลือก</span>
-        <span id="selected-task-count" class="bg-sky-100 text-sky-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">0 รายการ</span>
-      </div>
-      <div class="bg-sky-50 border border-sky-100 p-3 rounded-2xl space-y-2">
-        <div class="flex items-center justify-between">
-          <span class="text-[11px] font-extrabold text-sky-900"><i class="fa-solid fa-star"></i> กิจกรรมในวันนี้</span>
+
+      <div class="bg-white rounded-2xl p-3 border">
+        <div class="grid grid-cols-7 text-center text-xs font-bold mb-2">
+          <span>อา</span><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span>ส</span>
         </div>
-        <div id="event-list-view" class="space-y-1.5 max-h-[120px] overflow-y-auto"></div>
+        <div id="calendar-days" class="grid grid-cols-7 gap-1"></div>
       </div>
-      <div id="selected-date-tasks" class="space-y-2 max-h-[180px] overflow-y-auto"></div>
-    </div>
-  </div>
 
-  <!-- TRACKING VIEW -->
-  <div id="view-tracking" class="hidden space-y-4">
-    <div class="grid grid-cols-2 gap-2">
-      <button onclick="toggleTrackingAddForm()" class="py-2.5 rounded-2xl bg-purple-600 text-white font-bold text-xs shadow-sm">
-        <i class="fa-solid fa-plus"></i> เพิ่มการบ้าน
-      </button>
-      <button onclick="toggleTrackingAddStudentForm()" class="py-2.5 rounded-2xl bg-indigo-600 text-white font-bold text-xs shadow-sm">
-        <i class="fa-solid fa-user-plus"></i> เพิ่มรายชื่อคนค้าง
-      </button>
-    </div>
+      <div class="mt-4 bg-sky-50 rounded-2xl p-4">
+        <h3 id="selected-date-label" class="font-bold text-xs mb-3"></h3>
+        <div id="selected-date-tasks" class="space-y-2"></div>
+      </div>
 
-    <!-- ส่วนย่อยที่ 1: เพิ่มการบ้าน -->
-    <div id="tracking-admin-form" class="hidden bg-slate-50 p-4 rounded-2xl border space-y-3">
-      <h3 class="text-xs font-bold text-slate-700"><i class="fa-solid fa-plus text-purple-600"></i> ฟอร์มเพิ่มรายการการบ้าน</h3>
-      <div class="grid grid-cols-3 gap-2">
-        <input id="tracking-task-code" list="code-options" placeholder="รหัสวิชา" class="w-full p-2.5 text-xs bg-white rounded-xl border">
+      <div class="mt-4 bg-white rounded-2xl p-4 border">
+        <h3 class="text-xs font-bold mb-3">กิจกรรม</h3>
+        <div id="event-list" class="space-y-2 mb-3"></div>
+        <input id="event-input" class="w-full border rounded-xl p-3 text-xs" placeholder="ชื่อกิจกรรม">
+        <button onclick="addEvent()" class="w-full bg-sky-400 rounded-xl py-3 text-xs font-bold mt-2">
+          เพิ่มกิจกรรม
+        </button>
+      </div>
+    </section>
+
+    <section id="view-tracking" class="hidden">
+
+      <div class="grid grid-cols-2 gap-2 mb-4">
+        <button onclick="toggleForm('task-form')" class="bg-purple-600 text-white py-3 rounded-xl text-xs font-bold">
+          <i class="fa-solid fa-plus"></i> เพิ่มการบ้าน
+        </button>
+        <button onclick="toggleForm('student-form')" class="bg-indigo-600 text-white py-3 rounded-xl text-xs font-bold">
+          <i class="fa-solid fa-user-plus"></i> เพิ่มคนค้าง
+        </button>
+      </div>
+
+      <div id="task-form" class="hidden bg-slate-50 rounded-2xl p-4 mb-4 space-y-3">
+        <h3 class="text-xs font-bold">เพิ่มรายการการบ้าน</h3>
+
+        <input id="task-code" list="code-options" placeholder="รหัสวิชา" class="w-full p-3 border rounded-xl text-xs">
         <datalist id="code-options"></datalist>
-        <input id="tracking-task-subject" list="subject-options" placeholder="ชื่อวิชา" class="col-span-2 w-full p-2.5 text-xs bg-white rounded-xl border">
+
+        <input id="task-subject" list="subject-options" placeholder="ชื่อวิชา" class="w-full p-3 border rounded-xl text-xs">
         <datalist id="subject-options"></datalist>
+
+        <input id="task-detail" placeholder="รายละเอียดการบ้าน" class="w-full p-3 border rounded-xl text-xs">
+
+        <label class="block text-xs">วันสั่ง</label>
+        <input id="task-assign-date" type="date" class="w-full p-3 border rounded-xl text-xs">
+
+        <label class="block text-xs">วันส่ง</label>
+        <input id="task-due-date" type="date" class="w-full p-3 border rounded-xl text-xs">
+
+        <button id="save-task-btn" onclick="addTask()" class="w-full bg-purple-600 text-white py-3 rounded-xl font-bold text-xs">
+          บันทึกการบ้าน
+        </button>
       </div>
-      <input id="tracking-task-detail" placeholder="รายละเอียดการบ้าน" class="w-full p-2.5 text-xs bg-white rounded-xl border">
-      <div class="grid grid-cols-2 gap-2">
-        <label class="flex items-center bg-white border rounded-xl px-2 py-2"><span class="text-[11px] mr-1">วันสั่ง:</span><input type="date" id="tracking-assign-date" class="w-full text-xs"></label>
-        <label class="flex items-center bg-white border rounded-xl px-2 py-2"><span class="text-[11px] mr-1 text-rose-500">วันส่ง:</span><input type="date" id="tracking-due-date" class="w-full text-xs"></label>
+
+      <div id="student-form" class="hidden bg-slate-50 rounded-2xl p-4 mb-4 space-y-3">
+        <h3 class="text-xs font-bold">เพิ่มเลขที่คนค้างงาน</h3>
+
+        <select id="student-task-select" class="w-full p-3 border rounded-xl text-xs"></select>
+
+        <input id="student-number" type="number" min="1" placeholder="เลขที่นักเรียน" class="w-full p-3 border rounded-xl text-xs">
+
+        <button onclick="addExtraStudent()" class="w-full bg-indigo-600 text-white py-3 rounded-xl text-xs font-bold">
+          บันทึก
+        </button>
       </div>
-      <button onclick="addTrackingTask()" class="w-full py-2.5 bg-purple-600 text-white font-bold rounded-xl text-xs">บันทึกข้อมูลการบ้าน</button>
-    </div>
 
-    <!-- ส่วนย่อยที่ 2: เพิ่มรายชื่อคนค้างงาน -->
-    <div id="tracking-student-form" class="hidden bg-slate-50 p-4 rounded-2xl border space-y-3">
-      <h3 class="text-xs font-bold text-slate-700"><i class="fa-solid fa-user-plus text-indigo-600"></i> ฟอร์มเพิ่มชื่อ/เลขที่คนค้างงาน</h3>
-      <select id="select-target-task" class="w-full p-2.5 text-xs bg-white rounded-xl border font-semibold text-slate-700"></select>
-      <input type="number" id="extra-student-name" placeholder="ระบุเลขที่นักเรียนที่ค้างงานเพิ่ม (เช่น 41, 42)" min="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full p-2.5 text-xs bg-white rounded-xl border">
-      <button onclick="submitExtraStudent()" class="w-full py-2.5 bg-indigo-600 text-white font-bold rounded-xl text-xs">บันทึกรายชื่อคนค้างงาน</button>
-    </div>
+      <div id="tracking-list" class="space-y-3"></div>
+    </section>
 
-    <!-- ระบบเช็คงานค้าง -->
-    <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm space-y-3">
-      <div class="flex justify-between items-center px-1 border-b pb-3">
-        <span class="text-xs font-extrabold text-purple-600"><i class="fa-solid fa-list-check"></i> เช็คงานค้าง (สถานะการส่งงาน)</span>
-        <span id="tracking-count" class="bg-purple-100 text-purple-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full">0 ITEMS</span>
+    <div class="mt-6 border-t pt-4 grid grid-cols-2 gap-2">
+      <button onclick="openOptions()" class="bg-sky-100 text-sky-700 rounded-xl py-3 text-xs font-bold">
+        <i class="fa-solid fa-list-check"></i> จัดการวิชา
+      </button>
+
+      <button onclick="openLogs()" class="bg-purple-100 text-purple-700 rounded-xl py-3 text-xs font-bold">
+        <i class="fa-solid fa-clock-rotate-left"></i> ประวัติ
+      </button>
+    </div>
+  </main>
+
+  <div id="modal" class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-5 w-full max-w-lg max-h-[85vh] overflow-y-auto animate-pop">
+      <div class="flex justify-between items-center mb-4">
+        <h3 id="modal-title" class="font-extrabold text-sm"></h3>
+        <button onclick="closeModal()" class="text-slate-500 font-bold">✕</button>
       </div>
-      <div id="tracking-task-list" class="space-y-3 max-h-[450px] overflow-y-auto pr-1"></div>
+      <div id="modal-content"></div>
     </div>
   </div>
 
-  <!-- TASKS -->
-  <div id="view-tasks" class="space-y-4">
-    <div class="bg-amber-50 border border-amber-100 rounded-3xl p-4 space-y-3">
-      <div class="flex items-center gap-2 text-amber-800 text-xs font-bold"><i class="fa-solid fa-thumbtack text-amber-500"></i> ปักหมุดไว้</div>
-      <div id="pinned-list" class="space-y-2.5"></div>
-    </div>
-    <div class="space-y-2.5">
-      <div class="flex justify-between items-center">
-        <span class="text-xs font-extrabold text-[#FF75BC]">ภาพรวมงานค้าง</span>
-        <span id="task-count" class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full">0 ITEMS</span>
-      </div>
-      <div id="task-list" class="space-y-2.5 max-h-[350px] overflow-y-auto"></div>
-    </div>
-  </div>
-</div>
-
-<div class="flex-grow"></div>
-<footer class="py-4 text-center z-20 w-full"><span class="text-[11px] font-extrabold text-slate-600 bg-white/70 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/40">การส่งการบ้าน</span></footer>
-
-<!-- SUCCESS POPUP -->
-<div id="success-popup" class="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-50 hidden p-4">
-  <div class="bg-white rounded-3xl p-6 w-80 text-center shadow-2xl animate-pop">
-    <div class="w-16 h-16 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"><i class="fa-solid fa-circle-check"></i></div>
-    <h3 id="success-title" class="text-base font-extrabold text-slate-800 mb-1">บันทึกสำเร็จ</h3>
-    <p id="success-message" class="text-xs text-slate-400 mb-5">บันทึกข้อมูลเรียบร้อยแล้ว</p>
-    <button onclick="closeSuccessPopup()" class="w-full py-2.5 bg-emerald-500 text-white font-bold text-xs rounded-xl">ตกลง</button>
-  </div>
-</div>
-
-<!-- EVENT MODAL -->
-<div id="event-modal" class="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-50 hidden p-4">
-  <div class="bg-white rounded-3xl p-5 w-full max-w-sm shadow-2xl animate-pop space-y-4">
-    <div class="flex justify-between items-center border-b pb-3">
-      <h3 class="text-xs font-extrabold text-sky-900"><i class="fa-solid fa-star text-sky-400"></i> เพิ่มกิจกรรม</h3>
-      <button onclick="closeEventModal()" class="text-slate-400 text-xs">✕</button>
-    </div>
-    <span id="modal-date-label" class="text-[11px] font-bold text-slate-500 block">วันที่เลือก: -</span>
-    <input type="text" id="daily-event-input" placeholder="ชื่อกิจกรรม หรือวันสำคัญ..." class="w-full p-3 text-xs bg-slate-50 rounded-2xl border">
-    <button id="save-event-btn" onclick="saveDailyEvent()" class="w-full py-2.5 bg-[#50D8FF] text-slate-900 font-extrabold text-xs rounded-xl">บันทึกกิจกรรม</button>
-  </div>
-</div>
-
-<!-- ACTIVITY LOGS MODAL -->
-<div id="logs-modal" class="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-[60] hidden p-3">
-  <div class="bg-white rounded-3xl p-5 w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl animate-pop space-y-3">
-    <div class="flex justify-between items-center border-b pb-3">
-      <h3 class="font-extrabold text-sm text-purple-800"><i class="fa-solid fa-clock-rotate-left"></i> ประวัติการใช้งาน</h3>
-      <button onclick="closeModal('logs-modal')" class="text-slate-400 px-2 font-bold">✕</button>
-    </div>
-    <div class="grid grid-cols-2 gap-2">
-      <button onclick="clearLogs()" class="py-2.5 bg-rose-50 text-rose-600 rounded-xl text-xs font-bold"><i class="fa-solid fa-trash-can"></i> ล้างประวัติทั้งหมด</button>
-      <button onclick="loadLogs()" class="py-2.5 bg-purple-100 text-purple-700 rounded-xl text-xs font-bold"><i class="fa-solid fa-rotate"></i> โหลดใหม่</button>
-    </div>
-    <p id="logs-status" class="text-xs text-slate-500">กำลังโหลด...</p>
-    <div id="logs-list" class="space-y-2 max-h-[300px] overflow-y-auto pr-1"></div>
-  </div>
-</div>
-
-<!-- MANAGE OPTIONS MODAL -->
-<div id="manage-modal" class="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-[60] hidden p-3">
-  <div class="bg-white rounded-3xl p-5 w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl animate-pop space-y-3">
-    <div class="flex justify-between items-center border-b pb-3">
-      <h3 class="font-extrabold text-sm text-sky-800"><i class="fa-solid fa-list-check"></i> จัดการรหัสวิชาและชื่อวิชา</h3>
-      <button onclick="closeModal('manage-modal')" class="text-slate-400 px-2 font-bold">✕</button>
-    </div>
-    <p class="text-[11px] text-slate-500">คุณสามารถเพิ่มรหัสวิชาหรือชื่อวิชาใหม่ได้ที่นี่ หรือพิมพ์เพิ่มใน Google Sheets (ชีต Options)</p>
-    
-    <!-- ฟอร์มเพิ่มวิชาใหม่ -->
-    <div class="bg-sky-50 p-3 rounded-2xl border border-sky-100 space-y-2">
-      <h4 class="text-xs font-extrabold text-sky-900">เพิ่มวิชาใหม่</h4>
-      <div class="grid grid-cols-2 gap-2">
-        <input id="new-custom-code" placeholder="รหัสวิชา (เช่น M31101)" class="w-full p-2.5 text-xs bg-white rounded-xl border">
-        <input id="new-custom-subject" placeholder="ชื่อวิชา" class="w-full p-2.5 text-xs bg-white rounded-xl border">
-      </div>
-      <button onclick="addNewOption()" class="w-full py-2 bg-sky-600 text-white rounded-xl text-xs font-bold">บันทึกเพิ่มวิชา</button>
-    </div>
-
-    <div class="grid grid-cols-2 gap-3">
-      <div class="bg-slate-50 p-3 rounded-2xl border"><h4 class="text-xs font-extrabold text-slate-700 mb-2">รหัสวิชาที่มี</h4><div id="manage-codes" class="space-y-1 max-h-[150px] overflow-y-auto"></div></div>
-      <div class="bg-slate-50 p-3 rounded-2xl border"><h4 class="text-xs font-extrabold text-slate-700 mb-2">ชื่อวิชาที่มี</h4><div id="manage-subjects" class="space-y-1 max-h-[150px] overflow-y-auto"></div></div>
-    </div>
-    <button onclick="loadOptions()" class="w-full py-2.5 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold">รีเฟรชรายการ</button>
-  </div>
-</div>
-
-<!-- JAVASCRIPT SYSTEM -->
 <script>
 'use strict';
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1lacaaSbd6ZVh5jrD_s7yU1lmK6bmG_31yzUywyknR7xPZ7BDd_RLAygQHtgfvPRu/exec';
-let currentRole = 'member', currentUsername = '', currentTab = 'pending', currentDateTime = new Date(), selectedDateStr = getFormattedDate(new Date());
-let tasks = [], dailyEvents = {}, codes = [], subjects = [], allowedUsersList = [];
-let lastActivityTime = Date.now();
-const IDLE_TIMEOUT_MS = 7 * 60 * 1000;
+
+let currentUser = null;
+let tasks = [];
+let dailyEvents = {};
+let codes = [];
+let subjects = [];
+let currentTab = 'pending';
+let calendarDate = new Date();
+let selectedDate = dateKey(new Date());
+
 const TOTAL_STUDENTS = 40;
+const IDLE_TIMEOUT = 7 * 60 * 1000;
+let lastActivity = Date.now();
+let busy = false;
 
-function resetIdleTimer() { lastActivityTime = Date.now(); }
-['click', 'touchstart', 'keypress', 'scroll', 'mousemove'].forEach(evt => { window.addEventListener(evt, resetIdleTimer, { passive: true }); });
-setInterval(() => { if (Date.now() - lastActivityTime > IDLE_TIMEOUT_MS) { logoutDueToTimeout(); } }, 30000);
-function logoutDueToTimeout() { alert('เซสชันหมดอายุเนื่องจากการใช้งานเกิน 7 นาที'); logout(); }
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && localStorage.getItem('isLoggedIn') === 'true') { if ((Date.now() - lastActivityTime) > IDLE_TIMEOUT_MS) { logoutDueToTimeout(); } else { fetchAllData(false); } } });
-
-const MONTH_NAMES_TH = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
-const MONTH_SHORT_TH = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-
-function showLoading(text='กำลังโหลดข้อมูล...') { document.getElementById('loading-text').textContent = text; document.getElementById('loading-overlay').classList.remove('hidden'); }
-function hideLoading() { document.getElementById('loading-overlay').classList.add('hidden'); }
-function getFormattedDate(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
-function normalizedDateStr(v) { if (!v) return ''; if (typeof v === 'string') { const s = v.trim(); const m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/); if (m) return `${m[1]}-${String(m[2]).padStart(2, '0')}-${String(m[3]).padStart(2, '0')}`; const d = new Date(v); if (!isNaN(d.getTime())) return getFormattedDate(d); } return formatThaiShortDate(v); }
-function formatThaiShortDate(str) { if (!str) return ''; const parts = str.split('-'); if (parts.length === 3) { const y = parseInt(parts[0], 10), m = parseInt(parts[1], 10), d = parseInt(parts[2], 10); const dt = new Date(y, m - 1, d); return isNaN(dt.getTime()) ? str : `${dt.getDate()} ${MONTH_SHORT_TH[dt.getMonth()]} ${y}`; } return str; }
-function escapeHtml(v) { return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
-function showSuccess(title, message) { document.getElementById('success-title').textContent = title; document.getElementById('success-message').textContent = message; document.getElementById('success-popup').classList.remove('hidden'); }
-function closeSuccessPopup() { document.getElementById('success-popup').classList.add('hidden'); }
-function cacheTasks() { localStorage.setItem('homework_cached_tasks_v2', JSON.stringify(tasks)); localStorage.setItem('homework_cached_events_v2', JSON.stringify(dailyEvents)); }
-
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    tasks = JSON.parse(localStorage.getItem('homework_cached_tasks_v2') || '[]');
-    dailyEvents = JSON.parse(localStorage.getItem('homework_cached_events_v2') || '{}');
-    if (localStorage.getItem('isLoggedIn') === 'true') {
-      currentRole = localStorage.getItem('userRole') || 'member';
-      currentUsername = localStorage.getItem('usernameKey') || '';
-      openDashboard(localStorage.getItem('userName'));
-      renderTasks(); renderCalendar(); selectDate(selectedDateStr);
-      fetchAllData(false);
-    }
-  } catch (e) { console.error('Cache Load Error:', e); }
-});
-
-async function fetchJSON(url) { const res = await fetch(url, { cache: 'no-store' }); if (!res.ok) throw new Error(`HTTP ${res.status}`); return await res.json(); }
-
-async function fetchAllData(showAlert=false) {
-  if (showAlert) showLoading('กำลังซิงค์ข้อมูล...');
-  try {
-    const [tasksRes, usersRes, eventsRes, optionsRes] = await Promise.allSettled([
-      fetchJSON(`${SCRIPT_URL}?t=${Date.now()}`),
-      fetchJSON(`${SCRIPT_URL}?action=getUsers&t=${Date.now()}`),
-      fetchJSON(`${SCRIPT_URL}?action=getEvents&t=${Date.now()}`),
-      fetchJSON(`${SCRIPT_URL}?action=getOptions&t=${Date.now()}`)
-    ]);
-    if (tasksRes.status === 'fulfilled' && Array.isArray(tasksRes.value)) {
-      tasks = tasksRes.value.map(t => ({
-        ...t,
-        id: String(t.id),
-        isPinned: String(t.isPinned) === 'true',
-        submitted: Array.isArray(t.submitted) ? t.submitted.map(String) : [],
-        extraUnsubmitted: Array.isArray(t.extraUnsubmitted) ? t.extraUnsubmitted.map(String) : []
-      }));
-      cacheTasks();
-    }
-    if (usersRes.status === 'fulfilled' && Array.isArray(usersRes.value)) {
-      const sheetUsers = usersRes.value.map(u => ({ username: String(u.username || u.Username || '').trim().toLowerCase(), role: String(u.role || u.Role || 'member').trim().toLowerCase(), name: String(u.name || u.Name || '').trim() })).filter(u => u.username);
-      if (sheetUsers.length > 0) allowedUsersList = sheetUsers;
-    }
-    if (eventsRes.status === 'fulfilled' && eventsRes.value) { dailyEvents = eventsRes.value; }
-    if (optionsRes.status === 'fulfilled' && optionsRes.value) {
-      codes = Array.isArray(optionsRes.value.codes) ? optionsRes.value.codes : [];
-      subjects = Array.isArray(optionsRes.value.subjects) ? optionsRes.value.subjects : [];
-      updateDatalists();
-    }
-    renderTasks(); renderCalendar(); selectDate(selectedDateStr);
-    if (showAlert) showSuccess('ซิงค์ข้อมูลสำเร็จ', 'อัปเดตข้อมูลล่าสุดเรียบร้อยแล้ว');
-    return true;
-  } catch (e) {
-    console.error('Fetch Error:', e);
-    if (showAlert) alert('ซิงค์ข้อมูลไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อ');
-    return false;
-  } finally { if (showAlert) hideLoading(); }
+function el(id) {
+  return document.getElementById(id);
 }
 
-async function login() {
-  const raw = document.getElementById('username').value.trim().toLowerCase();
-  if (!raw) { alert('กรุณากรอกชื่อผู้ใช้งาน'); return; }
-  showLoading('กำลังตรวจสอบชื่อในระบบ...');
-  const btn = document.getElementById('login-btn'); btn.disabled = true;
-  try {
-    const usersRes = await fetchJSON(`${SCRIPT_URL}?action=getUsers&t=${Date.now()}`);
-    if (Array.isArray(usersRes) && usersRes.length > 0) {
-      allowedUsersList = usersRes.map(u => ({ username: String(u.username || u.Username || '').trim().toLowerCase(), role: String(u.role || u.Role || 'member').trim().toLowerCase(), name: String(u.name || u.Name || '').trim() })).filter(u => u.username);
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function dateKey(date) {
+  return date.getFullYear() + '-' +
+    String(date.getMonth() + 1).padStart(2, '0') + '-' +
+    String(date.getDate()).padStart(2, '0');
+}
+
+function formatDate(value) {
+  if (!value) return '-';
+  const d = new Date(String(value).substring(0, 10) + 'T12:00:00');
+  if (isNaN(d.getTime())) return String(value);
+  return d.toLocaleDateString('th-TH', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  });
+}
+
+function showLoading(text = 'กำลังโหลด...') {
+  el('loading-text').textContent = text;
+  el('loading-overlay').classList.remove('hidden');
+}
+
+function hideLoading() {
+  el('loading-overlay').classList.add('hidden');
+}
+
+function setStatus(message, success = true) {
+  const box = el('sync-status');
+  box.textContent = message;
+  box.className = 'p-3 rounded-2xl text-xs font-bold mb-4 ' +
+    (success
+      ? 'bg-emerald-100 text-emerald-700'
+      : 'bg-rose-100 text-rose-700');
+}
+
+function server(functionName, ...args) {
+  return new Promise((resolve, reject) => {
+    if (!window.google || !google.script || !google.script.run) {
+      reject(new Error('กรุณาเปิดเว็บไซต์ผ่าน Google Apps Script Web App'));
+      return;
     }
-    let user = allowedUsersList.find(u => u.username === raw);
-    if (!user) { alert(`ไม่พบผู้ใช้งาน "${raw}" ในระบบ`); hideLoading(); btn.disabled = false; return; }
-    currentRole = user.role; currentUsername = raw;
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userRole', currentRole);
-    localStorage.setItem('usernameKey', currentUsername);
-    localStorage.setItem('userName', user.name);
-    hideLoading(); btn.disabled = false;
-    openDashboard(user.name);
-    logActivity('เข้าสู่ระบบ', `ผู้ใช้งาน ${user.name} เข้าสู่ระบบ`);
-    fetchAllData(false);
-  } catch (e) {
-    console.error('Login Error:', e);
-    alert('ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง');
-    hideLoading(); btn.disabled = false;
+
+    google.script.run
+      .withSuccessHandler(resolve)
+      .withFailureHandler(error => {
+        reject(new Error(error.message || String(error)));
+      })[functionName](...args);
+  });
+}
+
+async function execute(label, action) {
+  if (busy) return false;
+
+  busy = true;
+  showLoading(label);
+
+  try {
+    await action();
+    return true;
+  } catch (error) {
+    console.error(error);
+    setStatus('ผิดพลาด: ' + error.message, false);
+    alert('เกิดข้อผิดพลาด:\n' + error.message);
+    return false;
+  } finally {
+    busy = false;
+    hideLoading();
   }
 }
 
+function isAdmin() {
+  return currentUser &&
+    ['admin', 'creator'].includes(currentUser.role);
+}
+
+function requireAdmin() {
+  if (!isAdmin()) {
+    alert('เฉพาะ Admin หรือ Creator เท่านั้น');
+    return false;
+  }
+  return true;
+}
+
+async function login() {
+  const username = el('username').value.trim();
+  if (!username) {
+    alert('กรุณากรอกชื่อผู้ใช้งาน');
+    return;
+  }
+
+  await execute('กำลังเข้าสู่ระบบ...', async () => {
+    const user = await server('loginUser', username);
+
+    if (!user || !user.username) {
+      throw new Error('ไม่พบผู้ใช้งาน');
+    }
+
+    currentUser = user;
+    sessionStorage.setItem('homeworkUser', JSON.stringify(user));
+
+    el('login-page').classList.add('hidden');
+    el('main-page').classList.remove('hidden');
+    el('user-display').textContent =
+      user.name + ' • ' + user.role.toUpperCase();
+
+    await loadAllData(false);
+  });
+}
+
 function logout() {
-  localStorage.removeItem('isLoggedIn');
-  localStorage.removeItem('userRole');
-  localStorage.removeItem('usernameKey');
-  localStorage.removeItem('userName');
+  currentUser = null;
+  sessionStorage.removeItem('homeworkUser');
   location.reload();
 }
 
-function openDashboard(name) {
-  document.getElementById('login-page').classList.add('hidden');
-  document.getElementById('main-page').classList.remove('hidden');
-  document.getElementById('guest-badge').textContent = name || currentRole.toUpperCase();
-  switchTab('pending');
-  renderTasks(); renderCalendar(); selectDate(selectedDateStr);
+async function loadAllData(showMessage = false) {
+  const load = async () => {
+    const data = await server('getAllData');
+
+    tasks = Array.isArray(data.tasks) ? data.tasks : [];
+    dailyEvents = data.events || {};
+    codes = data.options?.codes || [];
+    subjects = data.options?.subjects || [];
+
+    updateOptions();
+    renderTasks();
+    renderCalendar();
+    selectDate(selectedDate);
+
+    setStatus('ซิงค์ข้อมูลสำเร็จ • ' +
+      new Date().toLocaleTimeString('th-TH'));
+
+    if (showMessage) {
+      alert('ซิงค์ข้อมูลสำเร็จ');
+    }
+  };
+
+  if (busy) {
+    await load();
+  } else {
+    await execute('กำลังซิงค์ข้อมูล...', load);
+  }
 }
 
 function switchTab(tab) {
   currentTab = tab;
-  document.getElementById('tab-pending').className = tab === 'pending' ? 'flex-1 py-2.5 rounded-xl bg-[#FF75BC] text-white' : 'flex-1 py-2.5 rounded-xl text-slate-500';
-  document.getElementById('tab-calendar').className = tab === 'calendar' ? 'flex-1 py-2.5 rounded-xl bg-[#50D8FF] text-slate-900 font-extrabold shadow-sm' : 'flex-1 py-2.5 rounded-xl text-slate-500';
-  document.getElementById('tab-tracking').className = tab === 'tracking' ? 'flex-1 py-2.5 rounded-xl bg-purple-600 text-white font-extrabold shadow-sm' : 'flex-1 py-2.5 rounded-xl text-slate-500';
-  
-  document.getElementById('view-tasks').classList.toggle('hidden', tab !== 'pending');
-  document.getElementById('view-calendar').classList.toggle('hidden', tab !== 'calendar');
-  document.getElementById('view-tracking').classList.toggle('hidden', tab !== 'tracking');
+
+  ['pending', 'calendar', 'tracking'].forEach(name => {
+    el('view-' + name).classList.toggle('hidden', name !== tab);
+
+    el('tab-' + name).className =
+      'py-3 rounded-xl text-xs font-bold ' +
+      (name === tab
+        ? 'bg-pink-400 text-white'
+        : 'text-slate-600');
+  });
 }
 
 function renderTasks() {
-  const listEl = document.getElementById('task-list');
-  const pinnedEl = document.getElementById('pinned-list');
-  const countEl = document.getElementById('task-count');
-  const trackingListEl = document.getElementById('tracking-task-list');
-  const trackingCountEl = document.getElementById('tracking-count');
-  const selectTaskEl = document.getElementById('select-target-task');
+  const pinned = el('pinned-list');
+  const list = el('task-list');
+  const tracking = el('tracking-list');
+  const selector = el('student-task-select');
 
-  listEl.innerHTML = ''; pinnedEl.innerHTML = ''; trackingListEl.innerHTML = '';
-  if (selectTaskEl) selectTaskEl.innerHTML = '';
-  
-  const pinned = tasks.filter(t => t.isPinned);
-  const active = tasks.filter(t => !t.isPinned);
-  countEl.textContent = `${tasks.length} ITEMS`;
-  trackingCountEl.textContent = `${tasks.length} ITEMS`;
+  pinned.innerHTML = '';
+  list.innerHTML = '';
+  tracking.innerHTML = '';
+  selector.innerHTML = '';
 
-  if (pinned.length === 0) {
-    pinnedEl.innerHTML = '<p class="text-[11px] text-amber-600">ไม่มีรายการปักหมุด</p>';
-  } else {
-    pinned.forEach(t => { pinnedEl.appendChild(createTaskCard(t, true)); });
+  el('task-count').textContent = tasks.length + ' รายการ';
+
+  tasks.forEach(task => {
+    if (task.isPinned) {
+      pinned.appendChild(createTaskCard(task));
+    } else {
+      list.appendChild(createTaskCard(task));
+    }
+
+    tracking.appendChild(createTrackingCard(task));
+
+    const option = document.createElement('option');
+    option.value = task.id;
+    option.textContent = task.subject + ' - ' + task.detail;
+    selector.appendChild(option);
+  });
+
+  if (!pinned.children.length) {
+    pinned.innerHTML = '<p class="text-xs text-slate-400">ไม่มีงานปักหมุด</p>';
   }
 
-  if (active.length === 0) {
-    listEl.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">ไม่มีงานค้างในระบบ เยี่ยมมาก!</div>';
-  } else {
-    active.forEach(t => { listEl.appendChild(createTaskCard(t, true)); });
+  if (!list.children.length) {
+    list.innerHTML = '<p class="text-xs text-slate-400">ไม่มีรายการการบ้าน</p>';
   }
 
-  if (tasks.length === 0) {
-    trackingListEl.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">ไม่มีรายการงานค้าง</div>';
-    if (selectTaskEl) selectTaskEl.innerHTML = '<option value="">ไม่มีรายการการบ้าน</option>';
-  } else {
-    tasks.forEach(t => {
-      trackingListEl.appendChild(createTrackingCard(t));
-      if (selectTaskEl) {
-        const opt = document.createElement('option');
-        opt.value = t.id;
-        opt.textContent = `${t.code} - ${t.subject} (${t.detail})`;
-        selectTaskEl.appendChild(opt);
-      }
-    });
+  if (!tracking.children.length) {
+    tracking.innerHTML = '<p class="text-xs text-slate-400">ไม่มีรายการ</p>';
   }
 }
 
-function createTaskCard(t, showUnsubmittedIfOverdue = false) {
+function createTaskCard(task) {
   const div = document.createElement('div');
-  div.className = "bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-2 transition-all";
-  const isAdmin = currentRole === 'admin' || currentRole === 'creator';
-  
-  let overdueSection = '';
-  if (showUnsubmittedIfOverdue && t.dueDate) {
-    const due = new Date(t.dueDate);
-    const now = new Date();
-    due.setHours(0,0,0,0);
-    now.setHours(0,0,0,0);
-    
-    if (due < now) {
-      const submittedSet = new Set(Array.isArray(t.submitted) ? t.submitted.map(String) : []);
-      const extraSet = new Set(Array.isArray(t.extraUnsubmitted) ? t.extraUnsubmitted.map(String) : []);
-      const unsubmittedList = [];
-      for (let i = 1; i <= TOTAL_STUDENTS; i++) {
-        if (!submittedSet.has(String(i))) unsubmittedList.push(String(i));
-      }
-      extraSet.forEach(item => { if (!unsubmittedList.includes(item)) unsubmittedList.push(item); });
+  div.className = 'bg-white border rounded-2xl p-4 shadow-sm';
 
-      let badges = '';
-      if (unsubmittedList.length === 0) {
-        badges = '<span class="text-[10px] text-emerald-600 font-bold">ส่งครบทุกคนแล้ว! 🎉</span>';
-      } else {
-        badges = unsubmittedList.map(num => `
-          <span class="inline-flex items-center gap-1 bg-rose-50 text-rose-600 text-[10px] font-bold px-1.5 py-0.5 rounded-md border border-rose-100">
-            <button onclick="toggleStudentSubmit('${t.id}', '${num}')" title="คลิกเปลี่ยนเป็นส่งแล้ว" class="hover:text-emerald-600 cursor-pointer">${escapeHtml(num)}</button>
-            ${extraSet.has(num) && isAdmin ? `<button onclick="removeExtraUnsubmitted('${t.id}', '${num}')" class="text-rose-400 hover:text-rose-700 ml-0.5">×</button>` : ''}
-          </span>
-        `).join('');
-      }
+  div.innerHTML = `
+    <div class="flex justify-between gap-3">
+      <div class="min-w-0">
+        <span class="text-[10px] bg-pink-100 text-pink-700 px-2 py-1 rounded-lg font-bold">
+          ${escapeHtml(task.code)}
+        </span>
+        <h3 class="font-extrabold text-sm mt-2">${escapeHtml(task.subject)}</h3>
+        <p class="text-xs text-slate-600 mt-1">${escapeHtml(task.detail)}</p>
+        <p class="text-xs text-rose-500 mt-2">
+          ส่ง: ${formatDate(task.dueDate)}
+        </p>
+      </div>
+      <div class="flex gap-2 shrink-0">
+        <button data-action="pin" class="text-amber-500">
+          <i class="fa-solid fa-thumbtack"></i>
+        </button>
+        ${isAdmin() ? `
+          <button data-action="delete" class="text-rose-500">
+            <i class="fa-solid fa-trash"></i>
+          </button>` : ''}
+      </div>
+    </div>
+  `;
 
-      overdueSection = `
-        <div class="pt-2 mt-1 border-t border-rose-100 bg-rose-50/50 p-2 rounded-xl space-y-1">
-          <div class="flex items-center justify-between text-[10px] text-rose-700 font-bold">
-            <span><i class="fa-solid fa-triangle-exclamation"></i> เลยกำหนดส่งแล้ว (ยังไม่ส่ง ${unsubmittedList.length} คน)</span>
-          </div>
-          <div class="flex flex-wrap gap-1">${badges}</div>
-        </div>
-      `;
+  div.querySelector('[data-action="pin"]').onclick =
+    () => togglePin(task.id);
+
+  const deleteButton = div.querySelector('[data-action="delete"]');
+  if (deleteButton) {
+    deleteButton.onclick = () => deleteTask(task.id);
+  }
+
+  return div;
+}
+
+function getUnsubmitted(task) {
+  const submitted = new Set((task.submitted || []).map(String));
+  const extra = new Set((task.extraUnsubmitted || []).map(String));
+  const result = [];
+
+  for (let i = 1; i <= TOTAL_STUDENTS; i++) {
+    if (!submitted.has(String(i))) {
+      result.push(String(i));
     }
   }
 
-  div.innerHTML = `
-    <div class="flex items-start justify-between gap-2">
-      <div class="space-y-1 flex-grow">
-        <div class="flex items-center gap-1.5">
-          <span class="bg-pink-100 text-pink-700 text-[10px] font-bold px-2 py-0.5 rounded-md">${escapeHtml(t.code)}</span>
-          <span class="text-xs font-bold text-slate-800">${escapeHtml(t.subject)}</span>
-        </div>
-        <p class="text-xs text-slate-600">${escapeHtml(t.detail)}</p>
-        <p class="text-[10px] text-slate-400">กำหนดส่ง: <span class="text-rose-500 font-bold">${formatThaiShortDate(t.dueDate)}</span></p>
-      </div>
-      <div class="flex items-center gap-1 shrink-0">
-        <button onclick="togglePin('${t.id}')" title="ปักหมุด" class="text-xs px-2.5 py-1.5 rounded-xl ${t.isPinned ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-600'}"><i class="fa-solid fa-thumbtack"></i></button>
-        ${isAdmin ? `<button onclick="deleteTask('${t.id}')" title="ลบงาน" class="text-xs bg-rose-50 text-rose-500 px-2.5 py-1.5 rounded-xl"><i class="fa-solid fa-trash-can"></i></button>` : ''}
-      </div>
-    </div>
-    ${overdueSection}
-  `;
-  return div;
+  extra.forEach(number => {
+    if (!submitted.has(number) && !result.includes(number)) {
+      result.push(number);
+    }
+  });
+
+  return result;
 }
 
-function createTrackingCard(t) {
+function createTrackingCard(task) {
   const div = document.createElement('div');
-  div.className = "bg-white text-slate-800 p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3";
-  
-  const due = new Date(t.dueDate);
-  const now = new Date();
-  due.setHours(0,0,0,0);
-  now.setHours(0,0,0,0);
-  const diffTime = due - now;
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
-  let badgeHtml = '';
-  if (diffDays > 0) {
-    badgeHtml = `<span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2.5 py-1 rounded-xl">เหลือ ${diffDays} วัน</span>`;
-  } else if (diffDays === 0) {
-    badgeHtml = `<span class="bg-amber-100 text-amber-700 text-[10px] font-bold px-2.5 py-1 rounded-xl">กำหนดส่งวันนี้</span>`;
-  } else {
-    badgeHtml = `<span class="bg-rose-100 text-rose-600 text-[10px] font-bold px-2.5 py-1 rounded-xl">เลยกำหนด ${Math.abs(diffDays)} วัน</span>`;
-  }
+  div.className = 'bg-white rounded-2xl border p-4 space-y-3';
 
-  const submittedSet = new Set(Array.isArray(t.submitted) ? t.submitted.map(String) : []);
-  const extraSet = new Set(Array.isArray(t.extraUnsubmitted) ? t.extraUnsubmitted.map(String) : []);
-  
-  const unsubmittedList = [];
-  for (let i = 1; i <= TOTAL_STUDENTS; i++) {
-    if (!submittedSet.has(String(i))) unsubmittedList.push(String(i));
-  }
-  extraSet.forEach(item => { if (!unsubmittedList.includes(item)) unsubmittedList.push(item); });
+  const unsubmitted = getUnsubmitted(task);
+  const total = TOTAL_STUDENTS +
+    (task.extraUnsubmitted || []).filter(
+      n => Number(n) > TOTAL_STUDENTS
+    ).length;
 
-  const totalTracked = TOTAL_STUDENTS + extraSet.size;
-  const submittedCount = totalTracked - unsubmittedList.length;
-  const percent = Math.round((submittedCount / totalTracked) * 100);
-  const isAdmin = currentRole === 'admin' || currentRole === 'creator';
-  
-  let unsubmittedBadges = '';
-  if (unsubmittedList.length === 0) {
-    unsubmittedBadges = '<span class="text-[11px] text-emerald-600 font-bold">ส่งครบทุกคนแล้ว! 🎉</span>';
-  } else {
-    unsubmittedBadges = unsubmittedList.map(num => `
-      <span class="inline-flex items-center gap-1 bg-rose-50 text-rose-600 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-rose-100">
-        <button onclick="toggleStudentSubmit('${t.id}', '${num}')" title="คลิกเปลี่ยนเป็นส่งแล้ว" class="hover:text-emerald-600 cursor-pointer">${escapeHtml(num)}</button>
-        ${isAdmin && extraSet.has(num) ? `<button onclick="removeExtraUnsubmitted('${t.id}', '${num}')" class="text-rose-400 hover:text-rose-700 ml-0.5">×</button>` : ''}
-      </span>
-    `).join('');
-  }
+  const completed = Math.max(0, total - unsubmitted.length);
+  const percent = total ? Math.round(completed / total * 100) : 0;
 
   div.innerHTML = `
-    <div class="flex justify-between items-start gap-2">
-      <div>
-        <span class="text-xs font-bold text-slate-500">${escapeHtml(t.subject)}</span>
-        <h4 class="text-xs sm:text-sm font-extrabold text-slate-800 mt-0.5">${escapeHtml(t.detail)}</h4>
-      </div>
-      <div class="flex items-center gap-1.5 shrink-0">
-        ${badgeHtml}
-      </div>
-    </div>
-    
-    <div class="space-y-1.5">
-      <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-        <div class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width: ${percent}%;"></div>
-      </div>
-      <div class="flex justify-between items-center text-[10px] text-slate-500 font-semibold">
-        <span>รหัสวิชา: <span class="text-purple-600">${escapeHtml(t.code)}</span></span>
-        <span class="text-emerald-600 font-bold">${submittedCount}/${totalTracked} ส่งแล้ว (${percent}%)</span>
-      </div>
+    <div>
+      <h3 class="font-extrabold text-sm">${escapeHtml(task.subject)}</h3>
+      <p class="text-xs text-slate-600 mt-1">${escapeHtml(task.detail)}</p>
+      <p class="text-xs text-rose-500 mt-2">กำหนดส่ง: ${formatDate(task.dueDate)}</p>
     </div>
 
-    <div class="flex items-center gap-1.5 flex-wrap pt-1 border-t border-slate-100">
-      <span class="text-[10px] text-slate-400 font-bold mr-1">ยังไม่ส่ง (${unsubmittedList.length}):</span>
-      ${unsubmittedBadges}
+    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+      <div class="bg-emerald-500 h-full rounded-full" style="width:${percent}%"></div>
     </div>
+
+    <p class="text-xs font-bold text-emerald-600">
+      ส่งแล้ว ${completed}/${total} (${percent}%)
+    </p>
+
+    <p class="text-xs font-bold">ยังไม่ส่ง (${unsubmitted.length})</p>
+    <div class="flex flex-wrap gap-1" data-students></div>
   `;
+
+  const students = div.querySelector('[data-students]');
+
+  unsubmitted.forEach(number => {
+    const button = document.createElement('button');
+    button.className =
+      'bg-rose-50 text-rose-600 px-2 py-1 rounded-lg text-xs border';
+    button.textContent = number;
+    button.title = 'เปลี่ยนสถานะเป็นส่งแล้ว';
+    button.disabled = !isAdmin();
+    button.onclick = () => toggleStudent(task.id, number);
+    students.appendChild(button);
+  });
+
   return div;
 }
 
-function toggleStudentSubmit(taskId, numStr) {
-  const task = tasks.find(t => String(t.id) === String(taskId));
-  if (!task) return;
-  if (!Array.isArray(task.submitted)) task.submitted = [];
-  
-  const idx = task.submitted.indexOf(numStr);
-  if (idx > -1) {
-    task.submitted.splice(idx, 1);
-  } else {
-    task.submitted.push(numStr);
-  }
-  
-  renderTasks();
-  selectDate(selectedDateStr);
-  syncTasksToSheet();
-  logActivity('อัปเดตส่งงาน', `เปลี่ยนสถานะเลขที่ ${numStr} ในงาน: ${task.subject}`);
+function toggleForm(id) {
+  if (!requireAdmin()) return;
+
+  ['task-form', 'student-form'].forEach(name => {
+    if (name !== id) el(name).classList.add('hidden');
+  });
+
+  el(id).classList.toggle('hidden');
 }
 
-function toggleTrackingAddForm() {
-  const form = document.getElementById('tracking-admin-form');
-  const studentForm = document.getElementById('tracking-student-form');
-  studentForm.classList.add('hidden');
-  form.classList.toggle('hidden');
-}
+async function addTask() {
+  if (!requireAdmin()) return;
 
-function toggleTrackingAddStudentForm() {
-  const form = document.getElementById('tracking-student-form');
-  const adminForm = document.getElementById('tracking-admin-form');
-  adminForm.classList.add('hidden');
-  form.classList.toggle('hidden');
-}
-
-function addTrackingTask() {
-  const codeEl = document.getElementById('tracking-task-code');
-  const subjectEl = document.getElementById('tracking-task-subject');
-  const detailEl = document.getElementById('tracking-task-detail');
-  const assignDateEl = document.getElementById('tracking-assign-date');
-  const dueDateEl = document.getElementById('tracking-due-date');
-
-  const code = codeEl.value.trim();
-  const subject = subjectEl.value.trim();
-  const detail = detailEl.value.trim();
-  const assignDate = assignDateEl.value;
-  const dueDate = dueDateEl.value;
-
-  if (!code || !subject || !detail || !dueDate) { 
-    alert('กรุณากรอกข้อมูลให้ครบถ้วน'); 
-    return; 
-  }
-  
-  const newTask = { 
-    id: String(Date.now()), 
-    code, 
-    subject, 
-    detail, 
-    assignDate, 
-    dueDate, 
-    isPinned: false, 
-    submitted: [], 
-    extraUnsubmitted: [] 
+  const task = {
+    code: el('task-code').value.trim(),
+    subject: el('task-subject').value.trim(),
+    detail: el('task-detail').value.trim(),
+    assignDate: el('task-assign-date').value,
+    dueDate: el('task-due-date').value
   };
-  
-  tasks.unshift(newTask);
-  
-  // ล้างค่าฟอร์มให้ว่างหลังบันทึก
-  codeEl.value = '';
-  subjectEl.value = '';
-  detailEl.value = '';
-  assignDateEl.value = '';
-  dueDateEl.value = '';
 
-  renderTasks();
-  renderCalendar();
-  toggleTrackingAddForm();
-  showSuccess('บันทึกสำเร็จ', 'เพิ่มรายการการบ้านเรียบร้อยแล้ว');
-  syncTasksToSheet();
-  logActivity('เพิ่มการบ้าน', `${code} - ${subject} (${detail})`);
-}
-
-function submitExtraStudent() {
-  const taskId = document.getElementById('select-target-task').value;
-  const numInput = document.getElementById('extra-student-name').value.trim();
-  if (!taskId) { alert('กรุณาเลือกรายการการบ้าน'); return; }
-  if (!numInput || isNaN(numInput)) { alert('กรุณากรอกเฉพาะเลขที่นักเรียนเป็นตัวเลขเท่านั้น'); return; }
-  
-  const task = tasks.find(t => String(t.id) === String(taskId));
-  if (!task) return;
-  if (!Array.isArray(task.extraUnsubmitted)) task.extraUnsubmitted = [];
-  if (!task.extraUnsubmitted.includes(numInput)) {
-    task.extraUnsubmitted.push(numInput);
-    
-    renderTasks();
-    selectDate(selectedDateStr);
-    document.getElementById('extra-student-name').value = '';
-    toggleTrackingAddStudentForm();
-    showSuccess('สำเร็จ', 'เพิ่มรายชื่อคนค้างงานเรียบร้อยแล้ว');
-    syncTasksToSheet();
-    logActivity('เพิ่มคนค้างงาน', `เลขที่ ${numInput} ในวิชา ${task.subject}`);
-  } else {
-    alert('มีเลขที่นี้ในรายการค้างงานเพิ่มแล้ว');
-  }
-}
-
-function removeExtraUnsubmitted(taskId, val) {
-  const task = tasks.find(t => String(t.id) === String(taskId));
-  if (!task || !Array.isArray(task.extraUnsubmitted)) return;
-  task.extraUnsubmitted = task.extraUnsubmitted.filter(item => item !== val);
-  
-  renderTasks();
-  selectDate(selectedDateStr);
-  syncTasksToSheet();
-}
-
-function togglePin(id) {
-  const task = tasks.find(t => String(t.id) === String(id));
-  if (task) {
-    task.isPinned = !task.isPinned;
-    renderTasks();
-    renderCalendar();
-    selectDate(selectedDateStr);
-    showSuccess('สำเร็จ', task.isPinned ? 'ปักหมุดงานเรียบร้อยแล้ว' : 'ยกเลิกปักหมุดเรียบร้อยแล้ว');
-    syncTasksToSheet();
-    logActivity('ปักหมุดงาน', `${task.subject} (${task.detail}) -> ${task.isPinned ? 'ปักหมุด' : 'ยกเลิกปักหมุด'}`);
-  }
-}
-
-function deleteTask(id) {
-  const isAdmin = currentRole === 'admin' || currentRole === 'creator';
-  if (!isAdmin) {
-    alert('เฉพาะแอดมินเท่านั้นที่สามารถลบรายการการบ้านได้');
+  if (!task.code || !task.subject || !task.detail || !task.dueDate) {
+    alert('กรุณากรอกข้อมูลให้ครบ');
     return;
   }
-  if (!confirm('คุณต้องการลบรายการการบ้านนี้ใช่หรือไม่?')) return;
-  const task = tasks.find(t => String(t.id) === String(id));
-  tasks = tasks.filter(t => String(t.id) !== String(id));
-  
-  renderTasks();
-  renderCalendar();
-  selectDate(selectedDateStr);
-  showSuccess('ลบสำเร็จ', 'ลบรายการการบ้านเรียบร้อยแล้ว');
-  syncTasksToSheet();
-  if (task) logActivity('ลบการบ้าน', `${task.subject} (${task.detail})`);
+
+  if (task.assignDate && task.dueDate < task.assignDate) {
+    alert('วันส่งต้องไม่อยู่ก่อนวันสั่ง');
+    return;
+  }
+
+  const success = await execute('กำลังบันทึกการบ้าน...', async () => {
+    await server('addTaskServer', currentUser.username, task);
+    await loadAllData(false);
+  });
+
+  if (success) {
+    ['task-code', 'task-subject', 'task-detail',
+      'task-assign-date', 'task-due-date'].forEach(id => {
+      el(id).value = '';
+    });
+
+    el('task-form').classList.add('hidden');
+    setStatus('บันทึกการบ้านลง Google Sheets สำเร็จ');
+    alert('บันทึกการบ้านสำเร็จ');
+  }
+}
+
+async function togglePin(id) {
+  if (!requireAdmin()) return;
+
+  await execute('กำลังบันทึก...', async () => {
+    await server('togglePinServer', currentUser.username, id);
+    await loadAllData(false);
+  });
+}
+
+async function deleteTask(id) {
+  if (!requireAdmin()) return;
+  if (!confirm('ต้องการลบการบ้านนี้ใช่หรือไม่?')) return;
+
+  await execute('กำลังลบ...', async () => {
+    await server('deleteTaskServer', currentUser.username, id);
+    await loadAllData(false);
+  });
+}
+
+async function toggleStudent(taskId, number) {
+  if (!requireAdmin()) return;
+
+  await execute('กำลังอัปเดตสถานะ...', async () => {
+    await server(
+      'toggleStudentServer',
+      currentUser.username,
+      taskId,
+      String(number)
+    );
+    await loadAllData(false);
+  });
+}
+
+async function addExtraStudent() {
+  if (!requireAdmin()) return;
+
+  const taskId = el('student-task-select').value;
+  const number = el('student-number').value.trim();
+
+  if (!taskId || !/^[1-9]\d*$/.test(number)) {
+    alert('กรุณาเลือกงานและกรอกเลขที่ให้ถูกต้อง');
+    return;
+  }
+
+  const success = await execute('กำลังเพิ่มเลขที่...', async () => {
+    await server(
+      'addExtraStudentServer',
+      currentUser.username,
+      taskId,
+      number
+    );
+    await loadAllData(false);
+  });
+
+  if (success) {
+    el('student-number').value = '';
+    el('student-form').classList.add('hidden');
+  }
 }
 
 function renderCalendar() {
-  const year = currentDateTime.getFullYear();
-  const month = currentDateTime.getMonth();
-  document.getElementById('calendar-month-year').textContent = `${MONTH_NAMES_TH[month]} ${year + 543}`;
-  const daysEl = document.getElementById('calendar-days');
-  daysEl.innerHTML = '';
-  
+  const year = calendarDate.getFullYear();
+  const month = calendarDate.getMonth();
+
+  el('calendar-month-year').textContent =
+    calendarDate.toLocaleDateString('th-TH', {
+      month: 'long',
+      year: 'numeric'
+    });
+
+  const container = el('calendar-days');
+  container.innerHTML = '';
+
   const firstDay = new Date(year, month, 1).getDay();
   const totalDays = new Date(year, month + 1, 0).getDate();
-  
+
   for (let i = 0; i < firstDay; i++) {
-    daysEl.appendChild(document.createElement('div'));
+    container.appendChild(document.createElement('div'));
   }
-  
-  for (let d = 1; d <= totalDays; d++) {
-    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    const btn = document.createElement('button');
-    btn.className = `h-9 rounded-xl text-xs font-bold flex flex-col items-center justify-center transition border ${dateStr === selectedDateStr ? 'bg-[#50D8FF] text-slate-900 border-sky-300 font-extrabold' : 'bg-slate-50 text-slate-700 border-slate-100 hover:bg-sky-50'}`;
-    btn.innerHTML = `<span>${d}</span>`;
-    btn.onclick = () => selectDate(dateStr);
-    daysEl.appendChild(btn);
+
+  for (let day = 1; day <= totalDays; day++) {
+    const key = dateKey(new Date(year, month, day));
+    const button = document.createElement('button');
+
+    button.textContent = day;
+    button.className =
+      'h-10 rounded-xl text-xs font-bold ' +
+      (key === selectedDate
+        ? 'bg-sky-400 text-white'
+        : 'bg-slate-50 text-slate-700');
+
+    button.onclick = () => selectDate(key);
+    container.appendChild(button);
   }
 }
 
-function changeMonth(dir) {
-  currentDateTime.setMonth(currentDateTime.getMonth() + dir);
+function changeMonth(direction) {
+  calendarDate = new Date(
+    calendarDate.getFullYear(),
+    calendarDate.getMonth() + direction,
+    1
+  );
   renderCalendar();
 }
 
-function selectDate(dateStr) {
-  selectedDateStr = dateStr;
+function selectDate(key) {
+  selectedDate = key;
   renderCalendar();
-  document.getElementById('selected-date-label').textContent = `รายการวันที่ ${formatThaiShortDate(dateStr)}`;
-  const dateTasks = tasks.filter(t => normalizedDateStr(t.dueDate) === dateStr || normalizedDateStr(t.assignDate) === dateStr);
-  document.getElementById('selected-task-count').textContent = `${dateTasks.length} รายการ`;
-  
-  const container = document.getElementById('selected-date-tasks');
+
+  el('selected-date-label').textContent =
+    'รายการวันที่ ' + formatDate(key);
+
+  const container = el('selected-date-tasks');
   container.innerHTML = '';
-  if (dateTasks.length === 0) {
-    container.innerHTML = '<p class="text-[11px] text-slate-400 text-center py-2">ไม่มีรายการในวันนี้</p>';
-  } else {
-    dateTasks.forEach(t => { container.appendChild(createTaskCard(t, false)); });
+
+  const matches = tasks.filter(task =>
+    task.assignDate === key || task.dueDate === key
+  );
+
+  matches.forEach(task => container.appendChild(createTaskCard(task)));
+
+  if (!matches.length) {
+    container.innerHTML =
+      '<p class="text-xs text-slate-400">ไม่มีการบ้านในวันนี้</p>';
   }
 
-  const eventView = document.getElementById('event-list-view');
-  eventView.innerHTML = '';
-  const evts = dailyEvents[dateStr] || [];
-  if (evts.length === 0) {
-    eventView.innerHTML = '<p class="text-[10px] text-sky-600">ไม่มีกิจกรรมพิเศษ</p>';
-  } else {
-    evts.forEach(e => {
-      const p = document.createElement('p');
-      p.className = 'text-[11px] text-sky-900 font-bold bg-white p-1.5 rounded-xl border border-sky-100';
-      p.textContent = e;
-      eventView.appendChild(p);
-    });
+  const eventList = el('event-list');
+  eventList.innerHTML = '';
+
+  (dailyEvents[key] || []).forEach(event => {
+    const p = document.createElement('p');
+    p.className = 'bg-sky-50 rounded-xl p-2 text-xs';
+    p.textContent = event;
+    eventList.appendChild(p);
+  });
+
+  if (!eventList.children.length) {
+    eventList.innerHTML =
+      '<p class="text-xs text-slate-400">ไม่มีกิจกรรม</p>';
   }
 }
 
-function openEventModal() {
-  document.getElementById('modal-date-label').textContent = `วันที่เลือก: ${formatThaiShortDate(selectedDateStr)}`;
-  document.getElementById('daily-event-input').value = '';
-  document.getElementById('event-modal').classList.remove('hidden');
+async function addEvent() {
+  if (!requireAdmin()) return;
+
+  const event = el('event-input').value.trim();
+  if (!event) return;
+
+  const success = await execute('กำลังบันทึกกิจกรรม...', async () => {
+    await server(
+      'addEventServer',
+      currentUser.username,
+      selectedDate,
+      event
+    );
+    await loadAllData(false);
+  });
+
+  if (success) {
+    el('event-input').value = '';
+  }
 }
 
-function closeEventModal() { document.getElementById('event-modal').classList.add('hidden'); }
+function updateOptions() {
+  el('code-options').innerHTML = '';
+  el('subject-options').innerHTML = '';
 
-async function saveDailyEvent() {
-  const val = document.getElementById('daily-event-input').value.trim();
-  if (!val) { alert('กรุณากรอกกิจกรรม'); return; }
-  if (!dailyEvents[selectedDateStr]) dailyEvents[selectedDateStr] = [];
-  dailyEvents[selectedDateStr].push(val);
-  cacheTasks();
-  closeEventModal();
-  selectDate(selectedDateStr);
-  showSuccess('บันทึกสำเร็จ', 'เพิ่มกิจกรรมเรียบร้อยแล้ว');
-  
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'saveEvents', events: dailyEvents })
-  }).catch(e => console.error('Sync Events Error:', e));
-  
-  logActivity('เพิ่มกิจกรรม', `วันที่ ${selectedDateStr}: ${val}`);
+  codes.forEach(code => {
+    const option = document.createElement('option');
+    option.value = code;
+    el('code-options').appendChild(option);
+  });
+
+  subjects.forEach(subject => {
+    const option = document.createElement('option');
+    option.value = subject;
+    el('subject-options').appendChild(option);
+  });
 }
 
-function updateDatalists() {
-  const codeList = document.getElementById('code-options');
-  const subjList = document.getElementById('subject-options');
-  if (codeList) codeList.innerHTML = codes.map(c => `<option value="${escapeHtml(c)}">`).join('');
-  if (subjList) subjList.innerHTML = subjects.map(s => `<option value="${escapeHtml(s)}">`).join('');
+function openModal(title, content) {
+  el('modal-title').textContent = title;
+  el('modal-content').innerHTML = content;
+  el('modal').classList.remove('hidden');
 }
 
-function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-// ----------------- ปุ่มที่ 1: ACTIVITY LOGS -----------------
-function openLogsModal() {
-  document.getElementById('logs-modal').classList.remove('hidden');
-  loadLogs();
+function closeModal() {
+  el('modal').classList.add('hidden');
 }
 
-async function loadLogs() {
-  const statusEl = document.getElementById('logs-status');
-  const listEl = document.getElementById('logs-list');
-  statusEl.textContent = 'กำลังโหลดประวัติ...';
-  listEl.innerHTML = '';
-  
+function openOptions() {
+  const content = `
+    <div class="space-y-3">
+      <input id="new-code" class="w-full border rounded-xl p-3 text-xs" placeholder="รหัสวิชา">
+      <input id="new-subject" class="w-full border rounded-xl p-3 text-xs" placeholder="ชื่อวิชา">
+      <button onclick="saveOption()" class="w-full bg-sky-500 text-white py-3 rounded-xl text-xs font-bold">
+        เพิ่มวิชา
+      </button>
+      <h4 class="font-bold text-xs">รหัสวิชา</h4>
+      <div id="option-codes" class="text-xs space-y-1"></div>
+      <h4 class="font-bold text-xs">ชื่อวิชา</h4>
+      <div id="option-subjects" class="text-xs space-y-1"></div>
+    </div>
+  `;
+
+  openModal('จัดการรหัสวิชาและชื่อวิชา', content);
+
+  codes.forEach(code => {
+    const p = document.createElement('p');
+    p.textContent = code;
+    el('option-codes').appendChild(p);
+  });
+
+  subjects.forEach(subject => {
+    const p = document.createElement('p');
+    p.textContent = subject;
+    el('option-subjects').appendChild(p);
+  });
+}
+
+async function saveOption() {
+  if (!requireAdmin()) return;
+
+  const code = el('new-code').value.trim();
+  const subject = el('new-subject').value.trim();
+
+  if (!code && !subject) {
+    alert('กรุณากรอกข้อมูลอย่างน้อยหนึ่งช่อง');
+    return;
+  }
+
+  const success = await execute('กำลังเพิ่มวิชา...', async () => {
+    await server(
+      'saveOptionServer',
+      currentUser.username,
+      code,
+      subject
+    );
+    await loadAllData(false);
+  });
+
+  if (success) {
+    openOptions();
+  }
+}
+
+async function openLogs() {
+  openModal('ประวัติการใช้งาน',
+    '<p class="text-xs">กำลังโหลด...</p>');
+
   try {
-    const res = await fetch(`${SCRIPT_URL}?action=getLogs&t=${Date.now()}`);
-    const logs = await res.json();
-    if (!Array.isArray(logs) || logs.length === 0) {
-      statusEl.textContent = 'ไม่มีประวัติการใช้งาน';
-      return;
+    const logs = await server('getLogsServer');
+    const container = el('modal-content');
+    container.innerHTML = '';
+
+    if (isAdmin()) {
+      const clearButton = document.createElement('button');
+      clearButton.className =
+        'bg-rose-100 text-rose-600 rounded-xl px-3 py-2 text-xs font-bold mb-3';
+      clearButton.textContent = 'ล้างประวัติทั้งหมด';
+      clearButton.onclick = clearLogs;
+      container.appendChild(clearButton);
     }
-    statusEl.textContent = `พบประวัติทั้งหมด ${logs.length} รายการ`;
-    logs.forEach(l => {
+
+    logs.forEach(log => {
       const div = document.createElement('div');
-      div.className = 'bg-slate-50 p-2.5 rounded-xl border text-[11px] space-y-0.5';
-      const timeStr = l.timestamp ? new Date(l.timestamp).toLocaleString('th-TH') : '-';
-      div.innerHTML = `
-        <div class="flex justify-between font-bold text-purple-700">
-          <span><i class="fa-solid fa-user"></i> ${escapeHtml(l.username)}</span>
-          <span class="text-[10px] text-slate-400">${timeStr}</span>
-        </div>
-        <div class="font-semibold text-slate-800">${escapeHtml(l.action)}</div>
-        <div class="text-slate-500">${escapeHtml(l.details)}</div>
-      `;
-      listEl.appendChild(div);
+      div.className = 'border-b py-3 text-xs';
+
+      const title = document.createElement('p');
+      title.className = 'font-bold';
+      title.textContent = log.username + ' • ' + log.action;
+
+      const details = document.createElement('p');
+      details.className = 'text-slate-500 mt-1';
+      details.textContent = log.details;
+
+      const time = document.createElement('p');
+      time.className = 'text-slate-400 mt-1';
+      time.textContent = log.timestamp;
+
+      div.append(title, details, time);
+      container.appendChild(div);
     });
-  } catch (e) {
-    console.error('Load Logs Error:', e);
-    statusEl.textContent = 'โหลดประวัติไม่สำเร็จ';
+
+    if (!logs.length) {
+      container.innerHTML = '<p class="text-xs">ไม่มีประวัติ</p>';
+    }
+  } catch (error) {
+    el('modal-content').textContent = error.message;
   }
 }
 
 async function clearLogs() {
-  if (!confirm('คุณต้องการลบประวัติการใช้งานทั้งหมดใช่หรือไม่?')) return;
-  showLoading('กำลังล้างประวัติ...');
-  try {
-    await fetch(SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'clearLogs' })
-    });
-    hideLoading();
-    loadLogs();
-    showSuccess('สำเร็จ', 'ล้างประวัติการใช้งานเรียบร้อยแล้ว');
-  } catch (e) {
-    hideLoading();
-    alert('ล้างประวัติไม่สำเร็จ');
+  if (!requireAdmin()) return;
+  if (!confirm('ล้างประวัติทั้งหมดใช่หรือไม่?')) return;
+
+  const success = await execute('กำลังล้างประวัติ...', async () => {
+    await server('clearLogsServer', currentUser.username);
+  });
+
+  if (success) openLogs();
+}
+
+['click', 'touchstart', 'keydown', 'scroll'].forEach(eventName => {
+  window.addEventListener(eventName, () => {
+    lastActivity = Date.now();
+  }, { passive: true });
+});
+
+setInterval(() => {
+  if (currentUser && Date.now() - lastActivity > IDLE_TIMEOUT) {
+    alert('หมดเวลาใช้งาน กรุณาเข้าสู่ระบบใหม่');
+    logout();
   }
-}
+}, 30000);
 
-function logActivity(actionText, details) {
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'saveLog', username: currentUsername || 'Unknown', actionText, details })
-  }).catch(e => console.error('Log Error:', e));
-}
+document.addEventListener('DOMContentLoaded', async () => {
+  const saved = sessionStorage.getItem('homeworkUser');
 
-// ----------------- ปุ่มที่ 2: MANAGE OPTIONS & ADD SUBJECT -----------------
-function openManageModal() {
-  document.getElementById('manage-modal').classList.remove('hidden');
-  loadOptionsModal();
-}
-
-function loadOptionsModal() {
-  const codesEl = document.getElementById('manage-codes');
-  const subjectsEl = document.getElementById('manage-subjects');
-  codesEl.innerHTML = codes.length ? codes.map(c => `<div class="bg-white p-2 rounded-xl border text-xs font-bold text-slate-700">${escapeHtml(c)}</div>`).join('') : '<p class="text-[11px] text-slate-400">ไม่มีข้อมูล</p>';
-  subjectsEl.innerHTML = subjects.length ? subjects.map(s => `<div class="bg-white p-2 rounded-xl border text-xs font-bold text-slate-700">${escapeHtml(s)}</div>`).join('') : '<p class="text-[11px] text-slate-400">ไม่มีข้อมูล</p>';
-}
-
-function loadOptions() {
-  fetchAllData(true);
-  setTimeout(() => { loadOptionsModal(); }, 1000);
-}
-
-async function addNewOption() {
-  const code = document.getElementById('new-custom-code').value.trim();
-  const subject = document.getElementById('new-custom-subject').value.trim();
-  if (!code && !subject) { alert('กรุณากรอกรหัสวิชาหรือชื่อวิชาอย่างน้อย 1 ช่อง'); return; }
-  
-  showLoading('กำลังบันทึกข้อมูล...');
-  try {
-    await fetch(SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'saveOption', code: code, subject: subject })
-    });
-    document.getElementById('new-custom-code').value = '';
-    document.getElementById('new-custom-subject').value = '';
-    hideLoading();
-    showSuccess('สำเร็จ', 'เพิ่มรายการวิชาเรียบร้อยแล้ว');
-    loadOptions();
-    logActivity('เพิ่มวิชาใหม่', `รหัส: ${code}, วิชา: ${subject}`);
-  } catch (e) {
-    hideLoading();
-    alert('บันทึกไม่สำเร็จ กรุณาลองใหม่');
+  if (saved) {
+    try {
+      const user = JSON.parse(saved);
+      el('username').value = user.username || '';
+      await login();
+    } catch (error) {
+      console.error(error);
+      sessionStorage.removeItem('homeworkUser');
+    }
   }
-}
-
-// ----------------- ปุ่มที่ 3: SYNC / REFRESH -----------------
-function syncTasksToSheet() {
-  cacheTasks();
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
-  }).catch(e => console.error('Background Sync Error:', e));
-}
+});
 </script>
 </body>
 </html>
