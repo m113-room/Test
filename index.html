@@ -321,9 +321,18 @@ function setStatus(message, success = true) {
 }
 
 async function fetchJSON(url) {
-  const res = await fetch(url, { cache: 'no-store' });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return await res.json();
+  try {
+    const res = await fetch(url, { 
+      method: 'GET',
+      redirect: 'follow',
+      cache: 'no-store' 
+    });
+    if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.error('Fetch Failed:', err);
+    throw new Error('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ (กรุณาเช็คการตั้งค่า Deploy เป็น Anyone)');
+  }
 }
 
 async function execute(label, action) {
