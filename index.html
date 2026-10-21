@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Homework M.113 - V.1.59 (Turbo)</title>
+<title>Homework M.113 - V.1.60 (Turbo)</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -34,7 +34,7 @@
       <i class="fa-solid fa-book-open-reader text-2xl text-white"></i>
     </div>
     <h1 class="text-2xl font-extrabold text-slate-800">Homework M.113</h1>
-    <p class="text-xs text-slate-400 mt-1 font-semibold text-pink-600">ระบบการบ้านห้อง M.113 (V.1.59 Turbo)</p>
+    <p class="text-xs text-slate-400 mt-1 font-semibold text-pink-600">ระบบการบ้านห้อง M.113 (V.1.60 Turbo)</p>
   </div>
   <div class="space-y-1.5 mb-6">
     <label class="block text-[11px] font-bold text-slate-600">ชื่อผู้ใช้งาน (USERNAME)</label>
@@ -595,16 +595,44 @@ function toggleTrackingAddStudentForm() {
 }
 
 function addTrackingTask() {
-  const code = document.getElementById('tracking-task-code').value.trim();
-  const subject = document.getElementById('tracking-task-subject').value.trim();
-  const detail = document.getElementById('tracking-task-detail').value.trim();
-  const assignDate = document.getElementById('tracking-assign-date').value;
-  const dueDate = document.getElementById('tracking-due-date').value;
-  if (!code || !subject || !detail || !dueDate) { alert('กรุณากรอกข้อมูลให้ครบถ้วน'); return; }
+  const codeEl = document.getElementById('tracking-task-code');
+  const subjectEl = document.getElementById('tracking-task-subject');
+  const detailEl = document.getElementById('tracking-task-detail');
+  const assignDateEl = document.getElementById('tracking-assign-date');
+  const dueDateEl = document.getElementById('tracking-due-date');
+
+  const code = codeEl.value.trim();
+  const subject = subjectEl.value.trim();
+  const detail = detailEl.value.trim();
+  const assignDate = assignDateEl.value;
+  const dueDate = dueDateEl.value;
+
+  if (!code || !subject || !detail || !dueDate) { 
+    alert('กรุณากรอกข้อมูลให้ครบถ้วน'); 
+    return; 
+  }
   
-  const newTask = { id: String(Date.now()), code, subject, detail, assignDate, dueDate, isPinned: false, submitted: [], extraUnsubmitted: [] };
+  const newTask = { 
+    id: String(Date.now()), 
+    code, 
+    subject, 
+    detail, 
+    assignDate, 
+    dueDate, 
+    isPinned: false, 
+    submitted: [], 
+    extraUnsubmitted: [] 
+  };
+  
   tasks.unshift(newTask);
   
+  // ล้างค่าฟอร์มให้ว่างหลังบันทึก
+  codeEl.value = '';
+  subjectEl.value = '';
+  detailEl.value = '';
+  assignDateEl.value = '';
+  dueDateEl.value = '';
+
   renderTasks();
   renderCalendar();
   toggleTrackingAddForm();
