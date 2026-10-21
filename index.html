@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -15,7 +14,7 @@
     * { box-sizing: border-box; }
     html, body { min-height: 100%; }
 
-    body {
+    body { 
       font-family: 'Plus Jakarta Sans', 'Sarabun', sans-serif;
       margin: 0;
     }
@@ -256,6 +255,8 @@
 <script>
 'use strict';
 
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1lacaaSbd6ZVh5jrD_s7yU1lmK6bmG_31yzUywyknR7xPZ7BDd_RLAygQHtgfvPRu/exec';
+
 let currentUser = null;
 let tasks = [];
 let dailyEvents = {};
@@ -292,11 +293,8 @@ function dateKey(date) {
 
 function formatDate(value) {
   if (!value) return '-';
-
   const d = new Date(String(value).substring(0, 10) + 'T12:00:00');
-
   if (isNaN(d.getTime())) return String(value);
-
   return d.toLocaleDateString('th-TH', {
     day: 'numeric',
     month: 'short',
@@ -322,24 +320,14 @@ function setStatus(message, success = true) {
       : 'bg-rose-100 text-rose-700');
 }
 
-function server(functionName, ...args) {
-  return new Promise((resolve, reject) => {
-    if (!window.google || !google.script || !google.script.run) {
-      reject(new Error('กรุณาเปิดเว็บไซต์ผ่าน Google Apps Script Web App'));
-      return;
-    }
-
-    google.script.run
-      .withSuccessHandler(resolve)
-      .withFailureHandler(error => {
-        reject(new Error(error.message || String(error)));
-      })[functionName](...args);
-  });
+async function fetchJSON(url) {
+  const res = await fetch(url, { cache: 'no-store' });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return await res.json();
 }
 
 async function execute(label, action) {
   if (busy) return false;
-
   busy = true;
   showLoading(label);
 
@@ -371,7 +359,7 @@ function requireAdmin() {
 }
 
 async function login() {
-  const username = el('username').value.trim();
+  const username = el('username').value.trim().toLowerCase();
 
   if (!username) {
     alert('กรุณากรอกชื่อผู้ใช้งาน');
@@ -379,22 +367,29 @@ async function login() {
   }
 
   await execute('กำลังเข้าสู่ระบบ...', async () => {
-    const user = await server('loginUser', username);
+    const users = await fetchJSON(`${SCRIPT_URL}?action=getUsers&t=${Date.now()}`);
+    const user = Array.isArray(users) ? users.find(u => String(u.username || u.Username || '').toLowerCase() === username) : null;
 
-    if (!user || !user.username) {
-      throw new Error('ไม่พบผู้ใช้งาน');
+    if (!user) {
+      throw new Error(`ไม่พบผู้ใช้งาน "${username}" ในระบบ`);
     }
 
-    currentUser = user;
-    sessionStorage.setItem('homeworkUser', JSON.stringify(user));
+    currentUser = {
+      username: username,
+      role: String(user.role || user.Role || 'member').toLowerCase(),
+      name: String(user.name || user.Name || username)
+    };
+
+    sessionStorage.setItem('homeworkUser', JSON.stringify(currentUser));
 
     el('login-page').classList.add('hidden');
     el('main-page').classList.remove('hidden');
 
     el('user-display').textContent =
-      user.name + ' • ' + user.role.toUpperCase();
+      currentUser.name + ' • ' + currentUser.role.toUpperCase();
 
     await loadAllData(false);
+    logActivity('เข้าสู่ระบบ', `ผู้ใช้งาน ${currentUser.name} เข้าสู่ระบบ`);
   });
 }
 
@@ -406,12 +401,19 @@ function logout() {
 
 async function loadAllData(showMessage = false) {
   const load = async () => {
-    const data = await server('getAllData');
+    const [tasksRes, eventsRes, optionsRes] = await Promise.allSettled([
+      fetchJSON(`${SCRIPT_URL}?t=${Date.now()}`),
+      fetchJSON(`${SCRIPT_URL}?action=getEvents&t=${Date.now()}`),
+      fetchJSON(`${SCRIPT_URL}?action=getOptions&t=${Date.now()}`)
+    ]);
 
-    tasks = Array.isArray(data.tasks) ? data.tasks : [];
-    dailyEvents = data.events || {};
-    codes = data.options?.codes || [];
-    subjects = data.options?.subjects || [];
+    tasks = (tasksRes.status === 'fulfilled' && Array.isArray(tasksRes.value)) ? tasksRes.value : [];
+    dailyEvents = (eventsRes.status === 'fulfilled' && eventsRes.value) ? eventsRes.value : {};
+    
+    if (optionsRes.status === 'fulfilled' && optionsRes.value) {
+      codes = optionsRes.value.codes || [];
+      subjects = optionsRes.value.subjects || [];
+    }
 
     updateOptions();
     renderTasks();
@@ -619,11 +621,15 @@ async function addTask() {
   if (!requireAdmin()) return;
 
   const task = {
+    id: String(Date.now()),
     code: el('task-code').value.trim(),
     subject: el('task-subject').value.trim(),
     detail: el('task-detail').value.trim(),
     assignDate: el('task-assign-date').value,
-    dueDate: el('task-due-date').value
+    dueDate: el('task-due-date').value,
+    isPinned: false,
+    submitted: [],
+    extraUnsubmitted: []
   };
 
   if (!task.code || !task.subject || !task.detail || !task.dueDate) {
@@ -636,9 +642,15 @@ async function addTask() {
     return;
   }
 
+  tasks.unshift(task);
+
   const success = await execute('กำลังบันทึกการบ้าน...', async () => {
-    await server('addTaskServer', currentUser.username, task);
-    await loadAllData(false);
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
+    });
   });
 
   if (success) {
@@ -648,42 +660,79 @@ async function addTask() {
     });
 
     el('task-form').classList.add('hidden');
+    renderTasks();
+    renderCalendar();
+    selectDate(selectedDate);
     setStatus('บันทึกการบ้านลง Google Sheets สำเร็จ');
+    logActivity('เพิ่มการบ้าน', `${task.code} - ${task.subject} (${task.detail})`);
     alert('บันทึกการบ้านสำเร็จ');
   }
 }
 
 async function togglePin(id) {
   if (!requireAdmin()) return;
-
-  await execute('กำลังบันทึก...', async () => {
-    await server('togglePinServer', currentUser.username, id);
-    await loadAllData(false);
-  });
+  const task = tasks.find(t => String(t.id) === String(id));
+  if (task) {
+    task.isPinned = !task.isPinned;
+    renderTasks();
+    renderCalendar();
+    selectDate(selectedDate);
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
+    });
+    logActivity('ปักหมุดงาน', `${task.subject} -> ${task.isPinned ? 'ปักหมุด' : 'ยกเลิกปักหมุด'}`);
+  }
 }
 
 async function deleteTask(id) {
   if (!requireAdmin()) return;
   if (!confirm('ต้องการลบการบ้านนี้ใช่หรือไม่?')) return;
 
-  await execute('กำลังลบ...', async () => {
-    await server('deleteTaskServer', currentUser.username, id);
-    await loadAllData(false);
+  const task = tasks.find(t => String(t.id) === String(id));
+  tasks = tasks.filter(t => String(t.id) !== String(id));
+
+  renderTasks();
+  renderCalendar();
+  selectDate(selectedDate);
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
   });
+
+  if (task) logActivity('ลบการบ้าน', `${task.subject} (${task.detail})`);
 }
 
 async function toggleStudent(taskId, number) {
   if (!requireAdmin()) return;
+  const task = tasks.find(t => String(t.id) === String(taskId));
+  if (!task) return;
+  if (!Array.isArray(task.submitted)) task.submitted = [];
 
-  await execute('กำลังอัปเดตสถานะ...', async () => {
-    await server(
-      'toggleStudentServer',
-      currentUser.username,
-      taskId,
-      String(number)
-    );
-    await loadAllData(false);
+  const numStr = String(number);
+  const idx = task.submitted.indexOf(numStr);
+  if (idx > -1) {
+    task.submitted.splice(idx, 1);
+  } else {
+    task.submitted.push(numStr);
+  }
+
+  renderTasks();
+  selectDate(selectedDate);
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
   });
+
+  logActivity('อัปเดตส่งงาน', `เปลี่ยนสถานะเลขที่ ${numStr} ในวิชา ${task.subject}`);
 }
 
 async function addExtraStudent() {
@@ -697,20 +746,25 @@ async function addExtraStudent() {
     return;
   }
 
-  const success = await execute('กำลังเพิ่มเลขที่...', async () => {
-    await server(
-      'addExtraStudentServer',
-      currentUser.username,
-      taskId,
-      number
-    );
-    await loadAllData(false);
-  });
+  const task = tasks.find(t => String(t.id) === String(taskId));
+  if (!task) return;
+  if (!Array.isArray(task.extraUnsubmitted)) task.extraUnsubmitted = [];
 
-  if (success) {
-    el('student-number').value = '';
-    el('student-form').classList.add('hidden');
+  if (!task.extraUnsubmitted.includes(number)) {
+    task.extraUnsubmitted.push(number);
+    renderTasks();
+    selectDate(selectedDate);
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
+    });
+    logActivity('เพิ่มคนค้างงาน', `เลขที่ ${number} ในวิชา ${task.subject}`);
   }
+
+  el('student-number').value = '';
+  el('student-form').classList.add('hidden');
 }
 
 function renderCalendar() {
@@ -802,20 +856,20 @@ async function addEvent() {
   const event = el('event-input').value.trim();
   if (!event) return;
 
-  const success = await execute('กำลังบันทึกกิจกรรม...', async () => {
-    await server(
-      'addEventServer',
-      currentUser.username,
-      selectedDate,
-      event
-    );
+  if (!dailyEvents[selectedDate]) dailyEvents[selectedDate] = [];
+  dailyEvents[selectedDate].push(event);
 
-    await loadAllData(false);
+  selectDate(selectedDate);
+  el('event-input').value = '';
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'saveEvents', events: dailyEvents })
   });
 
-  if (success) {
-    el('event-input').value = '';
-  }
+  logActivity('เพิ่มกิจกรรม', `วันที่ ${selectedDate}: ${event}`);
 }
 
 function updateOptions() {
@@ -856,10 +910,10 @@ function openOptions() {
       </button>
 
       <h4 class="font-bold text-xs">รหัสวิชา</h4>
-      <div id="option-codes" class="text-xs space-y-1"></div>
+      <div id="option-codes" class="text-xs space-y-1 max-h-[120px] overflow-y-auto"></div>
 
       <h4 class="font-bold text-xs">ชื่อวิชา</h4>
-      <div id="option-subjects" class="text-xs space-y-1"></div>
+      <div id="option-subjects" class="text-xs space-y-1 max-h-[120px] overflow-y-auto"></div>
     </div>
   `;
 
@@ -889,20 +943,18 @@ async function saveOption() {
     return;
   }
 
-  const success = await execute('กำลังเพิ่มวิชา...', async () => {
-    await server(
-      'saveOptionServer',
-      currentUser.username,
-      code,
-      subject
-    );
-
+  await execute('กำลังเพิ่มวิชา...', async () => {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'saveOption', code: code, subject: subject })
+    });
+    logActivity('เพิ่มวิชาใหม่', `รหัส: ${code}, วิชา: ${subject}`);
     await loadAllData(false);
   });
 
-  if (success) {
-    openOptions();
-  }
+  openOptions();
 }
 
 async function openLogs() {
@@ -912,7 +964,7 @@ async function openLogs() {
   );
 
   try {
-    const logs = await server('getLogsServer');
+    const logs = await fetchJSON(`${SCRIPT_URL}?action=getLogs&t=${Date.now()}`);
     const container = el('modal-content');
     container.innerHTML = '';
 
@@ -926,28 +978,28 @@ async function openLogs() {
       container.appendChild(clearButton);
     }
 
-    logs.forEach(log => {
-      const div = document.createElement('div');
-      div.className = 'border-b py-3 text-xs';
+    if (Array.isArray(logs) && logs.length > 0) {
+      logs.forEach(log => {
+        const div = document.createElement('div');
+        div.className = 'border-b py-3 text-xs';
 
-      const title = document.createElement('p');
-      title.className = 'font-bold';
-      title.textContent = log.username + ' • ' + log.action;
+        const title = document.createElement('p');
+        title.className = 'font-bold';
+        title.textContent = (log.username || 'System') + ' • ' + (log.actionText || log.action || '-');
 
-      const details = document.createElement('p');
-      details.className = 'text-slate-500 mt-1';
-      details.textContent = log.details;
+        const details = document.createElement('p');
+        details.className = 'text-slate-500 mt-1';
+        details.textContent = log.details || '';
 
-      const time = document.createElement('p');
-      time.className = 'text-slate-400 mt-1';
-      time.textContent = log.timestamp;
+        const time = document.createElement('p');
+        time.className = 'text-slate-400 mt-1';
+        time.textContent = log.timestamp ? new Date(log.timestamp).toLocaleString('th-TH') : '-';
 
-      div.append(title, details, time);
-      container.appendChild(div);
-    });
-
-    if (!logs.length) {
-      container.innerHTML = '<p class="text-xs">ไม่มีประวัติ</p>';
+        div.append(title, details, time);
+        container.appendChild(div);
+      });
+    } else {
+      container.innerHTML = '<p class="text-xs text-slate-400">ไม่มีประวัติการใช้งาน</p>';
     }
   } catch (error) {
     el('modal-content').textContent = error.message;
@@ -958,11 +1010,30 @@ async function clearLogs() {
   if (!requireAdmin()) return;
   if (!confirm('ล้างประวัติทั้งหมดใช่หรือไม่?')) return;
 
-  const success = await execute('กำลังล้างประวัติ...', async () => {
-    await server('clearLogsServer', currentUser.username);
+  await execute('กำลังล้างประวัติ...', async () => {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'clearLogs' })
+    });
   });
 
-  if (success) openLogs();
+  openLogs();
+}
+
+function logActivity(actionText, details) {
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'saveLog',
+      username: currentUser ? currentUser.username : 'Unknown',
+      actionText: actionText,
+      details: details
+    })
+  }).catch(e => console.error('Log Error:', e));
 }
 
 ['click', 'touchstart', 'keydown', 'scroll'].forEach(eventName => {
@@ -983,9 +1054,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (saved) {
     try {
-      const user = JSON.parse(saved);
-      el('username').value = user.username || '';
-      await login();
+      currentUser = JSON.parse(saved);
+      el('login-page').classList.add('hidden');
+      el('main-page').classList.remove('hidden');
+      el('user-display').textContent = currentUser.name + ' • ' + currentUser.role.toUpperCase();
+      await loadAllData(false);
     } catch (error) {
       console.error(error);
       sessionStorage.removeItem('homeworkUser');
