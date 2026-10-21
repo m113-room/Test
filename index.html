@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Homework M.113 - V.1.58 (Turbo)</title>
+<title>Homework M.113 - V.1.59 (Turbo)</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -34,7 +34,7 @@
       <i class="fa-solid fa-book-open-reader text-2xl text-white"></i>
     </div>
     <h1 class="text-2xl font-extrabold text-slate-800">Homework M.113</h1>
-    <p class="text-xs text-slate-400 mt-1 font-semibold text-pink-600">ระบบการบ้านห้อง M.113 (V.1.58 Turbo)</p>
+    <p class="text-xs text-slate-400 mt-1 font-semibold text-pink-600">ระบบการบ้านห้อง M.113 (V.1.59 Turbo)</p>
   </div>
   <div class="space-y-1.5 mb-6">
     <label class="block text-[11px] font-bold text-slate-600">ชื่อผู้ใช้งาน (USERNAME)</label>
@@ -56,7 +56,7 @@
       <span id="guest-badge" class="bg-pink-100 text-pink-700 text-[10px] font-bold px-2.5 py-1 rounded-xl">MEMBER</span>
     </div>
     <div class="flex items-center gap-1.5">
-      <!-- 3 ปุ่มหลักตามรูป -->
+      <!-- 3 ปุ่มหลัก -->
       <button onclick="openLogsModal()" id="btn-view-logs" title="ประวัติการใช้งาน" class="text-xs bg-purple-100 text-purple-700 px-3 py-2 rounded-2xl hover:bg-purple-200 transition"><i class="fa-solid fa-clock-rotate-left"></i></button>
       <button onclick="openManageModal()" id="btn-manage-history" title="จัดการตัวเลือกวิชา" class="text-xs bg-sky-100 text-sky-700 px-3 py-2 rounded-2xl hover:bg-sky-200 transition"><i class="fa-solid fa-list-check"></i></button>
       <button onclick="fetchAllData(true)" title="ซิงค์ข้อมูลล่าสุด" class="text-xs bg-slate-100 text-slate-600 px-3 py-2 rounded-2xl hover:bg-slate-200 transition"><i class="fa-solid fa-rotate"></i></button>
@@ -217,15 +217,26 @@
 <div id="manage-modal" class="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-[60] hidden p-3">
   <div class="bg-white rounded-3xl p-5 w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl animate-pop space-y-3">
     <div class="flex justify-between items-center border-b pb-3">
-      <h3 class="font-extrabold text-sm text-sky-800"><i class="fa-solid fa-list-check"></i> จัดการประวัติวิชาและรหัส</h3>
+      <h3 class="font-extrabold text-sm text-sky-800"><i class="fa-solid fa-list-check"></i> จัดการรหัสวิชาและชื่อวิชา</h3>
       <button onclick="closeModal('manage-modal')" class="text-slate-400 px-2 font-bold">✕</button>
     </div>
-    <p class="text-[11px] text-slate-500">รายการรหัสวิชาและชื่อวิชาทั้งหมดที่มีในระบบปัจจุบัน</p>
-    <div class="grid grid-cols-2 gap-3">
-      <div class="bg-slate-50 p-3 rounded-2xl border"><h4 class="text-xs font-extrabold text-slate-700 mb-2">รหัสวิชา</h4><div id="manage-codes" class="space-y-1"></div></div>
-      <div class="bg-slate-50 p-3 rounded-2xl border"><h4 class="text-xs font-extrabold text-slate-700 mb-2">ชื่อวิชา</h4><div id="manage-subjects" class="space-y-1"></div></div>
+    <p class="text-[11px] text-slate-500">คุณสามารถเพิ่มรหัสวิชาหรือชื่อวิชาใหม่ได้ที่นี่ หรือพิมพ์เพิ่มใน Google Sheets (ชีต Options)</p>
+    
+    <!-- ฟอร์มเพิ่มวิชาใหม่ -->
+    <div class="bg-sky-50 p-3 rounded-2xl border border-sky-100 space-y-2">
+      <h4 class="text-xs font-extrabold text-sky-900">เพิ่มวิชาใหม่</h4>
+      <div class="grid grid-cols-2 gap-2">
+        <input id="new-custom-code" placeholder="รหัสวิชา (เช่น M31101)" class="w-full p-2.5 text-xs bg-white rounded-xl border">
+        <input id="new-custom-subject" placeholder="ชื่อวิชา" class="w-full p-2.5 text-xs bg-white rounded-xl border">
+      </div>
+      <button onclick="addNewOption()" class="w-full py-2 bg-sky-600 text-white rounded-xl text-xs font-bold">บันทึกเพิ่มวิชา</button>
     </div>
-    <button onclick="loadOptions()" class="w-full py-2.5 bg-sky-100 text-sky-700 rounded-xl text-xs font-bold">รีเฟรชรายการตัวเลือก</button>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div class="bg-slate-50 p-3 rounded-2xl border"><h4 class="text-xs font-extrabold text-slate-700 mb-2">รหัสวิชาที่มี</h4><div id="manage-codes" class="space-y-1 max-h-[150px] overflow-y-auto"></div></div>
+      <div class="bg-slate-50 p-3 rounded-2xl border"><h4 class="text-xs font-extrabold text-slate-700 mb-2">ชื่อวิชาที่มี</h4><div id="manage-subjects" class="space-y-1 max-h-[150px] overflow-y-auto"></div></div>
+    </div>
+    <button onclick="loadOptions()" class="w-full py-2.5 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold">รีเฟรชรายการ</button>
   </div>
 </div>
 
@@ -744,7 +755,6 @@ async function saveDailyEvent() {
   selectDate(selectedDateStr);
   showSuccess('บันทึกสำเร็จ', 'เพิ่มกิจกรรมเรียบร้อยแล้ว');
   
-  // ซิงค์ Events ไปชีต
   fetch(SCRIPT_URL, {
     method: 'POST',
     mode: 'no-cors',
@@ -832,7 +842,7 @@ function logActivity(actionText, details) {
   }).catch(e => console.error('Log Error:', e));
 }
 
-// ----------------- ปุ่มที่ 2: MANAGE OPTIONS -----------------
+// ----------------- ปุ่มที่ 2: MANAGE OPTIONS & ADD SUBJECT -----------------
 function openManageModal() {
   document.getElementById('manage-modal').classList.remove('hidden');
   loadOptionsModal();
@@ -850,9 +860,32 @@ function loadOptions() {
   setTimeout(() => { loadOptionsModal(); }, 1000);
 }
 
-// ----------------- ปุ่มที่ 3: SYNC / REFRESH -----------------
-// (ใช้ฟังก์ชัน fetchAllData(true) ที่มีอยู่แล้ว ซึ่งผูกไว้กับปุ่มรีเฟรชแล้ว)
+async function addNewOption() {
+  const code = document.getElementById('new-custom-code').value.trim();
+  const subject = document.getElementById('new-custom-subject').value.trim();
+  if (!code && !subject) { alert('กรุณากรอกรหัสวิชาหรือชื่อวิชาอย่างน้อย 1 ช่อง'); return; }
+  
+  showLoading('กำลังบันทึกข้อมูล...');
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'saveOption', code: code, subject: subject })
+    });
+    document.getElementById('new-custom-code').value = '';
+    document.getElementById('new-custom-subject').value = '';
+    hideLoading();
+    showSuccess('สำเร็จ', 'เพิ่มรายการวิชาเรียบร้อยแล้ว');
+    loadOptions();
+    logActivity('เพิ่มวิชาใหม่', `รหัส: ${code}, วิชา: ${subject}`);
+  } catch (e) {
+    hideLoading();
+    alert('บันทึกไม่สำเร็จ กรุณาลองใหม่');
+  }
+}
 
+// ----------------- ปุ่มที่ 3: SYNC / REFRESH -----------------
 function syncTasksToSheet() {
   cacheTasks();
   fetch(SCRIPT_URL, {
