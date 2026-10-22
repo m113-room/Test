@@ -321,11 +321,7 @@ function setStatus(message, success = true) {
 }
 
 async function fetchJSON(url) {
-  const res = await fetch(url, { 
-    method: 'GET',
-    redirect: 'follow',
-    cache: 'no-store' 
-  });
+  const res = await fetch(url, { redirect: 'follow' });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return await res.json();
 }
