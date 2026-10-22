@@ -361,9 +361,9 @@ function requireAdmin() {
   return true;
 }
 
+// ฟังก์ชัน Login ตรวจสอบผ่านเซิร์ฟเวอร์แบบปลอดภัย ไม่ดึงรายชื่อคนอื่นมาไว้ที่หน้าเว็บ
 async function login() {
   const inputVal = el('username').value.trim();
-  const inputLower = inputVal.toLowerCase();
 
   if (!inputVal) {
     alert('กรุณากรอกชื่อผู้ใช้งาน');
@@ -371,58 +371,16 @@ async function login() {
   }
 
   await execute('กำลังเข้าสู่ระบบ...', async () => {
-    const rawRes = await fetchJSON(`${SCRIPT_URL}?action=getUsers&t=${Date.now()}`);
-    
-    let userList = [];
-    if (Array.isArray(rawRes)) {
-      userList = rawRes;
-    } else if (rawRes && typeof rawRes === 'object') {
-      const foundKey = Object.keys(rawRes).find(k => Array.isArray(rawRes[k]));
-      if (foundKey) {
-        userList = rawRes[foundKey];
-      } else {
-        userList = Object.values(rawRes);
-      }
-    }
+    const res = await fetchJSON(`${SCRIPT_URL}?action=checkLogin&username=${encodeURIComponent(inputVal)}&t=${Date.now()}`);
 
-    // ค้นหาผู้ใช้งานรองรับทั้ง Array 1 มิติ, Array 2 มิติ และ Object
-    const matchedUser = userList.find(u => {
-      if (!u) return false;
-      
-      // กรณีข้อมูลเป็น Array (เช่น Array 2 มิติที่อ่านจาก Sheet โดยตรง)
-      if (Array.isArray(u)) {
-        return u.some(val => String(val ?? '').trim().toLowerCase() === inputLower);
-      }
-      
-      // กรณีข้อมูลเป็น Object
-      if (typeof u === 'object') {
-        return Object.values(u).some(val => String(val ?? '').trim().toLowerCase() === inputLower);
-      }
-      
-      // กรณีข้อความเดี่ยว
-      return String(u).trim().toLowerCase() === inputLower;
-    });
-
-    if (!matchedUser) {
+    if (!res || !res.success || !res.user) {
       throw new Error(`ไม่พบผู้ใช้งาน "${inputVal}" ในระบบ`);
     }
 
-    let userRole = 'member';
-    let userName = inputVal;
-
-    // แกะค่า Role และ Name จากประเภทโครงสร้างข้อมูล
-    if (Array.isArray(matchedUser)) {
-      userName = String(matchedUser[0] ?? inputVal);
-      userRole = String(matchedUser[1] ?? 'member').toLowerCase();
-    } else if (typeof matchedUser === 'object' && matchedUser !== null) {
-      userRole = String(matchedUser.role || matchedUser.Role || matchedUser.ROLE || 'member').toLowerCase();
-      userName = String(matchedUser.name || matchedUser.Name || matchedUser.NAME || matchedUser.username || matchedUser.Username || inputVal);
-    }
-
     currentUser = {
-      username: inputVal,
-      role: userRole,
-      name: userName
+      username: res.user.username,
+      role: res.user.role,
+      name: res.user.name
     };
 
     sessionStorage.setItem('homeworkUser', JSON.stringify(currentUser));
