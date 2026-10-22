@@ -17,7 +17,7 @@
     body { 
       font-family: 'Plus Jakarta Sans', 'Sarabun', sans-serif;
       margin: 0;
-      background: linear-gradient(135deg, #fbcfe8 0%, #f3e8ff 50%, #bae6fd 100%);
+      background: linear-gradient(135deg, #fbcfe8 0%, #e9d5ff 50%, #bae6fd 100%);
     }
 
     .hidden { display: none !important; }
@@ -59,14 +59,14 @@
 
   <div id="loading-overlay" class="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-[100] hidden flex items-center justify-center">
     <div class="bg-white rounded-3xl p-6 shadow-2xl text-center min-w-[180px]">
-      <div class="w-8 h-8 border-4 border-purple-400 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+      <div class="w-8 h-8 border-4 border-pink-400 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
       <p id="loading-text" class="text-xs font-bold text-slate-600">กำลังโหลด...</p>
     </div>
   </div>
 
   <div class="app-layout">
 
-    <div></div> <!-- เว้นพื้นที่ด้านบนเพื่อให้การ์ดอยู่ตรงกลาง -->
+    <div></div>
 
     <!-- Login Page -->
     <div id="login-page" class="app-card max-w-sm bg-white/95 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white text-center">
@@ -75,7 +75,7 @@
       </div>
 
       <h1 class="text-xl font-extrabold text-slate-800 mb-1">Homework M.113</h1>
-      <p class="text-[11px] text-slate-900 font-bold mb-6">ระบบการบ้านห้อง M.113</p>
+      <p class="text-[11px] text-slate-500 font-bold mb-6">ระบบการบ้านห้อง M.113 (V.1.58 Turbo)</p>
 
       <div class="text-left mb-4">
         <label class="text-[11px] font-bold text-slate-600 ml-1">ชื่อผู้ใช้งาน (USERNAME)</label>
@@ -96,14 +96,14 @@
       <header class="flex items-center justify-between mb-4">
         <div>
           <div class="flex items-center gap-1.5">
-            <h1 class="font-extrabold text-purple-600 text-lg">HOMEWORK</h1>
+            <h1 class="font-extrabold text-pink-500 text-lg">HOMEWORK</h1>
             <span class="bg-slate-800 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md">M113</span>
           </div>
-          <span id="user-display" class="inline-block mt-1 text-[11px] font-extrabold text-purple-600 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-100"></span>
+          <span id="user-display" class="inline-block mt-1 text-[11px] font-extrabold text-pink-600 bg-pink-50 px-2.5 py-0.5 rounded-full border border-pink-100"></span>
         </div>
 
         <div class="flex items-center gap-1.5">
-          <button onclick="openLogs()" title="ประวัติการใช้งาน" class="w-8 h-8 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center text-xs hover:bg-purple-100 transition">
+          <button onclick="openLogs()" title="ประวัติการใช้งาน" class="w-8 h-8 rounded-full bg-pink-50 text-pink-600 flex items-center justify-center text-xs hover:bg-pink-100 transition">
             <i class="fa-solid fa-clock-rotate-left"></i>
           </button>
           <button onclick="openOptions()" title="จัดการวิชา" class="w-8 h-8 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center text-xs hover:bg-sky-100 transition">
@@ -137,7 +137,7 @@
         </div>
 
         <div class="flex justify-between items-center mb-3">
-          <h2 class="text-xs font-extrabold text-purple-600">ภาพรวมงานค้าง</h2>
+          <h2 class="text-xs font-extrabold text-pink-500">ภาพรวมงานค้าง</h2>
           <span id="task-count" class="text-[10px] font-extrabold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">0 ITEMS</span>
         </div>
 
@@ -192,16 +192,16 @@
 
       <section id="view-tracking" class="hidden">
         <div class="grid grid-cols-2 gap-2 mb-4">
-          <button onclick="toggleForm('task-form')" class="bg-purple-600 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:opacity-95 transition">
+          <button onclick="toggleForm('task-form')" class="bg-pink-500 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:opacity-95 transition">
             + เพิ่มการบ้าน
           </button>
-          <button onclick="toggleForm('student-form')" class="bg-indigo-600 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:opacity-95 transition">
+          <button onclick="toggleForm('student-form')" class="bg-rose-500 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:opacity-95 transition">
             <i class="fa-solid fa-user-plus"></i> เพิ่มรายชื่อคนค้าง
           </button>
         </div>
 
         <div id="task-form" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-4 space-y-3 shadow-sm">
-          <h3 class="text-xs font-bold text-purple-700 mb-1">เพิ่มรายการการบ้าน</h3>
+          <h3 class="text-xs font-bold text-pink-600 mb-1">เพิ่มรายการการบ้าน</h3>
           
           <div class="grid grid-cols-2 gap-2">
             <input id="task-code" list="code-options" placeholder="รหัสวิชา" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white">
@@ -223,22 +223,22 @@
             </div>
           </div>
 
-          <button onclick="addTask()" class="w-full bg-purple-600 text-white py-3 rounded-2xl font-extrabold text-xs shadow-sm hover:opacity-95 transition mt-2">
+          <button onclick="addTask()" class="w-full bg-pink-500 text-white py-3 rounded-2xl font-extrabold text-xs shadow-sm hover:opacity-95 transition mt-2">
             บันทึกข้อมูลการบ้าน
           </button>
         </div>
 
         <div id="student-form" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-4 space-y-3 shadow-sm">
-          <h3 class="text-xs font-bold text-indigo-700 mb-1">เพิ่มเลขที่คนค้างงาน</h3>
+          <h3 class="text-xs font-bold text-rose-600 mb-1">เพิ่มเลขที่คนค้างงาน</h3>
           <select id="student-task-select" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white"></select>
           <input id="student-number" type="number" min="1" placeholder="เลขที่นักเรียน" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white">
-          <button onclick="addExtraStudent()" class="w-full bg-indigo-600 text-white py-3 rounded-2xl font-extrabold text-xs shadow-sm hover:opacity-95 transition mt-2">
+          <button onclick="addExtraStudent()" class="w-full bg-rose-500 text-white py-3 rounded-2xl font-extrabold text-xs shadow-sm hover:opacity-95 transition mt-2">
             บันทึก
           </button>
         </div>
 
         <div class="flex justify-between items-center mb-3">
-          <h2 class="text-xs font-extrabold text-purple-600">เช็คงานค้าง (สถานะการส่งงาน)</h2>
+          <h2 class="text-xs font-extrabold text-pink-500">เช็คงานค้าง (สถานะการส่งงาน)</h2>
           <span id="tracking-count" class="text-[10px] font-extrabold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">0 ITEMS</span>
         </div>
 
@@ -247,7 +247,7 @@
 
     </main>
 
-    <!-- ปุ่มการส่งการบ้านด้านล่างสุด เกือบชิดขอบจอ -->
+    <!-- ปุ่มการส่งการบ้านด้านล่างสุด -->
     <div class="w-full text-center pb-2">
       <button onclick="alert('ระบบส่งการบ้านเปิดใช้งานปกติ')" class="bg-white/95 backdrop-blur-md text-slate-700 text-xs font-bold px-8 py-2.5 rounded-full border border-white shadow-sm hover:bg-white transition">
         การส่งการบ้าน
@@ -279,6 +279,7 @@ let subjects = [];
 let currentTab = 'pending';
 let calendarDate = new Date();
 let selectedDate = dateKey(new Date());
+let isAllLogsLoaded = false;
 
 const TOTAL_STUDENTS = 40;
 const IDLE_TIMEOUT = 7 * 60 * 1000;
@@ -430,9 +431,9 @@ function switchTab(tab) {
     el('view-' + name).classList.toggle('hidden', name !== tab);
     const btn = el('tab-' + name);
     if (name === tab) {
-      if (tab === 'pending') btn.className = 'py-2.5 rounded-xl text-xs font-extrabold transition shadow-sm bg-purple-600 text-white';
+      if (tab === 'pending') btn.className = 'py-2.5 rounded-xl text-xs font-extrabold transition shadow-sm bg-pink-500 text-white';
       else if (tab === 'calendar') btn.className = 'py-2.5 rounded-xl text-xs font-extrabold transition shadow-sm bg-[#38bdf8] text-white';
-      else if (tab === 'tracking') btn.className = 'py-2.5 rounded-xl text-xs font-extrabold transition shadow-sm bg-purple-600 text-white';
+      else if (tab === 'tracking') btn.className = 'py-2.5 rounded-xl text-xs font-extrabold transition shadow-sm bg-pink-500 text-white';
     } else {
       btn.className = 'py-2.5 rounded-xl text-xs font-extrabold transition text-slate-500';
     }
@@ -477,7 +478,7 @@ function createTaskCard(task) {
   div.innerHTML = `
     <div class="flex justify-between items-start gap-2">
       <div>
-        <span class="text-[10px] bg-purple-50 text-purple-600 px-2 py-0.5 rounded-md font-extrabold border border-purple-100">
+        <span class="text-[10px] bg-pink-50 text-pink-600 px-2 py-0.5 rounded-md font-extrabold border border-pink-100">
           ${escapeHtml(task.code)}
         </span>
         <h3 class="font-extrabold text-xs text-slate-800 mt-1">${escapeHtml(task.subject)}</h3>
@@ -854,10 +855,16 @@ async function saveOption() {
 }
 
 async function openLogs() {
-  openModal('ประวัติการใช้งาน', '<p class="text-xs text-center py-4 text-slate-500 font-bold">กำลังโหลดประวัติ...</p>');
+  const fetchAll = isAllLogsLoaded;
+
+  if (!fetchAll) {
+    openModal('ประวัติการใช้งาน', '<p class="text-xs text-center py-4 text-slate-500 font-bold">กำลังโหลดประวัติ...</p>');
+  } else {
+    el('modal-content').innerHTML = '<p class="text-xs text-center py-4 text-slate-500 font-bold">กำลังโหลดประวัติทั้งหมด...</p>';
+  }
 
   try {
-    const logs = await fetchJSON(`${SCRIPT_URL}?action=getLogs&t=${Date.now()}`);
+    const logs = await fetchJSON(`${SCRIPT_URL}?action=getLogs&all=${fetchAll ? 'true' : 'false'}&t=${Date.now()}`);
     const container = el('modal-content');
     container.innerHTML = '';
 
@@ -867,13 +874,17 @@ async function openLogs() {
     if (isAdmin()) {
       topBtns.innerHTML = `
         <button onclick="clearLogs()" class="w-1/2 bg-rose-50 text-rose-600 rounded-xl py-2 text-xs font-bold border border-rose-100">ล้างประวัติทั้งหมด</button>
-        <button onclick="openLogs()" class="w-1/2 bg-purple-50 text-purple-700 rounded-xl py-2 text-xs font-bold border border-purple-100">โหลดใหม่</button>
+        <button onclick="isAllLogsLoaded = !isAllLogsLoaded; openLogs();" class="w-1/2 bg-pink-50 text-pink-700 rounded-xl py-2 text-xs font-bold border border-pink-100">
+          ${fetchAll ? 'แสดง 20 ล่าสุด' : 'โหลดทั้งหมด'}
+        </button>
       `;
       container.appendChild(topBtns);
     }
 
     if (Array.isArray(logs) && logs.length > 0) {
-      logs.forEach(log => {
+      const listToShow = [...logs].reverse();
+
+      listToShow.forEach(log => {
         const div = document.createElement('div');
         div.className = 'border-b py-2 text-xs';
         div.innerHTML = `
@@ -904,6 +915,7 @@ async function clearLogs() {
     });
   });
 
+  isAllLogsLoaded = false;
   openLogs();
 }
 
