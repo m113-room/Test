@@ -371,22 +371,47 @@ async function login() {
   }
 
   await execute('กำลังเข้าสู่ระบบ...', async () => {
-    const users = await fetchJSON(`${SCRIPT_URL}?action=getUsers&t=${Date.now()}`);
+    const rawRes = await fetchJSON(`${SCRIPT_URL}?action=getUsers&t=${Date.now()}`);
     
-    // ตรวจสอบข้อมูลผู้ใช้รองรับทุกรูปแบบคีย์ (username, Username, USERNAME)
-    const user = Array.isArray(users) ? users.find(u => {
-      const uname = String(u.username || u.Username || u.USER || u.name || '').trim();
-      return uname.toLowerCase() === inputLower;
-    }) : null;
+    // ดึงอาเรย์รายชื่อผู้ใช้ออกมาอย่างปลอดภัย ไม่ว่าจะส่งมาเป็นรูปแบบใด
+    let userList = [];
+    if (Array.isArray(rawRes)) {
+      userList = rawRes;
+    } else if (rawRes && typeof rawRes === 'object') {
+      const foundKey = Object.keys(rawRes).find(k => Array.isArray(rawRes[k]));
+      if (foundKey) {
+        userList = rawRes[foundKey];
+      } else {
+        userList = Object.values(rawRes);
+      }
+    }
 
-    if (!user) {
+    const matchedUser = userList.find(u => {
+      if (!u) return false;
+      if (typeof u === 'object' && !Array.isArray(u)) {
+        return Object.values(u).some(val => 
+          String(val ?? '').trim().toLowerCase() === inputLower
+        );
+      }
+      return String(u).trim().toLowerCase() === inputLower;
+    });
+
+    if (!matchedUser) {
       throw new Error(`ไม่พบผู้ใช้งาน "${inputVal}" ในระบบ`);
+    }
+
+    let userRole = 'member';
+    let userName = inputVal;
+
+    if (typeof matchedUser === 'object' && matchedUser !== null) {
+      userRole = String(matchedUser.role || matchedUser.Role || matchedUser.ROLE || matchedUser[1] || 'member').toLowerCase();
+      userName = String(matchedUser.name || matchedUser.Name || matchedUser.NAME || matchedUser[0] || inputVal);
     }
 
     currentUser = {
       username: inputVal,
-      role: String(user.role || user.Role || user.ROLE || 'member').toLowerCase(),
-      name: String(user.name || user.Name || user.NAME || inputVal)
+      role: userRole,
+      name: userName
     };
 
     sessionStorage.setItem('homeworkUser', JSON.stringify(currentUser));
