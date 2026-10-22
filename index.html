@@ -195,7 +195,8 @@
           <button onclick="toggleForm('task-form')" class="bg-pink-500 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:opacity-95 transition">
             + เพิ่มการบ้าน
           </button>
-          <button onclick="toggleForm('student-form')" class="bg-rose-500 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:opacity-95 transition">
+          <!-- เปลี่ยนจาก bg-rose-500 เป็น bg-pink-500 -->
+          <button onclick="toggleForm('student-form')" class="bg-pink-500 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:opacity-95 transition">
             <i class="fa-solid fa-user-plus"></i> เพิ่มรายชื่อคนค้าง
           </button>
         </div>
@@ -229,10 +230,11 @@
         </div>
 
         <div id="student-form" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-4 space-y-3 shadow-sm">
-          <h3 class="text-xs font-bold text-rose-600 mb-1">เพิ่มเลขที่คนค้างงาน</h3>
+          <h3 class="text-xs font-bold text-pink-600 mb-1">เพิ่มเลขที่คนค้างงาน</h3>
           <select id="student-task-select" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white"></select>
           <input id="student-number" type="number" min="1" placeholder="เลขที่นักเรียน" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white">
-          <button onclick="addExtraStudent()" class="w-full bg-rose-500 text-white py-3 rounded-2xl font-extrabold text-xs shadow-sm hover:opacity-95 transition mt-2">
+          <!-- ปุ่มบันทึกในฟอร์มเพิ่มคนค้าง ปรับเป็นสีชมพูด้วย -->
+          <button onclick="addExtraStudent()" class="w-full bg-pink-500 text-white py-3 rounded-2xl font-extrabold text-xs shadow-sm hover:opacity-95 transition mt-2">
             บันทึก
           </button>
         </div>
@@ -553,7 +555,6 @@ function createTrackingCard(task) {
     const button = document.createElement('button');
     button.className = 'bg-rose-50 text-rose-600 px-2 py-0.5 rounded-lg text-[10px] font-bold border border-rose-100 hover:bg-rose-100 transition';
     button.textContent = number;
-    // เปิดให้ทุกคนกดติ๊กสถานะส่งงานได้
     button.onclick = () => toggleStudent(task.id, number);
     students.appendChild(button);
   });
@@ -562,7 +563,6 @@ function createTrackingCard(task) {
 }
 
 function toggleForm(id) {
-  // เปิดให้ทุกคนใช้งานฟอร์มเพิ่มข้อมูลได้ทันที
   ['task-form', 'student-form', 'event-form'].forEach(name => {
     if (name !== id && el(name)) el(name).classList.add('hidden');
   });
