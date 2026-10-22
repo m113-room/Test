@@ -362,25 +362,26 @@ function requireAdmin() {
 }
 
 async function login() {
-  const username = el('username').value.trim().toLowerCase();
+  const rawInput = el('username').value.trim();
+  const username = rawInput.toLowerCase();
 
-  if (!username) {
+  if (!rawInput) {
     alert('กรุณากรอกชื่อผู้ใช้งาน');
     return;
   }
 
   await execute('กำลังเข้าสู่ระบบ...', async () => {
     const users = await fetchJSON(`${SCRIPT_URL}?action=getUsers&t=${Date.now()}`);
-    const user = Array.isArray(users) ? users.find(u => String(u.username || u.Username || '').toLowerCase() === username) : null;
+    const user = Array.isArray(users) ? users.find(u => String(u.username || u.Username || '').trim().toLowerCase() === username) : null;
 
     if (!user) {
-      throw new Error(`ไม่พบผู้ใช้งาน "${username}" ในระบบ`);
+      throw new Error(`ไม่พบผู้ใช้งาน "${rawInput}" ในระบบ`);
     }
 
     currentUser = {
-      username: username,
+      username: rawInput,
       role: String(user.role || user.Role || 'member').toLowerCase(),
-      name: String(user.name || user.Name || username)
+      name: String(user.name || user.Name || rawInput)
     };
 
     sessionStorage.setItem('homeworkUser', JSON.stringify(currentUser));
@@ -1072,4 +1073,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
-
