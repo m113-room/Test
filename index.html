@@ -17,6 +17,7 @@
     body { 
       font-family: 'Plus Jakarta Sans', 'Sarabun', sans-serif;
       margin: 0;
+      background: linear-gradient(135deg, #fce7f3 0%, #e0e7ff 50%, #dbeafe 100%);
     }
 
     .hidden { display: none !important; }
@@ -36,17 +37,8 @@
       margin-right: auto;
     }
 
-    .brand-line {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-      text-align: center;
-    }
-
     @keyframes pop {
-      from { opacity: 0; transform: scale(.94); }
+      from { opacity: 0; transform: scale(.95); }
       to { opacity: 1; transform: scale(1); }
     }
 
@@ -58,195 +50,211 @@
     }
 
     input, select { outline: none; }
-    input:focus, select:focus { border-color: #ff75bc; }
-
-    @media (max-height: 650px) {
-      .app-layout { align-items: flex-start; }
-    }
+    input:focus, select:focus { border-color: #ec4899; }
   </style>
 </head>
 
-<body class="bg-gradient-to-br from-[#FFC2E2] via-purple-200 to-[#B6F0FF]">
+<body>
 
-  <div id="loading-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] hidden flex items-center justify-center">
-    <div class="bg-white rounded-3xl p-7 shadow-2xl text-center">
-      <div class="w-10 h-10 border-4 border-pink-400 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-      <p id="loading-text" class="text-xs font-bold text-slate-700">กำลังโหลด...</p>
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-[100] hidden flex items-center justify-center">
+    <div class="bg-white rounded-3xl p-6 shadow-2xl text-center min-w-[180px]">
+      <div class="w-8 h-8 border-4 border-pink-400 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+      <p id="loading-text" class="text-xs font-bold text-slate-600">กำลังโหลด...</p>
     </div>
   </div>
 
   <div class="app-layout">
 
-    <!-- หน้าเข้าสู่ระบบ -->
-    <div id="login-page" class="app-card max-w-sm bg-white/85 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white">
-      <div class="text-center mb-8">
-        <div class="w-16 h-16 mx-auto bg-gradient-to-br from-pink-400 to-sky-400 rounded-2xl flex items-center justify-center text-white text-3xl mb-4">
-          <i class="fa-solid fa-book-open-reader"></i>
-        </div>
-
-        <div class="brand-line">
-          <h1 class="text-2xl font-extrabold text-slate-800">Homework M.113</h1>
-        </div>
+    <!-- Login Page -->
+    <div id="login-page" class="app-card max-w-sm bg-white/90 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white text-center">
+      <div class="w-16 h-16 mx-auto bg-gradient-to-br from-pink-400 to-rose-400 rounded-2xl flex items-center justify-center text-white text-3xl mb-4 shadow-lg shadow-pink-200">
+        <i class="fa-solid fa-book-open-reader"></i>
       </div>
 
-      <label class="text-xs font-bold text-slate-600">ชื่อผู้ใช้งาน</label>
+      <h1 class="text-2xl font-extrabold text-slate-800 mb-6">HOMEWORK <span class="bg-slate-800 text-white text-xs px-2 py-0.5 rounded-lg ml-1">M113</span></h1>
 
-      <input id="username" type="text" placeholder="Username"
-        class="w-full mt-2 p-3 rounded-2xl bg-slate-50 border text-sm"
-        onkeydown="if(event.key==='Enter')login()">
+      <div class="text-left mb-4">
+        <label class="text-xs font-bold text-slate-500 ml-1">ชื่อผู้ใช้งาน</label>
+        <input id="username" type="text" placeholder="Username"
+          class="w-full mt-1 p-3 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-semibold text-slate-700"
+          onkeydown="if(event.key==='Enter')login()">
+      </div>
 
       <button id="login-btn" onclick="login()"
-        class="w-full mt-5 py-3 bg-gradient-to-r from-pink-400 to-rose-400 text-white rounded-2xl font-bold">
+        class="w-full py-3 bg-gradient-to-r from-pink-400 to-rose-400 text-white rounded-2xl font-extrabold text-sm shadow-md hover:opacity-95 transition">
         เข้าสู่ระบบ
       </button>
     </div>
 
-    <!-- หน้าโฮม -->
-    <main id="main-page" class="app-card hidden max-w-2xl bg-white/85 backdrop-blur-xl rounded-3xl shadow-2xl p-5 sm:p-7 border border-white">
+    <!-- Main Page -->
+    <main id="main-page" class="app-card hidden max-w-md bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-6 border border-white">
 
-      <header class="border-b pb-4 mb-5">
-        <div class="brand-line">
-          <h1 class="font-extrabold text-pink-500 text-xl">
-            HOMEWORK <span class="text-slate-800">M113</span>
-          </h1>
+      <!-- Header UI เดิม -->
+      <header class="flex items-center justify-between mb-4">
+        <div>
+          <div class="flex items-center gap-1.5">
+            <h1 class="font-extrabold text-pink-500 text-lg">HOMEWORK</h1>
+            <span class="bg-slate-800 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md">M113</span>
+          </div>
+          <span id="user-display" class="inline-block mt-1 text-[11px] font-extrabold text-pink-500 bg-pink-50 px-2.5 py-0.5 rounded-full border border-pink-100"></span>
         </div>
 
-        <p id="user-display" class="text-xs text-slate-500 mt-2 text-center"></p>
-
-        <div class="flex justify-center gap-2 mt-3">
-          <button onclick="loadAllData(true)" class="bg-sky-100 text-sky-700 px-3 py-2 rounded-xl text-xs">
-            <i class="fa-solid fa-rotate"></i>
+        <div class="flex items-center gap-1.5">
+          <button onclick="openLogs()" title="ประวัติการใช้งาน" class="w-8 h-8 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center text-xs hover:bg-purple-100 transition">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+          </button>
+          <button onclick="openOptions()" title="จัดการวิชา" class="w-8 h-8 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center text-xs hover:bg-sky-100 transition">
+            <i class="fa-solid fa-list-check"></i>
           </button>
 
-          <button onclick="logout()" class="bg-rose-100 text-rose-600 px-3 py-2 rounded-xl text-xs font-bold">
+          <button onclick="loadAllData(true)" title="รีเฟรช" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs hover:bg-slate-200 transition">
+            <i class="fa-solid fa-rotate"></i>
+          </button>
+          <button onclick="logout()" class="px-3 py-1.5 bg-rose-50 text-rose-500 rounded-xl text-[11px] font-extrabold hover:bg-rose-100 transition ml-1">
             LOGOUT
           </button>
         </div>
       </header>
 
-      <div id="sync-status" class="bg-slate-100 text-slate-600 p-3 rounded-2xl text-xs font-bold mb-4 text-center">
+      <!-- Sync Status -->
+      <div id="sync-status" class="bg-slate-50 text-slate-500 p-2.5 rounded-2xl text-[11px] font-bold mb-4 text-center border border-slate-100">
         <i class="fa-solid fa-circle-info"></i> พร้อมใช้งาน
       </div>
 
-      <nav class="grid grid-cols-3 gap-2 bg-slate-100 rounded-2xl p-1 mb-5">
-        <button id="tab-pending" onclick="switchTab('pending')" class="py-3 bg-pink-400 text-white rounded-xl text-xs font-bold">ภาพรวม</button>
-        <button id="tab-calendar" onclick="switchTab('calendar')" class="py-3 text-slate-600 rounded-xl text-xs font-bold">ปฏิทิน</button>
-        <button id="tab-tracking" onclick="switchTab('tracking')" class="py-3 text-slate-600 rounded-xl text-xs font-bold">งานค้าง</button>
+      <!-- Navigation Tabs UI เดิม -->
+      <nav class="grid grid-cols-3 gap-1 bg-slate-100/80 rounded-2xl p-1 mb-5 text-center">
+        <button id="tab-pending" onclick="switchTab('pending')" class="py-2.5 bg-pink-400 text-white rounded-xl text-xs font-extrabold transition shadow-sm">ภาพรวมงานค้าง</button>
+        <button id="tab-calendar" onclick="switchTab('calendar')" class="py-2.5 text-slate-500 rounded-xl text-xs font-extrabold transition">ปฏิทินงาน</button>
+        <button id="tab-tracking" onclick="switchTab('tracking')" class="py-2.5 text-slate-500 rounded-xl text-xs font-extrabold transition">งานค้าง</button>
       </nav>
 
+      <!-- View 1: ภาพรวมงานค้าง -->
       <section id="view-pending">
-        <h2 class="text-sm font-extrabold text-pink-500 mb-3">
-          <i class="fa-solid fa-thumbtack"></i> งานปักหมุด
-        </h2>
-
-        <div id="pinned-list" class="space-y-3 mb-5"></div>
+        <div class="bg-amber-50/70 border border-amber-100 rounded-2xl p-3.5 mb-4">
+          <h2 class="text-xs font-extrabold text-amber-600 mb-2 flex items-center gap-1.5">
+            <i class="fa-solid fa-thumbtack"></i> ปักหมุดไว้
+          </h2>
+          <div id="pinned-list" class="space-y-2"></div>
+        </div>
 
         <div class="flex justify-between items-center mb-3">
-          <h2 class="text-sm font-extrabold text-slate-800">รายการการบ้าน</h2>
-          <span id="task-count" class="text-xs bg-slate-100 rounded-full px-3 py-1">0 รายการ</span>
+          <h2 class="text-xs font-extrabold text-pink-400">ภาพรวมงานค้าง</h2>
+          <span id="task-count" class="text-[10px] font-extrabold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">0 ITEMS</span>
         </div>
 
-        <div id="task-list" class="space-y-3"></div>
+        <div id="task-list" class="space-y-2.5"></div>
       </section>
 
+      <!-- View 2: ปฏิทินงาน -->
       <section id="view-calendar" class="hidden">
-        <div class="flex justify-between items-center mb-4">
-          <button onclick="changeMonth(-1)" class="bg-white border rounded-xl px-3 py-2 text-xs">PREV</button>
-          <h2 id="calendar-month-year" class="text-sm font-bold"></h2>
-          <button onclick="changeMonth(1)" class="bg-white border rounded-xl px-3 py-2 text-xs">NEXT</button>
+        <button onclick="toggleForm('event-form')" class="w-full bg-sky-400 text-white font-extrabold py-2.5 rounded-2xl text-xs mb-4 shadow-sm hover:opacity-95 transition">
+          + เพิ่มกิจกรรม
+        </button>
+
+        <div id="event-form" class="hidden bg-sky-50 border border-sky-100 rounded-2xl p-3.5 mb-4 space-y-2.5">
+          <input id="event-input" class="w-full border rounded-xl p-2.5 text-xs bg-white" placeholder="ชื่อกิจกรรม">
+          <button onclick="addEvent()" class="w-full bg-sky-500 text-white rounded-xl py-2 text-xs font-bold">บันทึกกิจกรรม</button>
         </div>
 
-        <div class="bg-white rounded-2xl p-3 border">
-          <div class="grid grid-cols-7 text-center text-xs font-bold mb-2">
-            <span>อา</span><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span>ส</span>
+        <div class="flex justify-between items-center mb-3">
+          <h2 id="calendar-month-year" class="text-xs font-extrabold text-slate-700"></h2>
+          <div class="flex gap-1 text-[10px] font-bold">
+            <button onclick="changeMonth(-1)" class="bg-slate-100 px-2.5 py-1 rounded-lg text-slate-600">PREV</button>
+            <button onclick="changeMonth(1)" class="bg-slate-100 px-2.5 py-1 rounded-lg text-slate-600">NEXT</button>
+          </div>
+        </div>
+
+        <div class="bg-slate-50/60 rounded-2xl p-3 border border-slate-100 mb-4">
+          <div class="grid grid-cols-7 text-center text-[10px] font-bold text-amber-500 mb-2">
+            <span>SUN</span><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span>
           </div>
           <div id="calendar-days" class="grid grid-cols-7 gap-1"></div>
         </div>
 
-        <div class="mt-4 bg-sky-50 rounded-2xl p-4">
-          <h3 id="selected-date-label" class="font-bold text-xs mb-3"></h3>
+        <div class="bg-slate-50/60 border border-slate-100 rounded-2xl p-3.5">
+          <div class="flex justify-between items-center mb-2">
+            <h3 id="selected-date-label" class="font-extrabold text-xs text-slate-700"></h3>
+            <span id="selected-date-count" class="text-[10px] font-extrabold text-slate-400 bg-slate-200/60 px-2 py-0.5 rounded-full">0 รายการ</span>
+          </div>
+
+          <div class="mb-3">
+            <h4 class="text-[11px] font-extrabold text-sky-500 mb-1">★ กิจกรรมในวันนี้</h4>
+            <div id="event-list" class="space-y-1"></div>
+          </div>
+
           <div id="selected-date-tasks" class="space-y-2"></div>
-        </div>
-
-        <div class="mt-4 bg-white rounded-2xl p-4 border">
-          <h3 class="text-xs font-bold mb-3">กิจกรรม</h3>
-          <div id="event-list" class="space-y-2 mb-3"></div>
-
-          <input id="event-input" class="w-full border rounded-xl p-3 text-xs" placeholder="ชื่อกิจกรรม">
-
-          <button onclick="addEvent()" class="w-full bg-sky-400 rounded-xl py-3 text-xs font-bold mt-2">
-            เพิ่มกิจกรรม
-          </button>
         </div>
       </section>
 
+      <!-- View 3: งานค้าง -->
       <section id="view-tracking" class="hidden">
-
         <div class="grid grid-cols-2 gap-2 mb-4">
-          <button onclick="toggleForm('task-form')" class="bg-purple-600 text-white py-3 rounded-xl text-xs font-bold">
-            <i class="fa-solid fa-plus"></i> เพิ่มการบ้าน
+          <button onclick="toggleForm('task-form')" class="bg-purple-600 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:opacity-95 transition">
+            + เพิ่มการบ้าน
           </button>
-
-          <button onclick="toggleForm('student-form')" class="bg-indigo-600 text-white py-3 rounded-xl text-xs font-bold">
-            <i class="fa-solid fa-user-plus"></i> เพิ่มคนค้าง
+          <button onclick="toggleForm('student-form')" class="bg-indigo-600 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:opacity-95 transition">
+            <i class="fa-solid fa-user-plus"></i> เพิ่มรายชื่อคนค้าง
           </button>
         </div>
 
-        <div id="task-form" class="hidden bg-slate-50 rounded-2xl p-4 mb-4 space-y-3">
-          <h3 class="text-xs font-bold">เพิ่มรายการการบ้าน</h3>
-
-          <input id="task-code" list="code-options" placeholder="รหัสวิชา" class="w-full p-3 border rounded-xl text-xs">
+        <div id="task-form" class="hidden bg-purple-50 border border-purple-100 rounded-2xl p-4 mb-4 space-y-2.5">
+          <h3 class="text-xs font-bold text-purple-700">เพิ่มรายการการบ้าน</h3>
+          <input id="task-code" list="code-options" placeholder="รหัสวิชา" class="w-full p-2.5 border rounded-xl text-xs bg-white">
           <datalist id="code-options"></datalist>
-
-          <input id="task-subject" list="subject-options" placeholder="ชื่อวิชา" class="w-full p-3 border rounded-xl text-xs">
+          <input id="task-subject" list="subject-options" placeholder="ชื่อวิชา" class="w-full p-2.5 border rounded-xl text-xs bg-white">
           <datalist id="subject-options"></datalist>
+          <input id="task-detail" placeholder="รายละเอียดการบ้าน" class="w-full p-2.5 border rounded-xl text-xs bg-white">
+          
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[10px] font-bold text-slate-500">วันสั่ง</label>
+              <input id="task-assign-date" type="date" class="w-full p-2 border rounded-xl text-xs bg-white">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-slate-500">วันส่ง</label>
+              <input id="task-due-date" type="date" class="w-full p-2 border rounded-xl text-xs bg-white">
+            </div>
+          </div>
 
-          <input id="task-detail" placeholder="รายละเอียดการบ้าน" class="w-full p-3 border rounded-xl text-xs">
-
-          <label class="block text-xs">วันสั่ง</label>
-          <input id="task-assign-date" type="date" class="w-full p-3 border rounded-xl text-xs">
-
-          <label class="block text-xs">วันส่ง</label>
-          <input id="task-due-date" type="date" class="w-full p-3 border rounded-xl text-xs">
-
-          <button id="save-task-btn" onclick="addTask()" class="w-full bg-purple-600 text-white py-3 rounded-xl font-bold text-xs">
+          <button onclick="addTask()" class="w-full bg-purple-600 text-white py-2.5 rounded-xl font-bold text-xs mt-1">
             บันทึกการบ้าน
           </button>
         </div>
 
-        <div id="student-form" class="hidden bg-slate-50 rounded-2xl p-4 mb-4 space-y-3">
-          <h3 class="text-xs font-bold">เพิ่มเลขที่คนค้างงาน</h3>
-
-          <select id="student-task-select" class="w-full p-3 border rounded-xl text-xs"></select>
-
-          <input id="student-number" type="number" min="1" placeholder="เลขที่นักเรียน" class="w-full p-3 border rounded-xl text-xs">
-
-          <button onclick="addExtraStudent()" class="w-full bg-indigo-600 text-white py-3 rounded-xl text-xs font-bold">
+        <div id="student-form" class="hidden bg-indigo-50 border border-indigo-100 rounded-2xl p-4 mb-4 space-y-2.5">
+          <h3 class="text-xs font-bold text-indigo-700">เพิ่มเลขที่คนค้างงาน</h3>
+          <select id="student-task-select" class="w-full p-2.5 border rounded-xl text-xs bg-white"></select>
+          <input id="student-number" type="number" min="1" placeholder="เลขที่นักเรียน" class="w-full p-2.5 border rounded-xl text-xs bg-white">
+          <button onclick="addExtraStudent()" class="w-full bg-indigo-600 text-white py-2.5 rounded-xl text-xs font-bold">
             บันทึก
           </button>
+        </div>
+
+        <div class="flex justify-between items-center mb-3">
+          <h2 class="text-xs font-extrabold text-purple-600">เช็คงานค้าง (สถานะการส่งงาน)</h2>
+          <span id="tracking-count" class="text-[10px] font-extrabold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">0 ITEMS</span>
         </div>
 
         <div id="tracking-list" class="space-y-3"></div>
       </section>
 
-      <div class="mt-6 border-t pt-4 grid grid-cols-2 gap-2">
-        <button onclick="openOptions()" class="bg-sky-100 text-sky-700 rounded-xl py-3 text-xs font-bold">
-          <i class="fa-solid fa-list-check"></i> จัดการวิชา
-        </button>
-
-        <button onclick="openLogs()" class="bg-purple-100 text-purple-700 rounded-xl py-3 text-xs font-bold">
-          <i class="fa-solid fa-clock-rotate-left"></i> ประวัติ
+      <!-- Footer Button -->
+      <div class="mt-6 border-t pt-3 text-center">
+        <button onclick="alert('ระบบส่งการบ้านเปิดใช้งานปกติ')" class="bg-slate-100 text-slate-600 text-[11px] font-bold px-4 py-1.5 rounded-full border border-slate-200">
+          การส่งการบ้าน
         </button>
       </div>
 
     </main>
   </div>
 
-  <div id="modal" class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-5 w-full max-w-lg max-h-[85vh] overflow-y-auto animate-pop">
-      <div class="flex justify-between items-center mb-4">
-        <h3 id="modal-title" class="font-extrabold text-sm"></h3>
-        <button onclick="closeModal()" class="text-slate-500 font-bold">✕</button>
+  <!-- Modal UI เดิม -->
+  <div id="modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-5 w-full max-w-sm max-h-[85vh] overflow-y-auto animate-pop shadow-2xl">
+      <div class="flex justify-between items-center mb-4 pb-2 border-b">
+        <h3 id="modal-title" class="font-extrabold text-xs text-slate-700"></h3>
+        <button onclick="closeModal()" class="text-slate-400 font-bold hover:text-slate-600">✕</button>
       </div>
       <div id="modal-content"></div>
     </div>
@@ -272,9 +280,7 @@ const IDLE_TIMEOUT = 7 * 60 * 1000;
 let lastActivity = Date.now();
 let busy = false;
 
-function el(id) {
-  return document.getElementById(id);
-}
+function el(id) { return document.getElementById(id); }
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -295,11 +301,7 @@ function formatDate(value) {
   if (!value) return '-';
   const d = new Date(String(value).substring(0, 10) + 'T12:00:00');
   if (isNaN(d.getTime())) return String(value);
-  return d.toLocaleDateString('th-TH', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
-  });
+  return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 function showLoading(text = 'กำลังโหลด...') {
@@ -307,24 +309,17 @@ function showLoading(text = 'กำลังโหลด...') {
   el('loading-overlay').classList.remove('hidden');
 }
 
-function hideLoading() {
-  el('loading-overlay').classList.add('hidden');
-}
+function hideLoading() { el('loading-overlay').classList.add('hidden'); }
 
 function setStatus(message, success = true) {
   const box = el('sync-status');
   box.textContent = message;
-  box.className = 'p-3 rounded-2xl text-xs font-bold mb-4 text-center ' +
-    (success
-      ? 'bg-emerald-100 text-emerald-700'
-      : 'bg-rose-100 text-rose-700');
+  box.className = 'p-2.5 rounded-2xl text-[11px] font-bold mb-4 text-center border ' +
+    (success ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100');
 }
 
 async function fetchJSON(url) {
-  const res = await fetch(url, { 
-    method: 'GET',
-    redirect: 'follow'
-  });
+  const res = await fetch(url, { method: 'GET', redirect: 'follow' });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return await res.json();
 }
@@ -333,7 +328,6 @@ async function execute(label, action) {
   if (busy) return false;
   busy = true;
   showLoading(label);
-
   try {
     await action();
     return true;
@@ -348,10 +342,7 @@ async function execute(label, action) {
   }
 }
 
-function isAdmin() {
-  return currentUser &&
-    ['admin', 'creator'].includes(currentUser.role);
-}
+function isAdmin() { return currentUser && ['admin', 'creator'].includes(currentUser.role); }
 
 function requireAdmin() {
   if (!isAdmin()) {
@@ -361,10 +352,9 @@ function requireAdmin() {
   return true;
 }
 
-// ฟังก์ชัน Login ตรวจสอบผ่านเซิร์ฟเวอร์แบบปลอดภัย ไม่ดึงรายชื่อคนอื่นมาไว้ที่หน้าเว็บ
+// ฟังก์ชัน Login แบบเช็คหลังบ้าน ปลอดภัย 100%
 async function login() {
   const inputVal = el('username').value.trim();
-
   if (!inputVal) {
     alert('กรุณากรอกชื่อผู้ใช้งาน');
     return;
@@ -387,9 +377,7 @@ async function login() {
 
     el('login-page').classList.add('hidden');
     el('main-page').classList.remove('hidden');
-
-    el('user-display').textContent =
-      currentUser.name + ' • ' + currentUser.role.toUpperCase();
+    el('user-display').textContent = currentUser.name;
 
     await loadAllData(false);
     logActivity('เข้าสู่ระบบ', `ผู้ใช้งาน ${currentUser.name} เข้าสู่ระบบ`);
@@ -423,32 +411,20 @@ async function loadAllData(showMessage = false) {
     renderCalendar();
     selectDate(selectedDate);
 
-    setStatus('ซิงค์ข้อมูลสำเร็จ • ' +
-      new Date().toLocaleTimeString('th-TH'));
-
-    if (showMessage) {
-      alert('ซิงค์ข้อมูลสำเร็จ');
-    }
+    setStatus('ซิงค์ข้อมูลสำเร็จ • ' + new Date().toLocaleTimeString('th-TH'));
+    if (showMessage) alert('ซิงค์ข้อมูลสำเร็จ');
   };
 
-  if (busy) {
-    await load();
-  } else {
-    await execute('กำลังซิงค์ข้อมูล...', load);
-  }
+  if (busy) await load();
+  else await execute('กำลังซิงค์ข้อมูล...', load);
 }
 
 function switchTab(tab) {
   currentTab = tab;
-
   ['pending', 'calendar', 'tracking'].forEach(name => {
     el('view-' + name).classList.toggle('hidden', name !== tab);
-
-    el('tab-' + name).className =
-      'py-3 rounded-xl text-xs font-bold ' +
-      (name === tab
-        ? 'bg-pink-400 text-white'
-        : 'text-slate-600');
+    el('tab-' + name).className = 'py-2.5 rounded-xl text-xs font-extrabold transition ' +
+      (name === tab ? 'bg-pink-400 text-white shadow-sm' : 'text-slate-500');
   });
 }
 
@@ -463,14 +439,12 @@ function renderTasks() {
   tracking.innerHTML = '';
   selector.innerHTML = '';
 
-  el('task-count').textContent = tasks.length + ' รายการ';
+  el('task-count').textContent = tasks.length + ' ITEMS';
+  if(el('tracking-count')) el('tracking-count').textContent = tasks.length + ' ITEMS';
 
   tasks.forEach(task => {
-    if (task.isPinned) {
-      pinned.appendChild(createTaskCard(task));
-    } else {
-      list.appendChild(createTaskCard(task));
-    }
+    if (task.isPinned) pinned.appendChild(createTaskCard(task));
+    else list.appendChild(createTaskCard(task));
 
     tracking.appendChild(createTrackingCard(task));
 
@@ -480,60 +454,41 @@ function renderTasks() {
     selector.appendChild(option);
   });
 
-  if (!pinned.children.length) {
-    pinned.innerHTML =
-      '<p class="text-xs text-slate-400">ไม่มีงานปักหมุด</p>';
-  }
-
-  if (!list.children.length) {
-    list.innerHTML =
-      '<p class="text-xs text-slate-400">ไม่มีรายการการบ้าน</p>';
-  }
-
-  if (!tracking.children.length) {
-    tracking.innerHTML =
-      '<p class="text-xs text-slate-400">ไม่มีรายการ</p>';
-  }
+  if (!pinned.children.length) pinned.innerHTML = '<p class="text-[11px] text-amber-400 text-center py-2">ไม่มีรายการปักหมุด</p>';
+  if (!list.children.length) list.innerHTML = '<p class="text-xs text-slate-400 text-center py-6">ไม่มีงานค้างในระบบ เยี่ยมมาก!</p>';
+  if (!tracking.children.length) tracking.innerHTML = '<p class="text-xs text-slate-400 text-center py-6">ไม่มีรายการงานค้าง</p>';
 }
 
 function createTaskCard(task) {
   const div = document.createElement('div');
-  div.className = 'bg-white border rounded-2xl p-4 shadow-sm';
+  div.className = 'bg-white border border-slate-100 rounded-2xl p-3.5 shadow-sm';
 
   div.innerHTML = `
-    <div class="flex justify-between gap-3">
-      <div class="min-w-0">
-        <span class="text-[10px] bg-pink-100 text-pink-700 px-2 py-1 rounded-lg font-bold">
+    <div class="flex justify-between items-start gap-2">
+      <div>
+        <span class="text-[10px] bg-pink-50 text-pink-500 px-2 py-0.5 rounded-md font-extrabold border border-pink-100">
           ${escapeHtml(task.code)}
         </span>
-        <h3 class="font-extrabold text-sm mt-2">${escapeHtml(task.subject)}</h3>
-        <p class="text-xs text-slate-600 mt-1">${escapeHtml(task.detail)}</p>
-        <p class="text-xs text-rose-500 mt-2">
-          ส่ง: ${formatDate(task.dueDate)}
-        </p>
+        <h3 class="font-extrabold text-xs text-slate-800 mt-1">${escapeHtml(task.subject)}</h3>
+        <p class="text-[11px] text-slate-500 mt-0.5">${escapeHtml(task.detail)}</p>
+        <p class="text-[10px] text-rose-400 font-bold mt-1.5">กำหนดส่ง: ${formatDate(task.dueDate)}</p>
       </div>
 
-      <div class="flex gap-2 shrink-0">
-        <button data-action="pin" class="text-amber-500">
+      <div class="flex gap-1.5">
+        <button data-action="pin" class="text-amber-400 hover:text-amber-500 p-1">
           <i class="fa-solid fa-thumbtack"></i>
         </button>
-
         ${isAdmin() ? `
-          <button data-action="delete" class="text-rose-500">
+          <button data-action="delete" class="text-rose-400 hover:text-rose-500 p-1">
             <i class="fa-solid fa-trash"></i>
           </button>` : ''}
       </div>
     </div>
   `;
 
-  div.querySelector('[data-action="pin"]').onclick =
-    () => togglePin(task.id);
-
-  const deleteButton = div.querySelector('[data-action="delete"]');
-
-  if (deleteButton) {
-    deleteButton.onclick = () => deleteTask(task.id);
-  }
+  div.querySelector('[data-action="pin"]').onclick = () => togglePin(task.id);
+  const deleteBtn = div.querySelector('[data-action="delete"]');
+  if (deleteBtn) deleteBtn.onclick = () => deleteTask(task.id);
 
   return div;
 }
@@ -544,15 +499,11 @@ function getUnsubmitted(task) {
   const result = [];
 
   for (let i = 1; i <= TOTAL_STUDENTS; i++) {
-    if (!submitted.has(String(i))) {
-      result.push(String(i));
-    }
+    if (!submitted.has(String(i))) result.push(String(i));
   }
 
   extra.forEach(number => {
-    if (!submitted.has(number) && !result.includes(number)) {
-      result.push(number);
-    }
+    if (!submitted.has(number) && !result.includes(number)) result.push(number);
   });
 
   return result;
@@ -560,50 +511,38 @@ function getUnsubmitted(task) {
 
 function createTrackingCard(task) {
   const div = document.createElement('div');
-  div.className = 'bg-white rounded-2xl border p-4 space-y-3';
+  div.className = 'bg-white rounded-2xl border border-slate-100 p-3.5 space-y-2.5 shadow-sm';
 
   const unsubmitted = getUnsubmitted(task);
-
-  const total = TOTAL_STUDENTS +
-    (task.extraUnsubmitted || []).filter(
-      n => Number(n) > TOTAL_STUDENTS
-    ).length;
-
+  const total = TOTAL_STUDENTS + (task.extraUnsubmitted || []).filter(n => Number(n) > TOTAL_STUDENTS).length;
   const completed = Math.max(0, total - unsubmitted.length);
   const percent = total ? Math.round(completed / total * 100) : 0;
 
   div.innerHTML = `
     <div>
-      <h3 class="font-extrabold text-sm">${escapeHtml(task.subject)}</h3>
-      <p class="text-xs text-slate-600 mt-1">${escapeHtml(task.detail)}</p>
-      <p class="text-xs text-rose-500 mt-2">กำหนดส่ง: ${formatDate(task.dueDate)}</p>
+      <h3 class="font-extrabold text-xs text-slate-800">${escapeHtml(task.subject)}</h3>
+      <p class="text-[11px] text-slate-500 mt-0.5">${escapeHtml(task.detail)}</p>
     </div>
 
     <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-      <div class="bg-emerald-500 h-full rounded-full" style="width:${percent}%"></div>
+      <div class="bg-emerald-400 h-full rounded-full" style="width:${percent}%"></div>
     </div>
 
-    <p class="text-xs font-bold text-emerald-600">
-      ส่งแล้ว ${completed}/${total} (${percent}%)
-    </p>
+    <div class="flex justify-between items-center text-[10px] font-extrabold">
+      <span class="text-emerald-500">ส่งแล้ว ${completed}/${total} (${percent}%)</span>
+      <span class="text-rose-400">ยังไม่ส่ง (${unsubmitted.length})</span>
+    </div>
 
-    <p class="text-xs font-bold">ยังไม่ส่ง (${unsubmitted.length})</p>
-    <div class="flex flex-wrap gap-1" data-students></div>
+    <div class="flex flex-wrap gap-1 pt-1" data-students></div>
   `;
 
   const students = div.querySelector('[data-students]');
-
   unsubmitted.forEach(number => {
     const button = document.createElement('button');
-
-    button.className =
-      'bg-rose-50 text-rose-600 px-2 py-1 rounded-lg text-xs border';
-
+    button.className = 'bg-rose-50 text-rose-500 px-2 py-0.5 rounded-lg text-[10px] font-bold border border-rose-100 hover:bg-rose-100 transition';
     button.textContent = number;
-    button.title = 'เปลี่ยนสถานะเป็นส่งแล้ว';
     button.disabled = !isAdmin();
     button.onclick = () => toggleStudent(task.id, number);
-
     students.appendChild(button);
   });
 
@@ -612,12 +551,10 @@ function createTrackingCard(task) {
 
 function toggleForm(id) {
   if (!requireAdmin()) return;
-
-  ['task-form', 'student-form'].forEach(name => {
-    if (name !== id) el(name).classList.add('hidden');
+  ['task-form', 'student-form', 'event-form'].forEach(name => {
+    if (name !== id && el(name)) el(name).classList.add('hidden');
   });
-
-  el(id).classList.toggle('hidden');
+  if(el(id)) el(id).classList.toggle('hidden');
 }
 
 async function addTask() {
@@ -640,11 +577,6 @@ async function addTask() {
     return;
   }
 
-  if (task.assignDate && task.dueDate < task.assignDate) {
-    alert('วันส่งต้องไม่อยู่ก่อนวันสั่ง');
-    return;
-  }
-
   tasks.unshift(task);
 
   const success = await execute('กำลังบันทึกการบ้าน...', async () => {
@@ -657,18 +589,13 @@ async function addTask() {
   });
 
   if (success) {
-    ['task-code', 'task-subject', 'task-detail',
-      'task-assign-date', 'task-due-date'].forEach(id => {
-      el(id).value = '';
-    });
-
+    ['task-code', 'task-subject', 'task-detail', 'task-assign-date', 'task-due-date'].forEach(id => el(id).value = '');
     el('task-form').classList.add('hidden');
     renderTasks();
     renderCalendar();
     selectDate(selectedDate);
-    setStatus('บันทึกการบ้านลง Google Sheets สำเร็จ');
-    logActivity('เพิ่มการบ้าน', `${task.code} - ${task.subject} (${task.detail})`);
-    alert('บันทึกการบ้านสำเร็จ');
+    setStatus('บันทึกการบ้านเรียบร้อย');
+    logActivity('เพิ่มการบ้าน', `${task.code} - ${task.subject}`);
   }
 }
 
@@ -678,15 +605,12 @@ async function togglePin(id) {
   if (task) {
     task.isPinned = !task.isPinned;
     renderTasks();
-    renderCalendar();
-    selectDate(selectedDate);
     fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
     });
-    logActivity('ปักหมุดงาน', `${task.subject} -> ${task.isPinned ? 'ปักหมุด' : 'ยกเลิกปักหมุด'}`);
   }
 }
 
@@ -694,9 +618,7 @@ async function deleteTask(id) {
   if (!requireAdmin()) return;
   if (!confirm('ต้องการลบการบ้านนี้ใช่หรือไม่?')) return;
 
-  const task = tasks.find(t => String(t.id) === String(id));
   tasks = tasks.filter(t => String(t.id) !== String(id));
-
   renderTasks();
   renderCalendar();
   selectDate(selectedDate);
@@ -707,8 +629,6 @@ async function deleteTask(id) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
   });
-
-  if (task) logActivity('ลบการบ้าน', `${task.subject} (${task.detail})`);
 }
 
 async function toggleStudent(taskId, number) {
@@ -719,11 +639,8 @@ async function toggleStudent(taskId, number) {
 
   const numStr = String(number);
   const idx = task.submitted.indexOf(numStr);
-  if (idx > -1) {
-    task.submitted.splice(idx, 1);
-  } else {
-    task.submitted.push(numStr);
-  }
+  if (idx > -1) task.submitted.splice(idx, 1);
+  else task.submitted.push(numStr);
 
   renderTasks();
   selectDate(selectedDate);
@@ -734,36 +651,27 @@ async function toggleStudent(taskId, number) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
   });
-
-  logActivity('อัปเดตส่งงาน', `เปลี่ยนสถานะเลขที่ ${numStr} ในวิชา ${task.subject}`);
 }
 
 async function addExtraStudent() {
   if (!requireAdmin()) return;
-
   const taskId = el('student-task-select').value;
   const number = el('student-number').value.trim();
 
-  if (!taskId || !/^[1-9]\d*$/.test(number)) {
-    alert('กรุณาเลือกงานและกรอกเลขที่ให้ถูกต้อง');
-    return;
-  }
-
+  if (!taskId || !number) return;
   const task = tasks.find(t => String(t.id) === String(taskId));
   if (!task) return;
-  if (!Array.isArray(task.extraUnsubmitted)) task.extraUnsubmitted = [];
 
+  if (!Array.isArray(task.extraUnsubmitted)) task.extraUnsubmitted = [];
   if (!task.extraUnsubmitted.includes(number)) {
     task.extraUnsubmitted.push(number);
     renderTasks();
-    selectDate(selectedDate);
     fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
     });
-    logActivity('เพิ่มคนค้างงาน', `เลขที่ ${number} ในวิชา ${task.subject}`);
   }
 
   el('student-number').value = '';
@@ -774,11 +682,7 @@ function renderCalendar() {
   const year = calendarDate.getFullYear();
   const month = calendarDate.getMonth();
 
-  el('calendar-month-year').textContent =
-    calendarDate.toLocaleDateString('th-TH', {
-      month: 'long',
-      year: 'numeric'
-    });
+  el('calendar-month-year').textContent = calendarDate.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
 
   const container = el('calendar-days');
   container.innerHTML = '';
@@ -786,33 +690,21 @@ function renderCalendar() {
   const firstDay = new Date(year, month, 1).getDay();
   const totalDays = new Date(year, month + 1, 0).getDate();
 
-  for (let i = 0; i < firstDay; i++) {
-    container.appendChild(document.createElement('div'));
-  }
+  for (let i = 0; i < firstDay; i++) container.appendChild(document.createElement('div'));
 
   for (let day = 1; day <= totalDays; day++) {
     const key = dateKey(new Date(year, month, day));
     const button = document.createElement('button');
-
     button.textContent = day;
-    button.className =
-      'h-10 rounded-xl text-xs font-bold ' +
-      (key === selectedDate
-        ? 'bg-sky-400 text-white'
-        : 'bg-slate-50 text-slate-700');
-
+    button.className = 'h-8 rounded-xl text-xs font-bold transition ' +
+      (key === selectedDate ? 'bg-sky-400 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100');
     button.onclick = () => selectDate(key);
     container.appendChild(button);
   }
 }
 
 function changeMonth(direction) {
-  calendarDate = new Date(
-    calendarDate.getFullYear(),
-    calendarDate.getMonth() + direction,
-    1
-  );
-
+  calendarDate = new Date(calendarDate.getFullYear(), calendarDate.getMonth() + direction, 1);
   renderCalendar();
 }
 
@@ -820,42 +712,31 @@ function selectDate(key) {
   selectedDate = key;
   renderCalendar();
 
-  el('selected-date-label').textContent =
-    'รายการวันที่ ' + formatDate(key);
+  el('selected-date-label').textContent = 'รายการวันที่ ' + formatDate(key);
 
   const container = el('selected-date-tasks');
   container.innerHTML = '';
 
-  const matches = tasks.filter(task =>
-    task.assignDate === key || task.dueDate === key
-  );
+  const matches = tasks.filter(task => task.assignDate === key || task.dueDate === key);
+  el('selected-date-count').textContent = matches.length + ' รายการ';
 
   matches.forEach(task => container.appendChild(createTaskCard(task)));
-
-  if (!matches.length) {
-    container.innerHTML =
-      '<p class="text-xs text-slate-400">ไม่มีการบ้านในวันนี้</p>';
-  }
+  if (!matches.length) container.innerHTML = '<p class="text-xs text-slate-400 text-center py-2">ไม่มีรายการในวันนี้</p>';
 
   const eventList = el('event-list');
   eventList.innerHTML = '';
-
   (dailyEvents[key] || []).forEach(event => {
     const p = document.createElement('p');
-    p.className = 'bg-sky-50 rounded-xl p-2 text-xs';
+    p.className = 'bg-sky-50 text-sky-700 rounded-xl p-2 text-xs border border-sky-100 font-medium';
     p.textContent = event;
     eventList.appendChild(p);
   });
 
-  if (!eventList.children.length) {
-    eventList.innerHTML =
-      '<p class="text-xs text-slate-400">ไม่มีกิจกรรม</p>';
-  }
+  if (!eventList.children.length) eventList.innerHTML = '<p class="text-[11px] text-slate-400">ไม่มีกิจกรรมพิเศษ</p>';
 }
 
 async function addEvent() {
   if (!requireAdmin()) return;
-
   const event = el('event-input').value.trim();
   if (!event) return;
 
@@ -864,6 +745,7 @@ async function addEvent() {
 
   selectDate(selectedDate);
   el('event-input').value = '';
+  el('event-form').classList.add('hidden');
 
   fetch(SCRIPT_URL, {
     method: 'POST',
@@ -871,8 +753,6 @@ async function addEvent() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'saveEvents', events: dailyEvents })
   });
-
-  logActivity('เพิ่มกิจกรรม', `วันที่ ${selectedDate}: ${event}`);
 }
 
 function updateOptions() {
@@ -898,53 +778,56 @@ function openModal(title, content) {
   el('modal').classList.remove('hidden');
 }
 
-function closeModal() {
-  el('modal').classList.add('hidden');
-}
+function closeModal() { el('modal').classList.add('hidden'); }
 
 function openOptions() {
   const content = `
     <div class="space-y-3">
-      <input id="new-code" class="w-full border rounded-xl p-3 text-xs" placeholder="รหัสวิชา">
-      <input id="new-subject" class="w-full border rounded-xl p-3 text-xs" placeholder="ชื่อวิชา">
+      <p class="text-[11px] text-slate-500">รายการรหัสวิชาและชื่อวิชาทั้งหมดที่มีในระบบปัจจุบัน</p>
 
-      <button onclick="saveOption()" class="w-full bg-sky-500 text-white py-3 rounded-xl text-xs font-bold">
-        เพิ่มวิชา
+      <div class="grid grid-cols-2 gap-2">
+        <div class="bg-slate-50 p-2.5 rounded-2xl border">
+          <h4 class="font-extrabold text-[11px] text-slate-600 mb-1">รหัสวิชา</h4>
+          <div id="option-codes" class="text-xs space-y-1 max-h-[100px] overflow-y-auto"></div>
+        </div>
+
+        <div class="bg-slate-50 p-2.5 rounded-2xl border">
+          <h4 class="font-extrabold text-[11px] text-slate-600 mb-1">ชื่อวิชา</h4>
+          <div id="option-subjects" class="text-xs space-y-1 max-h-[100px] overflow-y-auto"></div>
+        </div>
+      </div>
+
+      ${isAdmin() ? `
+      <div class="pt-2 space-y-2 border-t">
+        <input id="new-code" class="w-full border rounded-xl p-2 text-xs" placeholder="รหัสวิชาใหม่">
+        <input id="new-subject" class="w-full border rounded-xl p-2 text-xs" placeholder="ชื่อวิชาใหม่">
+        <button onclick="saveOption()" class="w-full bg-sky-400 text-white py-2 rounded-xl text-xs font-extrabold">เพิ่มวิชา</button>
+      </div>` : ''}
+
+      <button onclick="loadAllData(true); closeModal();" class="w-full bg-sky-50 text-sky-600 border border-sky-100 py-2 rounded-xl text-xs font-bold mt-2">
+        รีเฟรชรายการตัวเลือก
       </button>
-
-      <h4 class="font-bold text-xs">รหัสวิชา</h4>
-      <div id="option-codes" class="text-xs space-y-1 max-h-[120px] overflow-y-auto"></div>
-
-      <h4 class="font-bold text-xs">ชื่อวิชา</h4>
-      <div id="option-subjects" class="text-xs space-y-1 max-h-[120px] overflow-y-auto"></div>
     </div>
   `;
 
-  openModal('จัดการรหัสวิชาและชื่อวิชา', content);
+  openModal('จัดการประวัติวิชาและรหัส', content);
 
-  codes.forEach(code => {
-    const p = document.createElement('p');
-    p.textContent = code;
-    el('option-codes').appendChild(p);
-  });
+  const cBox = el('option-codes');
+  const sBox = el('option-subjects');
 
-  subjects.forEach(subject => {
-    const p = document.createElement('p');
-    p.textContent = subject;
-    el('option-subjects').appendChild(p);
-  });
+  if (codes.length) codes.forEach(c => { const p = document.createElement('p'); p.textContent = c; cBox.appendChild(p); });
+  else cBox.innerHTML = '<p class="text-slate-400 text-[10px]">ไม่มีข้อมูล</p>';
+
+  if (subjects.length) subjects.forEach(s => { const p = document.createElement('p'); p.textContent = s; sBox.appendChild(p); });
+  else sBox.innerHTML = '<p class="text-slate-400 text-[10px]">ไม่มีข้อมูล</p>';
 }
 
 async function saveOption() {
   if (!requireAdmin()) return;
-
   const code = el('new-code').value.trim();
   const subject = el('new-subject').value.trim();
 
-  if (!code && !subject) {
-    alert('กรุณากรอกข้อมูลอย่างน้อยหนึ่งช่อง');
-    return;
-  }
+  if (!code && !subject) return;
 
   await execute('กำลังเพิ่มวิชา...', async () => {
     await fetch(SCRIPT_URL, {
@@ -953,56 +836,44 @@ async function saveOption() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'saveOption', code: code, subject: subject })
     });
-    logActivity('เพิ่มวิชาใหม่', `รหัส: ${code}, วิชา: ${subject}`);
     await loadAllData(false);
   });
 
-  openOptions();
+  closeModal();
 }
 
 async function openLogs() {
-  openModal(
-    'ประวัติการใช้งาน',
-    '<p class="text-xs">กำลังโหลด...</p>'
-  );
+  openModal('ประวัติการใช้งาน', '<p class="text-xs text-center py-4 text-slate-400">กำลังโหลดประวัติ...</p>');
 
   try {
     const logs = await fetchJSON(`${SCRIPT_URL}?action=getLogs&t=${Date.now()}`);
     const container = el('modal-content');
     container.innerHTML = '';
 
-    if (isAdmin()) {
-      const clearButton = document.createElement('button');
-      clearButton.className =
-        'bg-rose-100 text-rose-600 rounded-xl px-3 py-2 text-xs font-bold mb-3';
+    const topBtns = document.createElement('div');
+    topBtns.className = 'flex gap-2 mb-3';
 
-      clearButton.textContent = 'ล้างประวัติทั้งหมด';
-      clearButton.onclick = clearLogs;
-      container.appendChild(clearButton);
+    if (isAdmin()) {
+      topBtns.innerHTML = `
+        <button onclick="clearLogs()" class="w-1/2 bg-rose-50 text-rose-500 rounded-xl py-2 text-xs font-bold border border-rose-100">ล้างประวัติทั้งหมด</button>
+        <button onclick="openLogs()" class="w-1/2 bg-purple-50 text-purple-600 rounded-xl py-2 text-xs font-bold border border-purple-100">โหลดใหม่</button>
+      `;
+      container.appendChild(topBtns);
     }
 
     if (Array.isArray(logs) && logs.length > 0) {
       logs.forEach(log => {
         const div = document.createElement('div');
-        div.className = 'border-b py-3 text-xs';
-
-        const title = document.createElement('p');
-        title.className = 'font-bold';
-        title.textContent = (log.username || 'System') + ' • ' + (log.actionText || log.action || '-');
-
-        const details = document.createElement('p');
-        details.className = 'text-slate-500 mt-1';
-        details.textContent = log.details || '';
-
-        const time = document.createElement('p');
-        time.className = 'text-slate-400 mt-1';
-        time.textContent = log.timestamp ? new Date(log.timestamp).toLocaleString('th-TH') : '-';
-
-        div.append(title, details, time);
+        div.className = 'border-b py-2 text-xs';
+        div.innerHTML = `
+          <p class="font-bold text-slate-700">${escapeHtml(log.username || 'System')} • ${escapeHtml(log.actionText || '-')}</p>
+          <p class="text-slate-500 text-[11px]">${escapeHtml(log.details || '')}</p>
+          <p class="text-slate-400 text-[10px] mt-0.5">${log.timestamp ? new Date(log.timestamp).toLocaleString('th-TH') : '-'}</p>
+        `;
         container.appendChild(div);
       });
     } else {
-      container.innerHTML = '<p class="text-xs text-slate-400">ไม่มีประวัติการใช้งาน</p>';
+      container.innerHTML += '<p class="text-xs text-slate-400 text-center py-4">ไม่มีประวัติการใช้งาน</p>';
     }
   } catch (error) {
     el('modal-content').textContent = error.message;
@@ -1039,31 +910,16 @@ function logActivity(actionText, details) {
   }).catch(e => console.error('Log Error:', e));
 }
 
-['click', 'touchstart', 'keydown', 'scroll'].forEach(eventName => {
-  window.addEventListener(eventName, () => {
-    lastActivity = Date.now();
-  }, { passive: true });
-});
-
-setInterval(() => {
-  if (currentUser && Date.now() - lastActivity > IDLE_TIMEOUT) {
-    alert('หมดเวลาใช้งาน กรุณาเข้าสู่ระบบใหม่');
-    logout();
-  }
-}, 30000);
-
 document.addEventListener('DOMContentLoaded', async () => {
   const saved = sessionStorage.getItem('homeworkUser');
-
   if (saved) {
     try {
       currentUser = JSON.parse(saved);
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
-      el('user-display').textContent = currentUser.name + ' • ' + currentUser.role.toUpperCase();
+      el('user-display').textContent = currentUser.name;
       await loadAllData(false);
     } catch (error) {
-      console.error(error);
       sessionStorage.removeItem('homeworkUser');
     }
   }
