@@ -914,6 +914,7 @@ async function openLogs() {
     }
 
     if (Array.isArray(logs) && logs.length > 0) {
+      // เรียงลำดับเอาประวัติใหม่ขึ้นบนสุดโดยใช้ .reverse()
       const listToShow = [...logs].reverse();
 
       listToShow.forEach(log => {
