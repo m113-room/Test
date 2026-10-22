@@ -158,16 +158,16 @@
           </div>
         </div>
 
-        <!-- ปฏิทินปรับแต่งสีสันวันให้สบายตาและเป็นระเบียบ -->
+        <!-- ปฏิทินปรับสีตามวัน (แดง, เหลือง, ชมพู, เขียว, ส้ม, ฟ้า, ม่วง) -->
         <div class="bg-white rounded-2xl p-3.5 border border-slate-100 shadow-sm mb-4">
-          <div class="grid grid-cols-7 text-center text-[10px] font-extrabold text-slate-400 mb-2">
-            <span class="text-rose-400">SUN</span>
-            <span>MON</span>
-            <span>TUE</span>
-            <span>WED</span>
-            <span>THU</span>
-            <span>FRI</span>
-            <span class="text-indigo-400">SAT</span>
+          <div class="grid grid-cols-7 text-center text-[10px] font-extrabold mb-2">
+            <span style="color: #ef4444;">SUN</span>
+            <span style="color: #eab308;">MON</span>
+            <span style="color: #ec4899;">TUE</span>
+            <span style="color: #22c55e;">WED</span>
+            <span style="color: #f97316;">THU</span>
+            <span style="color: #3b82f6;">FRI</span>
+            <span style="color: #a855f7;">SAT</span>
           </div>
           <div id="calendar-days" class="grid grid-cols-7 gap-1"></div>
         </div>
@@ -242,8 +242,9 @@
         <div id="tracking-list" class="space-y-3"></div>
       </section>
 
-      <div class="mt-6 border-t pt-3 text-center">
-        <button onclick="alert('ระบบส่งการบ้านเปิดใช้งานปกติ')" class="bg-slate-100 text-slate-600 text-[11px] font-bold px-4 py-1.5 rounded-full border border-slate-200">
+      <!-- ปุ่มการส่งการบ้านย้ายมาอยู่ด้านล่างสุดตามต้องการ -->
+      <div class="mt-6 border-t pt-4 text-center">
+        <button onclick="alert('ระบบส่งการบ้านเปิดใช้งานปกติ')" class="bg-white text-slate-600 text-xs font-bold px-6 py-2.5 rounded-2xl border border-slate-200 shadow-sm hover:bg-slate-50 transition">
           การส่งการบ้าน
         </button>
       </div>
