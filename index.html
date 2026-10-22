@@ -56,7 +56,6 @@
 
 <body>
 
-  <!-- Loading Overlay -->
   <div id="loading-overlay" class="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-[100] hidden flex items-center justify-center">
     <div class="bg-white rounded-3xl p-6 shadow-2xl text-center min-w-[180px]">
       <div class="w-8 h-8 border-4 border-pink-400 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
@@ -90,7 +89,6 @@
     <!-- Main Page -->
     <main id="main-page" class="app-card hidden max-w-md bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-6 border border-white">
 
-      <!-- Header UI เดิม -->
       <header class="flex items-center justify-between mb-4">
         <div>
           <div class="flex items-center gap-1.5">
@@ -107,7 +105,6 @@
           <button onclick="openOptions()" title="จัดการวิชา" class="w-8 h-8 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center text-xs hover:bg-sky-100 transition">
             <i class="fa-solid fa-list-check"></i>
           </button>
-
           <button onclick="loadAllData(true)" title="รีเฟรช" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs hover:bg-slate-200 transition">
             <i class="fa-solid fa-rotate"></i>
           </button>
@@ -117,19 +114,16 @@
         </div>
       </header>
 
-      <!-- Sync Status -->
       <div id="sync-status" class="bg-slate-50 text-slate-500 p-2.5 rounded-2xl text-[11px] font-bold mb-4 text-center border border-slate-100">
         <i class="fa-solid fa-circle-info"></i> พร้อมใช้งาน
       </div>
 
-      <!-- Navigation Tabs UI เดิม -->
       <nav class="grid grid-cols-3 gap-1 bg-slate-100/80 rounded-2xl p-1 mb-5 text-center">
         <button id="tab-pending" onclick="switchTab('pending')" class="py-2.5 bg-pink-400 text-white rounded-xl text-xs font-extrabold transition shadow-sm">ภาพรวมงานค้าง</button>
         <button id="tab-calendar" onclick="switchTab('calendar')" class="py-2.5 text-slate-500 rounded-xl text-xs font-extrabold transition">ปฏิทินงาน</button>
         <button id="tab-tracking" onclick="switchTab('tracking')" class="py-2.5 text-slate-500 rounded-xl text-xs font-extrabold transition">งานค้าง</button>
       </nav>
 
-      <!-- View 1: ภาพรวมงานค้าง -->
       <section id="view-pending">
         <div class="bg-amber-50/70 border border-amber-100 rounded-2xl p-3.5 mb-4">
           <h2 class="text-xs font-extrabold text-amber-600 mb-2 flex items-center gap-1.5">
@@ -146,7 +140,6 @@
         <div id="task-list" class="space-y-2.5"></div>
       </section>
 
-      <!-- View 2: ปฏิทินงาน -->
       <section id="view-calendar" class="hidden">
         <button onclick="toggleForm('event-form')" class="w-full bg-sky-400 text-white font-extrabold py-2.5 rounded-2xl text-xs mb-4 shadow-sm hover:opacity-95 transition">
           + เพิ่มกิจกรรม
@@ -187,7 +180,6 @@
         </div>
       </section>
 
-      <!-- View 3: งานค้าง -->
       <section id="view-tracking" class="hidden">
         <div class="grid grid-cols-2 gap-2 mb-4">
           <button onclick="toggleForm('task-form')" class="bg-purple-600 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:opacity-95 transition">
@@ -239,7 +231,6 @@
         <div id="tracking-list" class="space-y-3"></div>
       </section>
 
-      <!-- Footer Button -->
       <div class="mt-6 border-t pt-3 text-center">
         <button onclick="alert('ระบบส่งการบ้านเปิดใช้งานปกติ')" class="bg-slate-100 text-slate-600 text-[11px] font-bold px-4 py-1.5 rounded-full border border-slate-200">
           การส่งการบ้าน
@@ -249,7 +240,6 @@
     </main>
   </div>
 
-  <!-- Modal UI เดิม -->
   <div id="modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl p-5 w-full max-w-sm max-h-[85vh] overflow-y-auto animate-pop shadow-2xl">
       <div class="flex justify-between items-center mb-4 pb-2 border-b">
@@ -352,7 +342,6 @@ function requireAdmin() {
   return true;
 }
 
-// ฟังก์ชัน Login แบบเช็คหลังบ้าน ปลอดภัย 100%
 async function login() {
   const inputVal = el('username').value.trim();
   if (!inputVal) {
