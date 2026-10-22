@@ -321,7 +321,10 @@ function setStatus(message, success = true) {
 }
 
 async function fetchJSON(url) {
-  const res = await fetch(url, { redirect: 'follow' });
+  const res = await fetch(url, { 
+    method: 'GET',
+    redirect: 'follow'
+  });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return await res.json();
 }
@@ -1069,3 +1072,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
