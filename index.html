@@ -362,26 +362,31 @@ function requireAdmin() {
 }
 
 async function login() {
-  const rawInput = el('username').value.trim();
-  const username = rawInput.toLowerCase();
+  const inputVal = el('username').value.trim();
+  const inputLower = inputVal.toLowerCase();
 
-  if (!rawInput) {
+  if (!inputVal) {
     alert('กรุณากรอกชื่อผู้ใช้งาน');
     return;
   }
 
   await execute('กำลังเข้าสู่ระบบ...', async () => {
     const users = await fetchJSON(`${SCRIPT_URL}?action=getUsers&t=${Date.now()}`);
-    const user = Array.isArray(users) ? users.find(u => String(u.username || u.Username || '').trim().toLowerCase() === username) : null;
+    
+    // ตรวจสอบข้อมูลผู้ใช้รองรับทุกรูปแบบคีย์ (username, Username, USERNAME)
+    const user = Array.isArray(users) ? users.find(u => {
+      const uname = String(u.username || u.Username || u.USER || u.name || '').trim();
+      return uname.toLowerCase() === inputLower;
+    }) : null;
 
     if (!user) {
-      throw new Error(`ไม่พบผู้ใช้งาน "${rawInput}" ในระบบ`);
+      throw new Error(`ไม่พบผู้ใช้งาน "${inputVal}" ในระบบ`);
     }
 
     currentUser = {
-      username: rawInput,
-      role: String(user.role || user.Role || 'member').toLowerCase(),
-      name: String(user.name || user.Name || rawInput)
+      username: inputVal,
+      role: String(user.role || user.Role || user.ROLE || 'member').toLowerCase(),
+      name: String(user.name || user.Name || user.NAME || inputVal)
     };
 
     sessionStorage.setItem('homeworkUser', JSON.stringify(currentUser));
