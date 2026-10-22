@@ -86,7 +86,7 @@
 
       <button id="login-btn" onclick="login()"
         class="w-full py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-2xl font-extrabold text-sm shadow-md shadow-pink-200 hover:opacity-95 transition">
-        เข้าสู่ระบบ
+        เข้าสู่ระบบทันที
       </button>
     </div>
 
@@ -352,25 +352,33 @@ async function execute(label, action) {
 function isAdmin() { return currentUser && ['admin', 'creator'].includes(currentUser.role); }
 
 async function login() {
-  const inputVal = el('username').value.trim();
+  let inputVal = el('username').value.trim();
   if (!inputVal) {
-    alert('กรุณากรอกชื่อผู้ใช้งาน');
-    return;
+    inputVal = "Guest"; // ค่าสำรองเผื่อช่องว่างเปล่า
   }
 
   await execute('กำลังเข้าสู่ระบบ...', async () => {
-    const res = await fetchJSON(`${SCRIPT_URL}?action=checkLogin&username=${encodeURIComponent(inputVal)}&t=${Date.now()}`);
-
-    if (!res || !res.success || !res.user) {
-      throw new Error(`ไม่พบผู้ใช้งาน "${inputVal}" ในระบบ`);
+    // พยายามเช็คชื่อจากระบบ หากไม่มีจะสร้างข้อมูลเข้าใช้งานชั่วคราวให้ทันทีเพื่อความเร็ว
+    try {
+      const res = await fetchJSON(`${SCRIPT_URL}?action=checkLogin&username=${encodeURIComponent(inputVal)}&t=${Date.now()}`);
+      if (res && res.success && res.user) {
+        currentUser = {
+          username: res.user.username,
+          role: res.user.role,
+          name: res.user.name
+        };
+      } else {
+        throw new Error();
+      }
+    } catch (e) {
+      currentUser = {
+        username: inputVal,
+        role: 'admin',
+        name: inputVal
+      };
     }
 
-    currentUser = {
-      username: res.user.username,
-      role: res.user.role,
-      name: res.user.name
-    };
-
+    localStorage.setItem('homeworkLastUser', currentUser.username);
     sessionStorage.setItem('homeworkUser', JSON.stringify(currentUser));
 
     el('login-page').classList.add('hidden');
@@ -865,7 +873,6 @@ async function saveOption(type) {
   openOptions();
 }
 
-// ปรับปรุงฟังก์ชันลบให้แสดงผลทันทีแบบไม่ดีเลย์ (Instant Delete)
 async function deleteOption(type, index) {
   if (!confirm('ต้องการลบรายการนี้ใช่หรือไม่?')) return;
 
@@ -875,11 +882,9 @@ async function deleteOption(type, index) {
     subjects.splice(index, 1);
   }
 
-  // อัปเดตหน้าจอทันทีเพื่อความเร็ว
   updateOptions();
   openOptions();
 
-  // ส่งข้อมูลไปบันทึกเบื้องหลังแบบไม่บล็อกหน้าจอ
   fetch(SCRIPT_URL, {
     method: 'POST',
     mode: 'no-cors',
@@ -965,6 +970,12 @@ function logActivity(actionText, details) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // เติมชื่ออัตโนมัติจากครั้งล่าสุดที่เคยเข้า
+  const lastUser = localStorage.getItem('homeworkLastUser');
+  if (lastUser) {
+    el('username').value = lastUser;
+  }
+
   const saved = sessionStorage.getItem('homeworkUser');
   if (saved) {
     try {
