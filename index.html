@@ -103,10 +103,11 @@
         </div>
 
         <div class="flex items-center gap-1.5">
-          <button onclick="openLogs()" title="ประวัติการใช้งาน" class="w-8 h-8 rounded-full bg-pink-50 text-pink-600 flex items-center justify-center text-xs hover:bg-pink-100 transition">
+          <!-- ปุ่มประวัติการใช้งานและจัดการวิชา จะแสดงเฉพาะแอดมิน -->
+          <button id="btn-logs" onclick="openLogs()" title="ประวัติการใช้งาน" class="w-8 h-8 rounded-full bg-pink-50 text-pink-600 items-center justify-center text-xs hover:bg-pink-100 transition hidden">
             <i class="fa-solid fa-clock-rotate-left"></i>
           </button>
-          <button onclick="openOptions()" title="จัดการวิชา" class="w-8 h-8 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center text-xs hover:bg-sky-100 transition">
+          <button id="btn-options" onclick="openOptions()" title="จัดการวิชา" class="w-8 h-8 rounded-full bg-sky-50 text-sky-600 items-center justify-center text-xs hover:bg-sky-100 transition hidden">
             <i class="fa-solid fa-list-check"></i>
           </button>
           <button onclick="loadAllData(true)" title="รีเฟรช" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs hover:bg-slate-200 transition">
@@ -192,11 +193,9 @@
 
       <section id="view-tracking" class="hidden">
         <div class="grid grid-cols-2 gap-2 mb-4">
-          <!-- ปุ่มเพิ่มการบ้าน (สีม่วง) -->
           <button onclick="toggleForm('task-form')" class="bg-purple-600 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:opacity-95 transition">
             + เพิ่มการบ้าน
           </button>
-          <!-- ปุ่มเพิ่มรายชื่อคนค้าง (สีน้ำเงิน) -->
           <button onclick="toggleForm('student-form')" class="bg-blue-600 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:opacity-95 transition">
             <i class="fa-solid fa-user-plus"></i> เพิ่มรายชื่อคนค้าง
           </button>
@@ -386,6 +385,14 @@ async function login() {
     el('login-page').classList.add('hidden');
     el('main-page').classList.remove('hidden');
     el('user-display').textContent = currentUser.name;
+
+    // เช็คสิทธิ์แสดงปุ่มแอดมิน
+    if (isAdmin()) {
+      el('btn-logs').classList.remove('hidden');
+      el('btn-logs').classList.add('flex');
+      el('btn-options').classList.remove('hidden');
+      el('btn-options').classList.add('flex');
+    }
 
     await loadAllData(false);
     logActivity('เข้าสู่ระบบ', `ผู้ใช้งาน ${currentUser.name} เข้าสู่ระบบ`);
@@ -983,6 +990,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
       el('user-display').textContent = currentUser.name;
+      
+      // เช็คสิทธิ์แสดงปุ่มแอดมินตอนโหลดหน้าเว็บจากเซสชันเดิม
+      if (isAdmin()) {
+        el('btn-logs').classList.remove('hidden');
+        el('btn-logs').classList.add('flex');
+        el('btn-options').classList.remove('hidden');
+        el('btn-options').classList.add('flex');
+      }
+
       await loadAllData(false);
     } catch (error) {
       sessionStorage.removeItem('homeworkUser');
