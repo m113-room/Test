@@ -373,7 +373,6 @@ async function login() {
   await execute('กำลังเข้าสู่ระบบ...', async () => {
     const rawRes = await fetchJSON(`${SCRIPT_URL}?action=getUsers&t=${Date.now()}`);
     
-    // ดึงอาเรย์รายชื่อผู้ใช้ออกมาอย่างปลอดภัย ไม่ว่าจะส่งมาเป็นรูปแบบใด
     let userList = [];
     if (Array.isArray(rawRes)) {
       userList = rawRes;
@@ -386,13 +385,21 @@ async function login() {
       }
     }
 
+    // ค้นหาผู้ใช้งานรองรับทั้ง Array 1 มิติ, Array 2 มิติ และ Object
     const matchedUser = userList.find(u => {
       if (!u) return false;
-      if (typeof u === 'object' && !Array.isArray(u)) {
-        return Object.values(u).some(val => 
-          String(val ?? '').trim().toLowerCase() === inputLower
-        );
+      
+      // กรณีข้อมูลเป็น Array (เช่น Array 2 มิติที่อ่านจาก Sheet โดยตรง)
+      if (Array.isArray(u)) {
+        return u.some(val => String(val ?? '').trim().toLowerCase() === inputLower);
       }
+      
+      // กรณีข้อมูลเป็น Object
+      if (typeof u === 'object') {
+        return Object.values(u).some(val => String(val ?? '').trim().toLowerCase() === inputLower);
+      }
+      
+      // กรณีข้อความเดี่ยว
       return String(u).trim().toLowerCase() === inputLower;
     });
 
@@ -403,9 +410,13 @@ async function login() {
     let userRole = 'member';
     let userName = inputVal;
 
-    if (typeof matchedUser === 'object' && matchedUser !== null) {
-      userRole = String(matchedUser.role || matchedUser.Role || matchedUser.ROLE || matchedUser[1] || 'member').toLowerCase();
-      userName = String(matchedUser.name || matchedUser.Name || matchedUser.NAME || matchedUser[0] || inputVal);
+    // แกะค่า Role และ Name จากประเภทโครงสร้างข้อมูล
+    if (Array.isArray(matchedUser)) {
+      userName = String(matchedUser[0] ?? inputVal);
+      userRole = String(matchedUser[1] ?? 'member').toLowerCase();
+    } else if (typeof matchedUser === 'object' && matchedUser !== null) {
+      userRole = String(matchedUser.role || matchedUser.Role || matchedUser.ROLE || 'member').toLowerCase();
+      userName = String(matchedUser.name || matchedUser.Name || matchedUser.NAME || matchedUser.username || matchedUser.Username || inputVal);
     }
 
     currentUser = {
