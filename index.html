@@ -118,9 +118,9 @@
       </div>
 
       <nav class="grid grid-cols-3 gap-1 bg-slate-100/80 rounded-2xl p-1 mb-5 text-center">
-        <button id="tab-pending" onclick="switchTab('pending')" class="py-2.5 bg-pink-400 text-white rounded-xl text-xs font-extrabold transition shadow-sm">ภาพรวมงานค้าง</button>
-        <button id="tab-calendar" onclick="switchTab('calendar')" class="py-2.5 text-slate-500 rounded-xl text-xs font-extrabold transition">ปฏิทินงาน</button>
-        <button id="tab-tracking" onclick="switchTab('tracking')" class="py-2.5 text-slate-500 rounded-xl text-xs font-extrabold transition">งานค้าง</button>
+        <button id="tab-pending" onclick="switchTab('pending')" class="py-2.5 rounded-xl text-xs font-extrabold transition">ภาพรวมงานค้าง</button>
+        <button id="tab-calendar" onclick="switchTab('calendar')" class="py-2.5 rounded-xl text-xs font-extrabold transition">ปฏิทินงาน</button>
+        <button id="tab-tracking" onclick="switchTab('tracking')" class="py-2.5 rounded-xl text-xs font-extrabold transition">งานค้าง</button>
       </nav>
 
       <section id="view-pending">
@@ -140,7 +140,7 @@
       </section>
 
       <section id="view-calendar" class="hidden">
-        <button onclick="toggleForm('event-form')" class="w-full bg-sky-400 text-white font-extrabold py-2.5 rounded-2xl text-xs mb-4 shadow-sm hover:opacity-95 transition">
+        <button onclick="toggleForm('event-form')" class="w-full bg-[#38bdf8] text-white font-extrabold py-3 rounded-2xl text-xs mb-4 shadow-sm hover:opacity-95 transition">
           + เพิ่มกิจกรรม
         </button>
 
@@ -240,7 +240,6 @@
         <div id="tracking-list" class="space-y-3"></div>
       </section>
 
-      <!-- ปุ่มการส่งการบ้านย้ายมาอยู่ด้านล่างสุด -->
       <div class="mt-6 border-t pt-4 text-center">
         <button onclick="alert('ระบบส่งการบ้านเปิดใช้งานปกติ')" class="bg-white text-slate-600 text-xs font-bold px-6 py-2.5 rounded-2xl border border-slate-200 shadow-sm hover:bg-slate-50 transition">
           การส่งการบ้าน
@@ -422,8 +421,14 @@ function switchTab(tab) {
   currentTab = tab;
   ['pending', 'calendar', 'tracking'].forEach(name => {
     el('view-' + name).classList.toggle('hidden', name !== tab);
-    el('tab-' + name).className = 'py-2.5 rounded-xl text-xs font-extrabold transition ' +
-      (name === tab ? 'bg-pink-400 text-white shadow-sm' : 'text-slate-500');
+    const btn = el('tab-' + name);
+    if (name === tab) {
+      if (tab === 'pending') btn.className = 'py-2.5 rounded-xl text-xs font-extrabold transition shadow-sm bg-pink-400 text-white';
+      else if (tab === 'calendar') btn.className = 'py-2.5 rounded-xl text-xs font-extrabold transition shadow-sm bg-[#38bdf8] text-white';
+      else if (tab === 'tracking') btn.className = 'py-2.5 rounded-xl text-xs font-extrabold transition shadow-sm bg-purple-600 text-white';
+    } else {
+      btn.className = 'py-2.5 rounded-xl text-xs font-extrabold transition text-slate-500';
+    }
   });
 }
 
@@ -696,7 +701,7 @@ function renderCalendar() {
     const button = document.createElement('button');
     button.textContent = day;
     button.className = 'h-9 rounded-xl text-xs font-bold transition ' +
-      (key === selectedDate ? 'bg-sky-400 text-white shadow-sm' : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-100');
+      (key === selectedDate ? 'bg-[#38bdf8] text-white shadow-sm' : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-100');
     button.onclick = () => selectDate(key);
     container.appendChild(button);
   }
@@ -800,7 +805,7 @@ function openOptions() {
       <div class="pt-2 space-y-2 border-t">
         <input id="new-code" class="w-full border rounded-xl p-2 text-xs" placeholder="รหัสวิชาใหม่">
         <input id="new-subject" class="w-full border rounded-xl p-2 text-xs" placeholder="ชื่อวิชาใหม่">
-        <button onclick="saveOption()" class="w-full bg-sky-400 text-white py-2 rounded-xl text-xs font-extrabold">เพิ่มวิชา</button>
+        <button onclick="saveOption()" class="w-full bg-[#38bdf8] text-white py-2 rounded-xl text-xs font-extrabold">เพิ่มวิชา</button>
       </div>` : ''}
 
       <button onclick="loadAllData(true); closeModal();" class="w-full bg-sky-50 text-sky-600 border border-sky-100 py-2 rounded-xl text-xs font-bold mt-2">
