@@ -810,10 +810,15 @@ function openOptions() {
       </div>
 
       ${isAdmin() ? `
-      <div class="pt-2 space-y-2 border-t">
-        <input id="new-code" class="w-full border rounded-xl p-2 text-xs" placeholder="รหัสวิชาใหม่">
-        <input id="new-subject" class="w-full border rounded-xl p-2 text-xs" placeholder="ชื่อวิชาใหม่">
-        <button onclick="saveOption()" class="w-full bg-pink-500 text-white py-2 rounded-xl text-xs font-extrabold">เพิ่มวิชา</button>
+      <div class="pt-2 space-y-3 border-t">
+        <div class="space-y-1.5">
+          <input id="new-code" class="w-full border rounded-xl p-2 text-xs bg-white" placeholder="รหัสวิชาใหม่">
+          <button onclick="saveOption('code')" class="w-full bg-pink-500 text-white py-2 rounded-xl text-xs font-extrabold hover:opacity-95 transition">เพิ่มเฉพาะรหัสวิชา</button>
+        </div>
+        <div class="space-y-1.5 pt-1 border-t border-dashed">
+          <input id="new-subject" class="w-full border rounded-xl p-2 text-xs bg-white" placeholder="ชื่อวิชาใหม่">
+          <button onclick="saveOption('subject')" class="w-full bg-pink-500 text-white py-2 rounded-xl text-xs font-extrabold hover:opacity-95 transition">เพิ่มเฉพาะชื่อวิชา</button>
+        </div>
       </div>` : ''}
 
       <button onclick="loadAllData(true); closeModal();" class="w-full bg-sky-50 text-sky-600 border border-sky-100 py-2 rounded-xl text-xs font-bold mt-2">
@@ -853,14 +858,17 @@ function openOptions() {
   }
 }
 
-async function saveOption() {
+async function saveOption(type) {
   if (!requireAdmin()) return;
-  const code = el('new-code').value.trim();
-  const subject = el('new-subject').value.trim();
+  const code = type === 'code' ? el('new-code').value.trim() : "";
+  const subject = type === 'subject' ? el('new-subject').value.trim() : "";
 
-  if (!code && !subject) return;
+  if (!code && !subject) {
+    alert('กรุณากรอกข้อมูลที่ต้องการเพิ่ม');
+    return;
+  }
 
-  await execute('กำลังเพิ่มวิชา...', async () => {
+  await execute('กำลังเพิ่มข้อมูล...', async () => {
     await fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
@@ -882,6 +890,16 @@ async function deleteOption(type, index) {
   } else if (type === 'subject') {
     subjects.splice(index, 1);
   }
+
+  await execute('กำลังลบข้อมูล...', async () => {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'saveAllOptions', codes: codes, subjects: subjects })
+    });
+    await loadAllData(false);
+  });
 
   openOptions();
 }
@@ -914,7 +932,6 @@ async function openLogs() {
     }
 
     if (Array.isArray(logs) && logs.length > 0) {
-      // เรียงลำดับเอาประวัติใหม่ขึ้นบนสุดโดยใช้ .reverse()
       const listToShow = [...logs].reverse();
 
       listToShow.forEach(log => {
