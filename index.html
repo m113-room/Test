@@ -538,9 +538,14 @@ function createTrackingCard(task) {
         <h3 class="font-extrabold text-xs text-slate-800">${escapeHtml(task.subject)}</h3>
         <p class="text-[11px] text-slate-600 mt-0.5 font-medium">${escapeHtml(task.detail)}</p>
       </div>
-      <button data-action="delete" class="text-rose-500 hover:text-rose-600 p-1" title="ลบ">
-        <i class="fa-solid fa-trash"></i>
-      </button>
+      <div class="flex gap-1.5">
+        <button data-action="pin" class="text-amber-500 hover:text-amber-600 p-1" title="ปักหมุด">
+          <i class="fa-solid fa-thumbtack"></i>
+        </button>
+        <button data-action="delete" class="text-rose-500 hover:text-rose-600 p-1" title="ลบ">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
     </div>
 
     <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
@@ -555,6 +560,7 @@ function createTrackingCard(task) {
     <div class="flex flex-wrap gap-1 pt-1" data-students></div>
   `;
 
+  div.querySelector('[data-action="pin"]').onclick = () => togglePin(task.id);
   div.querySelector('[data-action="delete"]').onclick = () => deleteTask(task.id);
 
   const students = div.querySelector('[data-students]');
