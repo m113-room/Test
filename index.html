@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.64 Strict Users Check)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.64)</span>
       </div>
     </div>
 
@@ -408,7 +408,7 @@ async function login() {
     return;
   }
 
-  await execute('กำลังตรวจสอบสิทธิ์...', async () => {
+  await execute('กำลังตรวจสอบบัญชี...', async () => {
     const res = await fetchJSON(`${SCRIPT_URL}?action=checkLogin&username=${encodeURIComponent(inputVal)}&t=${Date.now()}`);
     
     if (res && res.success && res.user) {
