@@ -351,6 +351,22 @@ async function execute(label, action) {
 
 function isAdmin() { return currentUser && ['admin', 'creator'].includes(currentUser.role); }
 
+function updateAdminUI() {
+  const isUserAdmin = isAdmin();
+  
+  if (isUserAdmin) {
+    el('btn-logs').classList.remove('hidden');
+    el('btn-logs').classList.add('flex');
+    el('btn-options').classList.remove('hidden');
+    el('btn-options').classList.add('flex');
+  } else {
+    el('btn-logs').classList.add('hidden');
+    el('btn-logs').classList.remove('flex');
+    el('btn-options').classList.add('hidden');
+    el('btn-options').classList.remove('flex');
+  }
+}
+
 async function login() {
   let inputVal = el('username').value.trim();
   if (!inputVal) {
@@ -372,7 +388,7 @@ async function login() {
     } catch (e) {
       currentUser = {
         username: inputVal,
-        role: 'admin',
+        role: inputVal.toLowerCase() === 'admin' ? 'admin' : 'user',
         name: inputVal
       };
     }
@@ -384,10 +400,7 @@ async function login() {
     el('main-page').classList.remove('hidden');
     el('user-display').textContent = currentUser.name;
 
-    el('btn-logs').classList.remove('hidden');
-    el('btn-logs').classList.add('flex');
-    el('btn-options').classList.remove('hidden');
-    el('btn-options').classList.add('flex');
+    updateAdminUI();
 
     await loadAllData(false);
     logActivity('เข้าสู่ระบบ', `ผู้ใช้งาน ${currentUser.name} เข้าสู่ระบบ`);
@@ -799,6 +812,11 @@ function openModal(title, content) {
 function closeModal() { el('modal').classList.add('hidden'); }
 
 function openOptions() {
+  if (!isAdmin()) {
+    alert('คุณไม่มีสิทธิ์เข้าถึงส่วนนี้');
+    return;
+  }
+
   const content = `
     <div class="space-y-3">
       <p class="text-[11px] text-slate-600 font-semibold">รายการรหัสวิชาและชื่อวิชาทั้งหมดที่มีในระบบปัจจุบัน</p>
@@ -906,6 +924,11 @@ async function deleteOption(type, index) {
 }
 
 async function openLogs() {
+  if (!isAdmin()) {
+    alert('คุณไม่มีสิทธิ์เข้าถึงส่วนนี้');
+    return;
+  }
+
   const fetchAll = isAllLogsLoaded;
 
   if (!fetchAll) {
@@ -995,10 +1018,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       el('main-page').classList.remove('hidden');
       el('user-display').textContent = currentUser.name;
       
-      el('btn-logs').classList.remove('hidden');
-      el('btn-logs').classList.add('flex');
-      el('btn-options').classList.remove('hidden');
-      el('btn-options').classList.add('flex');
+      updateAdminUI();
 
       await loadAllData(false);
     } catch (error) {
