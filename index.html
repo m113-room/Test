@@ -388,7 +388,6 @@ function setStatus(message, success = true) {
     (success ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100');
 }
 
-// ใช้ JSONP ผ่านแท็ก Script เพื่อหลบปัญหา CORS บน GitHub Pages / เว็บภายนอก
 function jsonpRequest(url) {
   return new Promise((resolve, reject) => {
     const callbackName = 'jsonp_cb_' + Math.round(100000 * Math.random());
@@ -843,11 +842,11 @@ function openOptions() {
       <div class="pt-2 space-y-3 border-t">
         <div class="space-y-1.5">
           <input id="new-code" class="w-full border rounded-xl p-2 text-xs bg-white" placeholder="รหัสวิชาใหม่">
-          <button onclick="saveOption('code')" class="w-full bg-pink-500 text-white py-2 rounded-xl text-xs font-extrabold hover:opacity-95 transition">เพิ่มเฉพาะรหัสวิชา</button>
+          <button onclick="saveSingleOption('code')" class="w-full bg-pink-500 text-white py-2 rounded-xl text-xs font-extrabold hover:opacity-95 transition">เพิ่มเฉพาะรหัสวิชา</button>
         </div>
         <div class="space-y-1.5 pt-1 border-t border-dashed">
           <input id="new-subject" class="w-full border rounded-xl p-2 text-xs bg-white" placeholder="ชื่อวิชาใหม่">
-          <button onclick="saveOption('subject')" class="w-full bg-pink-500 text-white py-2 rounded-xl text-xs font-extrabold transition">เพิ่มเฉพาะชื่อวิชา</button>
+          <button onclick="saveSingleOption('subject')" class="w-full bg-pink-500 text-white py-2.5 rounded-xl text-xs font-extrabold transition">เพิ่มเฉพาะชื่อวิชา</button>
         </div>
       </div>
 
@@ -866,12 +865,12 @@ function openOptions() {
   sBox.innerHTML = '';
 
   if (codes.length) {
-    codes.forEach((c, index) => {
+    codes.forEach((c) => {
       const row = document.createElement('div');
       row.className = 'flex justify-between items-center bg-white p-1.5 rounded-lg border border-slate-100 mb-1';
-      row.innerHTML = `<span>${escapeHtml(c)}</span> <button data-del-code="${index}" class="text-rose-500 hover:text-rose-700 px-1 text-[10px]"><i class="fa-solid fa-trash"></i></button>`;
+      row.innerHTML = `<span>${escapeHtml(c)}</span> <button class="text-rose-500 hover:text-rose-700 px-1 text-[10px]"><i class="fa-solid fa-trash"></i></button>`;
       row.querySelector('button').onclick = () => {
-        showConfirm(`ต้องการลบรหัสวิชา "${c}" ใช่หรือไม่?`, () => deleteOption('code', index));
+        showConfirm(`ต้องการลบรหัสวิชา "${c}" ใช่หรือไม่?`, () => deleteSingleOption('code', c));
       };
       cBox.appendChild(row);
     });
@@ -880,12 +879,12 @@ function openOptions() {
   }
 
   if (subjects.length) {
-    subjects.forEach((s, index) => {
+    subjects.forEach((s) => {
       const row = document.createElement('div');
       row.className = 'flex justify-between items-center bg-white p-1.5 rounded-lg border border-slate-100 mb-1';
-      row.innerHTML = `<span>${escapeHtml(s)}</span> <button data-del-sub="${index}" class="text-rose-500 hover:text-rose-700 px-1 text-[10px]"><i class="fa-solid fa-trash"></i></button>`;
+      row.innerHTML = `<span>${escapeHtml(s)}</span> <button class="text-rose-500 hover:text-rose-700 px-1 text-[10px]"><i class="fa-solid fa-trash"></i></button>`;
       row.querySelector('button').onclick = () => {
-        showConfirm(`ต้องการลบชื่อวิชา "${s}" ใช่หรือไม่?`, () => deleteOption('subject', index));
+        showConfirm(`ต้องการลบชื่อวิชา "${s}" ใช่หรือไม่?`, () => deleteSingleOption('subject', s));
       };
       sBox.appendChild(row);
     });
@@ -894,7 +893,7 @@ function openOptions() {
   }
 }
 
-async function saveOption(type) {
+async function saveSingleOption(type) {
   const code = type === 'code' ? el('new-code').value.trim() : "";
   const subject = type === 'subject' ? el('new-subject').value.trim() : "";
 
@@ -909,11 +908,11 @@ async function saveOption(type) {
   await sendData({ action: 'saveAllOptions', codes: codes, subjects: subjects });
 }
 
-async function deleteOption(type, index) {
+async function deleteSingleOption(type, targetVal) {
   if (type === 'code') {
-    codes.splice(index, 1);
+    codes = codes.filter(c => c !== targetVal);
   } else if (type === 'subject') {
-    subjects.splice(index, 1);
+    subjects = subjects.filter(s => s !== targetVal);
   }
 
   updateOptions();
