@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.66 New URL Connected)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.67 Stable Sync)</span>
       </div>
     </div>
 
@@ -660,18 +660,22 @@ async function addTask() {
     return;
   }
 
-  tasks.unshift(task);
+  const updatedTasks = [task, ...tasks];
 
   const success = await execute('กำลังบันทึกการบ้าน...', async () => {
     await fetch(SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'saveTasks', tasks: updatedTasks })
     });
   });
 
   if (success) {
+    tasks = updatedTasks;
+    const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
+    cachedData.tasks = tasks;
+    localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
+
     ['task-code', 'task-subject', 'task-detail', 'task-assign-date', 'task-due-date'].forEach(id => el(id).value = '');
     el('task-form').classList.add('hidden');
     renderTasks();
@@ -687,10 +691,14 @@ async function togglePin(id) {
   if (task) {
     task.isPinned = !task.isPinned;
     renderTasks();
+    
+    const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
+    cachedData.tasks = tasks;
+    localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
+
     fetch(SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
     });
     logActivity(task.isPinned ? 'ปักหมุดการบ้าน' : 'ยกเลิกปักหมุด', `วิชา ${task.subject}`);
@@ -706,10 +714,13 @@ async function deleteTask(id) {
   renderCalendar();
   selectDate(selectedDate);
 
+  const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
+  cachedData.tasks = tasks;
+  localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
+
   fetch(SCRIPT_URL, {
     method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
   });
 
@@ -733,10 +744,13 @@ async function toggleStudent(taskId, number) {
   renderTasks();
   selectDate(selectedDate);
 
+  const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
+  cachedData.tasks = tasks;
+  localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
+
   fetch(SCRIPT_URL, {
     method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
   });
 
@@ -755,10 +769,14 @@ async function addExtraStudent() {
   if (!task.extraUnsubmitted.includes(number)) {
     task.extraUnsubmitted.push(number);
     renderTasks();
+    
+    const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
+    cachedData.tasks = tasks;
+    localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
+
     fetch(SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
     });
     logActivity('เพิ่มรายชื่อคนค้างงาน', `เลขที่ ${number} ในวิชา ${task.subject}`);
@@ -836,10 +854,13 @@ async function addEvent() {
   el('event-input').value = '';
   el('event-form').classList.add('hidden');
 
+  const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
+  cachedData.events = dailyEvents;
+  localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
+
   fetch(SCRIPT_URL, {
     method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify({ action: 'saveEvents', events: dailyEvents })
   });
 
@@ -994,8 +1015,7 @@ async function clearLogs() {
   await execute('กำลังล้างประวัติ...', async () => {
     await fetch(SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ action: 'clearLogs' })
     });
   });
@@ -1007,8 +1027,7 @@ async function clearLogs() {
 function logActivity(actionText, details) {
   fetch(SCRIPT_URL, {
     method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify({
       action: 'saveLog',
       username: currentUser ? currentUser.username : 'Unknown',
