@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.62 Strict Security)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.63 Strict Block)</span>
       </div>
     </div>
 
@@ -400,6 +400,12 @@ async function login() {
   let inputVal = el('username').value.trim();
   if (!inputVal) inputVal = "Guest";
 
+  // ป้องกันการพิมพ์ชื่อ admin ตั้งแต่หน้าบ้าน
+  if (inputVal.toLowerCase() === 'admin') {
+    showAlert('ไม่อนุญาตให้ใช้ชื่อบัญชีนี้');
+    return;
+  }
+
   await execute('กำลังเข้าสู่ระบบ...', async () => {
     let verifiedRole = 'user';
     let verifiedName = inputVal;
@@ -407,14 +413,15 @@ async function login() {
     try {
       const res = await fetchJSON(`${SCRIPT_URL}?action=checkLogin&username=${encodeURIComponent(inputVal)}&t=${Date.now()}`);
       if (res && res.success && res.user) {
-        verifiedRole = res.user.role; // ยึดสิทธิ์จากชีต Users เท่านั้น
+        verifiedRole = res.user.role;
         verifiedName = res.user.name;
+      } else if (res && res.error) {
+        throw new Error(res.error);
       }
     } catch (e) {
-      console.error(e);
+      throw new Error(e.message || 'ไม่สามารถเข้าสู่ระบบได้');
     }
 
-    // บังคับเด็ดขาด: ห้ามเป็น admin เด็ดขาด เว้นแต่ในชีต Users จะระบุไว้ว่าเป็น admin จริงๆ
     currentUser = {
       username: inputVal,
       role: (verifiedRole === 'admin' || verifiedRole === 'creator') ? verifiedRole : 'user',
