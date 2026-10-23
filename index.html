@@ -354,11 +354,10 @@ function isAdmin() { return currentUser && ['admin', 'creator'].includes(current
 async function login() {
   let inputVal = el('username').value.trim();
   if (!inputVal) {
-    inputVal = "Guest"; // ค่าสำรองเผื่อช่องว่างเปล่า
+    inputVal = "Guest";
   }
 
   await execute('กำลังเข้าสู่ระบบ...', async () => {
-    // พยายามเช็คชื่อจากระบบ หากไม่มีจะสร้างข้อมูลเข้าใช้งานชั่วคราวให้ทันทีเพื่อความเร็ว
     try {
       const res = await fetchJSON(`${SCRIPT_URL}?action=checkLogin&username=${encodeURIComponent(inputVal)}&t=${Date.now()}`);
       if (res && res.success && res.user) {
@@ -534,9 +533,14 @@ function createTrackingCard(task) {
   const percent = total ? Math.round(completed / total * 100) : 0;
 
   div.innerHTML = `
-    <div>
-      <h3 class="font-extrabold text-xs text-slate-800">${escapeHtml(task.subject)}</h3>
-      <p class="text-[11px] text-slate-600 mt-0.5 font-medium">${escapeHtml(task.detail)}</p>
+    <div class="flex justify-between items-start gap-2">
+      <div>
+        <h3 class="font-extrabold text-xs text-slate-800">${escapeHtml(task.subject)}</h3>
+        <p class="text-[11px] text-slate-600 mt-0.5 font-medium">${escapeHtml(task.detail)}</p>
+      </div>
+      <button data-action="delete" class="text-rose-500 hover:text-rose-600 p-1" title="ลบ">
+        <i class="fa-solid fa-trash"></i>
+      </button>
     </div>
 
     <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
@@ -550,6 +554,8 @@ function createTrackingCard(task) {
 
     <div class="flex flex-wrap gap-1 pt-1" data-students></div>
   `;
+
+  div.querySelector('[data-action="delete"]').onclick = () => deleteTask(task.id);
 
   const students = div.querySelector('[data-students]');
   unsubmitted.forEach(number => {
@@ -970,7 +976,6 @@ function logActivity(actionText, details) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // เติมชื่ออัตโนมัติจากครั้งล่าสุดที่เคยเข้า
   const lastUser = localStorage.getItem('homeworkLastUser');
   if (lastUser) {
     el('username').value = lastUser;
