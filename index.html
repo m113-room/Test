@@ -341,7 +341,6 @@ async function execute(label, action) {
   } catch (error) {
     console.error(error);
     setStatus('ผิดพลาด: ' + error.message, false);
-    alert('เกิดข้อผิดพลาด:\n' + error.message);
     return false;
   } finally {
     busy = false;
@@ -349,16 +348,11 @@ async function execute(label, action) {
   }
 }
 
-function isAdmin() { return currentUser && ['admin', 'creator'].includes(currentUser.role); }
-
 async function login() {
   let inputVal = el('username').value.trim();
-  if (!inputVal) {
-    inputVal = "Guest"; // ค่าสำรองเผื่อช่องว่างเปล่า
-  }
+  if (!inputVal) inputVal = "Guest";
 
   await execute('กำลังเข้าสู่ระบบ...', async () => {
-    // พยายามเช็คชื่อจากระบบ หากไม่มีจะสร้างข้อมูลเข้าใช้งานชั่วคราวให้ทันทีเพื่อความเร็ว
     try {
       const res = await fetchJSON(`${SCRIPT_URL}?action=checkLogin&username=${encodeURIComponent(inputVal)}&t=${Date.now()}`);
       if (res && res.success && res.user) {
@@ -391,7 +385,6 @@ async function login() {
     el('btn-options').classList.add('flex');
 
     await loadAllData(false);
-    logActivity('เข้าสู่ระบบ', `ผู้ใช้งาน ${currentUser.name} เข้าสู่ระบบ`);
   });
 }
 
@@ -427,7 +420,7 @@ async function loadAllData(showMessage = false) {
   };
 
   if (busy) await load();
-  else await execute('กำลังซิงค์ข้อมูล...', load);
+  else await load();
 }
 
 function switchTab(tab) {
@@ -590,24 +583,19 @@ async function addTask() {
 
   tasks.unshift(task);
 
-  const success = await execute('กำลังบันทึกการบ้าน...', async () => {
-    await fetch(SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
-    });
+  await fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
   });
 
-  if (success) {
-    ['task-code', 'task-subject', 'task-detail', 'task-assign-date', 'task-due-date'].forEach(id => el(id).value = '');
-    el('task-form').classList.add('hidden');
-    renderTasks();
-    renderCalendar();
-    selectDate(selectedDate);
-    setStatus('บันทึกการบ้านเรียบร้อย');
-    logActivity('เพิ่มการบ้าน', `${task.code} - ${task.subject}`);
-  }
+  ['task-code', 'task-subject', 'task-detail', 'task-assign-date', 'task-due-date'].forEach(id => el(id).value = '');
+  el('task-form').classList.add('hidden');
+  renderTasks();
+  renderCalendar();
+  selectDate(selectedDate);
+  setStatus('บันทึกการบ้านเรียบร้อย');
 }
 
 async function togglePin(id) {
@@ -625,8 +613,6 @@ async function togglePin(id) {
 }
 
 async function deleteTask(id) {
-  if (!confirm('ต้องการลบการบ้านนี้ใช่หรือไม่?')) return;
-
   tasks = tasks.filter(t => String(t.id) !== String(id));
   renderTasks();
   renderCalendar();
@@ -810,7 +796,7 @@ function openOptions() {
         </div>
         <div class="space-y-1.5 pt-1 border-t border-dashed">
           <input id="new-subject" class="w-full border rounded-xl p-2 text-xs bg-white" placeholder="ชื่อวิชาใหม่">
-          <button onclick="saveOption('subject')" class="w-full bg-pink-500 text-white py-2 rounded-xl text-xs font-extrabold hover:opacity-95 transition">เพิ่มเฉพาะชื่อวิชา</button>
+          <button onclick="saveOption('subject')" class="w-full bg-pink-500 text-white py-2 rounded-xl text-xs font-extrabold transition">เพิ่มเฉพาะชื่อวิชา</button>
         </div>
       </div>
 
@@ -855,27 +841,24 @@ async function saveOption(type) {
   const code = type === 'code' ? el('new-code').value.trim() : "";
   const subject = type === 'subject' ? el('new-subject').value.trim() : "";
 
-  if (!code && !subject) {
-    alert('กรุณากรอกข้อมูลที่ต้องการเพิ่ม');
-    return;
-  }
+  if (!code && !subject) return;
 
-  await execute('กำลังเพิ่มข้อมูล...', async () => {
-    await fetch(SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'saveOption', code: code, subject: subject })
-    });
-    await loadAllData(false);
-  });
+  if (type === 'code' && !codes.includes(code)) codes.push(code);
+  if (type === 'subject' && !subjects.includes(subject)) subjects.push(subject);
 
+  updateOptions();
   openOptions();
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'saveAllOptions', codes: codes, subjects: subjects })
+  }).catch(e => console.error('Sync Error:', e));
 }
 
+// ลบทันทีแบบไม่มีกล่องยืนยันกวนใจ
 async function deleteOption(type, index) {
-  if (!confirm('ต้องการลบรายการนี้ใช่หรือไม่?')) return;
-
   if (type === 'code') {
     codes.splice(index, 1);
   } else if (type === 'subject') {
@@ -940,37 +923,18 @@ async function openLogs() {
 }
 
 async function clearLogs() {
-  if (!confirm('ล้างประวัติทั้งหมดใช่หรือไม่?')) return;
-
-  await execute('กำลังล้างประวัติ...', async () => {
-    await fetch(SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'clearLogs' })
-    });
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'clearLogs' })
   });
 
   isAllLogsLoaded = false;
   openLogs();
 }
 
-function logActivity(actionText, details) {
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      action: 'saveLog',
-      username: currentUser ? currentUser.username : 'Unknown',
-      actionText: actionText,
-      details: details
-    })
-  }).catch(e => console.error('Log Error:', e));
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
-  // เติมชื่ออัตโนมัติจากครั้งล่าสุดที่เคยเข้า
   const lastUser = localStorage.getItem('homeworkLastUser');
   if (lastUser) {
     el('username').value = lastUser;
