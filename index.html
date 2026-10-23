@@ -249,7 +249,7 @@
 
     <!-- ปุ่มการส่งการบ้านและเวอร์ชันด้านล่างสุด -->
     <div class="w-full text-center pb-2 space-y-2">
-      <button onclick="alert('ระบบส่งการบ้านเปิดใช้งานปกติ')" class="bg-white/95 backdrop-blur-md text-slate-700 text-xs font-bold px-8 py-2.5 rounded-full border border-white shadow-sm hover:bg-white transition">
+      <button onclick="showAlert('ระบบส่งการบ้านเปิดใช้งานปกติ')" class="bg-white/95 backdrop-blur-md text-slate-700 text-xs font-bold px-8 py-2.5 rounded-full border border-white shadow-sm hover:bg-white transition">
         การส่งการบ้าน
       </button>
       <div>
@@ -266,6 +266,18 @@
         <button onclick="closeModal()" class="text-slate-500 font-bold hover:text-slate-700">✕</button>
       </div>
       <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <!-- Custom Alert Modal -->
+  <div id="custom-alert" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[120] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-xs animate-pop shadow-2xl text-center">
+      <div class="w-12 h-12 mx-auto bg-pink-50 text-pink-500 rounded-2xl flex items-center justify-center text-xl mb-3 shadow-inner">
+        <i class="fa-solid fa-circle-info"></i>
+      </div>
+      <h3 class="font-extrabold text-sm text-slate-800 mb-1">แจ้งเตือน</h3>
+      <p id="alert-text" class="text-xs text-slate-500 font-semibold mb-5"></p>
+      <button onclick="closeAlert()" class="w-full bg-pink-500 text-white py-2.5 rounded-xl text-xs font-extrabold hover:bg-pink-600 transition shadow-sm">ปิด</button>
     </div>
   </div>
 
@@ -288,6 +300,15 @@ const TOTAL_STUDENTS = 40;
 let busy = false;
 
 function el(id) { return document.getElementById(id); }
+
+function showAlert(message) {
+  el('alert-text').textContent = message;
+  el('custom-alert').classList.remove('hidden');
+}
+
+function closeAlert() {
+  el('custom-alert').classList.add('hidden');
+}
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -341,7 +362,7 @@ async function execute(label, action) {
   } catch (error) {
     console.error(error);
     setStatus('ผิดพลาด: ' + error.message, false);
-    alert('เกิดข้อผิดพลาด:\n' + error.message);
+    showAlert('เกิดข้อผิดพลาด:\n' + error.message);
     return false;
   } finally {
     busy = false;
@@ -435,7 +456,7 @@ async function loadAllData(showMessage = false) {
     selectDate(selectedDate);
 
     setStatus('ซิงค์ข้อมูลสำเร็จ • ' + new Date().toLocaleTimeString('th-TH'));
-    if (showMessage) alert('ซิงค์ข้อมูลสำเร็จ');
+    if (showMessage) showAlert('ซิงค์ข้อมูลสำเร็จ');
   };
 
   if (busy) await load();
@@ -609,7 +630,7 @@ async function addTask() {
   };
 
   if (!task.code || !task.subject || !task.detail || !task.dueDate) {
-    alert('กรุณากรอกข้อมูลให้ครบ');
+    showAlert('กรุณากรอกข้อมูลให้ครบ');
     return;
   }
 
@@ -813,7 +834,7 @@ function closeModal() { el('modal').classList.add('hidden'); }
 
 function openOptions() {
   if (!isAdmin()) {
-    alert('คุณไม่มีสิทธิ์เข้าถึงส่วนนี้');
+    showAlert('คุณไม่มีสิทธิ์เข้าถึงส่วนนี้');
     return;
   }
 
@@ -886,7 +907,7 @@ async function saveOption(type) {
   const subject = type === 'subject' ? el('new-subject').value.trim() : "";
 
   if (!code && !subject) {
-    alert('กรุณากรอกข้อมูลที่ต้องการเพิ่ม');
+    showAlert('กรุณากรอกข้อมูลที่ต้องการเพิ่ม');
     return;
   }
 
@@ -907,6 +928,8 @@ async function saveOption(type) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'saveAllOptions', codes: codes, subjects: subjects })
     });
+    // หน่วงเวลา 1.2 วินาทีเพื่อให้ Google Sheets เขียนข้อมูลเสร็จสมบูรณ์ก่อนซิงค์กลับมา
+    await new Promise(resolve => setTimeout(resolve, 1200));
     await loadAllData(false);
   });
 }
@@ -923,17 +946,21 @@ async function deleteOption(type, index) {
   updateOptions();
   openOptions();
 
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'saveAllOptions', codes: codes, subjects: subjects })
-  }).catch(e => console.error('Sync Error:', e));
+  await execute('กำลังลบข้อมูล...', async () => {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'saveAllOptions', codes: codes, subjects: subjects })
+    });
+    await new Promise(resolve => setTimeout(resolve, 1200));
+    await loadAllData(false);
+  });
 }
 
 async function openLogs() {
   if (!isAdmin()) {
-    alert('คุณไม่มีสิทธิ์เข้าถึงส่วนนี้');
+    showAlert('คุณไม่มีสิทธิ์เข้าถึงส่วนนี้');
     return;
   }
 
