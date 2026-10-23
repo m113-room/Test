@@ -840,28 +840,17 @@ function openOptions() {
 
   const content = `
     <div class="space-y-3">
-      <p class="text-[11px] text-slate-600 font-semibold">รายการรหัสวิชาและชื่อวิชาทั้งหมดที่มีในระบบปัจจุบัน</p>
+      <p class="text-[11px] text-slate-600 font-semibold">รายการรหัสวิชาและชื่อวิชาทั้งหมดในระบบ (จัดการเพิ่ม/ลบผ่าน Google Sheets)</p>
 
       <div class="grid grid-cols-2 gap-2">
         <div class="bg-slate-50 p-2.5 rounded-2xl border">
           <h4 class="font-extrabold text-[11px] text-slate-700 mb-1">รหัสวิชา</h4>
-          <div id="option-codes" class="text-xs space-y-1 max-h-[120px] overflow-y-auto font-medium text-slate-700"></div>
+          <div id="option-codes" class="text-xs space-y-1 max-h-[180px] overflow-y-auto font-medium text-slate-700"></div>
         </div>
 
         <div class="bg-slate-50 p-2.5 rounded-2xl border">
           <h4 class="font-extrabold text-[11px] text-slate-700 mb-1">ชื่อวิชา</h4>
-          <div id="option-subjects" class="text-xs space-y-1 max-h-[120px] overflow-y-auto font-medium text-slate-700"></div>
-        </div>
-      </div>
-
-      <div class="pt-2 space-y-3 border-t">
-        <div class="space-y-1.5">
-          <input id="new-code" class="w-full border rounded-xl p-2 text-xs bg-white" placeholder="รหัสวิชาใหม่">
-          <button onclick="saveOption('code')" class="w-full bg-pink-500 text-white py-2 rounded-xl text-xs font-extrabold hover:opacity-95 transition">เพิ่มเฉพาะรหัสวิชา</button>
-        </div>
-        <div class="space-y-1.5 pt-1 border-t border-dashed">
-          <input id="new-subject" class="w-full border rounded-xl p-2 text-xs bg-white" placeholder="ชื่อวิชาใหม่">
-          <button onclick="saveOption('subject')" class="w-full bg-pink-500 text-white py-2 rounded-xl text-xs font-extrabold hover:opacity-95 transition">เพิ่มเฉพาะชื่อวิชา</button>
+          <div id="option-subjects" class="text-xs space-y-1 max-h-[180px] overflow-y-auto font-medium text-slate-700"></div>
         </div>
       </div>
 
@@ -871,7 +860,7 @@ function openOptions() {
     </div>
   `;
 
-  openModal('จัดการประวัติวิชาและรหัส', content);
+  openModal('รายการรหัสวิชาและชื่อวิชา', content);
 
   const cBox = el('option-codes');
   const sBox = el('option-subjects');
@@ -880,10 +869,10 @@ function openOptions() {
   sBox.innerHTML = '';
 
   if (codes.length) {
-    codes.forEach((c, index) => {
+    codes.forEach(c => {
       const row = document.createElement('div');
-      row.className = 'flex justify-between items-center bg-white p-1.5 rounded-lg border border-slate-100 mb-1';
-      row.innerHTML = `<span>${escapeHtml(c)}</span> <button onclick="deleteOption('code', ${index})" class="text-rose-500 hover:text-rose-700 px-1 text-[10px]"><i class="fa-solid fa-trash"></i></button>`;
+      row.className = 'bg-white p-1.5 rounded-lg border border-slate-100 mb-1 text-[11px]';
+      row.textContent = c;
       cBox.appendChild(row);
     });
   } else {
@@ -891,71 +880,15 @@ function openOptions() {
   }
 
   if (subjects.length) {
-    subjects.forEach((s, index) => {
+    subjects.forEach(s => {
       const row = document.createElement('div');
-      row.className = 'flex justify-between items-center bg-white p-1.5 rounded-lg border border-slate-100 mb-1';
-      row.innerHTML = `<span>${escapeHtml(s)}</span> <button onclick="deleteOption('subject', ${index})" class="text-rose-500 hover:text-rose-700 px-1 text-[10px]"><i class="fa-solid fa-trash"></i></button>`;
+      row.className = 'bg-white p-1.5 rounded-lg border border-slate-100 mb-1 text-[11px]';
+      row.textContent = s;
       sBox.appendChild(row);
     });
   } else {
     sBox.innerHTML = '<p class="text-slate-500 text-[10px]">ไม่มีข้อมูล</p>';
   }
-}
-
-async function saveOption(type) {
-  const code = type === 'code' ? el('new-code').value.trim() : "";
-  const subject = type === 'subject' ? el('new-subject').value.trim() : "";
-
-  if (!code && !subject) {
-    showAlert('กรุณากรอกข้อมูลที่ต้องการเพิ่ม');
-    return;
-  }
-
-  if (type === 'code' && code && !codes.includes(code)) {
-    codes.push(code);
-  }
-  if (type === 'subject' && subject && !subjects.includes(subject)) {
-    subjects.push(subject);
-  }
-
-  updateOptions();
-  openOptions();
-
-  await execute('กำลังเพิ่มข้อมูล...', async () => {
-    await fetch(SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'saveAllOptions', codes: codes, subjects: subjects })
-    });
-    // หน่วงเวลา 1.2 วินาทีเพื่อให้ Google Sheets เขียนข้อมูลเสร็จสมบูรณ์ก่อนซิงค์กลับมา
-    await new Promise(resolve => setTimeout(resolve, 1200));
-    await loadAllData(false);
-  });
-}
-
-async function deleteOption(type, index) {
-  if (!confirm('ต้องการลบรายการนี้ใช่หรือไม่?')) return;
-
-  if (type === 'code') {
-    codes.splice(index, 1);
-  } else if (type === 'subject') {
-    subjects.splice(index, 1);
-  }
-
-  updateOptions();
-  openOptions();
-
-  await execute('กำลังลบข้อมูล...', async () => {
-    await fetch(SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'saveAllOptions', codes: codes, subjects: subjects })
-    });
-    await new Promise(resolve => setTimeout(resolve, 1200));
-    await loadAllData(false);
-  });
 }
 
 async function openLogs() {
