@@ -60,7 +60,7 @@
   <div id="loading-overlay" class="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-[100] hidden flex items-center justify-center">
     <div class="bg-white rounded-3xl p-6 shadow-2xl text-center min-w-[180px]">
       <div class="w-8 h-8 border-4 border-pink-400 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-      <p id="loading-text" class="text-xs font-bold text-slate-600">กำลังโหลด...</p>
+      <p id="loading-text" class="text-xs font-bold text-slate-600">กำลังซิงค์...</p>
     </div>
   </div>
 
@@ -312,7 +312,6 @@ let selectedDate = dateKey(new Date());
 let isAllLogsLoaded = false;
 
 const TOTAL_STUDENTS = 40;
-let busy = false;
 
 function el(id) { return document.getElementById(id); }
 
@@ -389,10 +388,39 @@ function setStatus(message, success = true) {
     (success ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100');
 }
 
-async function fetchJSON(url) {
-  const res = await fetch(url, { method: 'GET', redirect: 'follow' });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return await res.json();
+// ใช้ JSONP ผ่านแท็ก Script เพื่อหลบปัญหา CORS บน GitHub Pages / เว็บภายนอก
+function jsonpRequest(url) {
+  return new Promise((resolve, reject) => {
+    const callbackName = 'jsonp_cb_' + Math.round(100000 * Math.random());
+    window[callbackName] = function(data) {
+      delete window[callbackName];
+      document.body.removeChild(script);
+      resolve(data);
+    };
+
+    const script = document.createElement('script');
+    script.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + callbackName;
+    script.onerror = function() {
+      delete window[callbackName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+      reject(new Error('JSONP Request Failed'));
+    };
+    document.body.appendChild(script);
+  });
+}
+
+async function sendData(payload) {
+  showLoading('กำลังซิงค์...');
+  try {
+    const jsonStr = encodeURIComponent(JSON.stringify(payload));
+    const url = `${SCRIPT_URL}?action=postJSONP&data=${jsonStr}&t=${Date.now()}`;
+    await jsonpRequest(url);
+  } catch (error) {
+    console.error(error);
+    setStatus('ซิงค์ข้อมูลไม่สำเร็จ', false);
+  } finally {
+    hideLoading();
+  }
 }
 
 async function login() {
@@ -401,7 +429,7 @@ async function login() {
 
   showLoading('กำลังซิงค์...');
   try {
-    const res = await fetchJSON(`${SCRIPT_URL}?action=checkLogin&username=${encodeURIComponent(inputVal)}&t=${Date.now()}`);
+    const res = await jsonpRequest(`${SCRIPT_URL}?action=checkLogin&username=${encodeURIComponent(inputVal)}&t=${Date.now()}`);
     if (res && res.success && res.user) {
       currentUser = {
         username: res.user.username,
@@ -443,36 +471,34 @@ function logout() {
 }
 
 async function loadAllData(showMessage = false) {
-  const load = async () => {
-    showLoading('กำลังซิงค์...');
-    try {
-      const [tasksRes, eventsRes, optionsRes] = await Promise.allSettled([
-        fetchJSON(`${SCRIPT_URL}?t=${Date.now()}`),
-        fetchJSON(`${SCRIPT_URL}?action=getEvents&t=${Date.now()}`),
-        fetchJSON(`${SCRIPT_URL}?action=getOptions&t=${Date.now()}`)
-      ]);
+  showLoading('กำลังซิงค์...');
+  try {
+    const [tasksRes, eventsRes, optionsRes] = await Promise.allSettled([
+      jsonpRequest(`${SCRIPT_URL}?action=getTasksJSONP&t=${Date.now()}`),
+      jsonpRequest(`${SCRIPT_URL}?action=getEventsJSONP&t=${Date.now()}`),
+      jsonpRequest(`${SCRIPT_URL}?action=getOptionsJSONP&t=${Date.now()}`)
+    ]);
 
-      tasks = (tasksRes.status === 'fulfilled' && Array.isArray(tasksRes.value)) ? tasksRes.value : [];
-      dailyEvents = (eventsRes.status === 'fulfilled' && eventsRes.value) ? eventsRes.value : {};
-      
-      if (optionsRes.status === 'fulfilled' && optionsRes.value) {
-        codes = optionsRes.value.codes || [];
-        subjects = optionsRes.value.subjects || [];
-      }
-
-      updateOptions();
-      renderTasks();
-      renderCalendar();
-      selectDate(selectedDate);
-
-      setStatus('ซิงค์ข้อมูลสำเร็จ • ' + new Date().toLocaleTimeString('th-TH'));
-      if (showMessage) showAlert('ซิงค์ข้อมูลสำเร็จ');
-    } finally {
-      hideLoading();
+    tasks = (tasksRes.status === 'fulfilled' && Array.isArray(tasksRes.value)) ? tasksRes.value : [];
+    dailyEvents = (eventsRes.status === 'fulfilled' && eventsRes.value) ? eventsRes.value : {};
+    
+    if (optionsRes.status === 'fulfilled' && optionsRes.value) {
+      codes = optionsRes.value.codes || [];
+      subjects = optionsRes.value.subjects || [];
     }
-  };
 
-  await load();
+    updateOptions();
+    renderTasks();
+    renderCalendar();
+    selectDate(selectedDate);
+
+    setStatus('ซิงค์ข้อมูลสำเร็จ • ' + new Date().toLocaleTimeString('th-TH'));
+    if (showMessage) showAlert('ซิงค์ข้อมูลสำเร็จ');
+  } catch (error) {
+    setStatus('ซิงค์ข้อมูลไม่สำเร็จ', false);
+  } finally {
+    hideLoading();
+  }
 }
 
 function switchTab(tab) {
@@ -636,19 +662,14 @@ async function addTask() {
   }
 
   tasks.unshift(task);
-
-  await fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
-  });
-
-  ['task-code', 'task-subject', 'task-detail', 'task-assign-date', 'task-due-date'].forEach(id => el(id).value = '');
-  el('task-form').classList.add('hidden');
   renderTasks();
   renderCalendar();
   selectDate(selectedDate);
+
+  await sendData({ action: 'saveTasks', tasks: tasks });
+
+  ['task-code', 'task-subject', 'task-detail', 'task-assign-date', 'task-due-date'].forEach(id => el(id).value = '');
+  el('task-form').classList.add('hidden');
   setStatus('บันทึกการบ้านเรียบร้อย');
 }
 
@@ -657,12 +678,7 @@ async function togglePin(id) {
   if (task) {
     task.isPinned = !task.isPinned;
     renderTasks();
-    fetch(SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
-    });
+    await sendData({ action: 'saveTasks', tasks: tasks });
   }
 }
 
@@ -672,12 +688,8 @@ async function deleteTask(id) {
   renderCalendar();
   selectDate(selectedDate);
 
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
-  });
+  await sendData({ action: 'saveTasks', tasks: tasks });
+  setStatus('ลบรายการเรียบร้อย');
 }
 
 async function toggleStudent(taskId, number) {
@@ -693,12 +705,7 @@ async function toggleStudent(taskId, number) {
   renderTasks();
   selectDate(selectedDate);
 
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
-  });
+  await sendData({ action: 'saveTasks', tasks: tasks });
 }
 
 async function addExtraStudent() {
@@ -713,12 +720,7 @@ async function addExtraStudent() {
   if (!task.extraUnsubmitted.includes(number)) {
     task.extraUnsubmitted.push(number);
     renderTasks();
-    fetch(SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
-    });
+    await sendData({ action: 'saveTasks', tasks: tasks });
   }
 
   el('student-number').value = '';
@@ -793,12 +795,7 @@ async function addEvent() {
   el('event-input').value = '';
   el('event-form').classList.add('hidden');
 
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'saveEvents', events: dailyEvents })
-  });
+  await sendData({ action: 'saveEvents', events: dailyEvents });
 }
 
 function updateOptions() {
@@ -909,12 +906,7 @@ async function saveOption(type) {
   updateOptions();
   openOptions();
 
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'saveAllOptions', codes: codes, subjects: subjects })
-  }).catch(e => console.error('Sync Error:', e));
+  await sendData({ action: 'saveAllOptions', codes: codes, subjects: subjects });
 }
 
 async function deleteOption(type, index) {
@@ -927,12 +919,7 @@ async function deleteOption(type, index) {
   updateOptions();
   openOptions();
 
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'saveAllOptions', codes: codes, subjects: subjects })
-  }).catch(e => console.error('Sync Error:', e));
+  await sendData({ action: 'saveAllOptions', codes: codes, subjects: subjects });
 }
 
 async function openLogs() {
@@ -945,7 +932,7 @@ async function openLogs() {
   }
 
   try {
-    const logs = await fetchJSON(`${SCRIPT_URL}?action=getLogs&all=${fetchAll ? 'true' : 'false'}&t=${Date.now()}`);
+    const logs = await jsonpRequest(`${SCRIPT_URL}?action=getLogsJSONP&all=${fetchAll ? 'true' : 'false'}&t=${Date.now()}`);
     const container = el('modal-content');
     container.innerHTML = '';
 
@@ -982,13 +969,7 @@ async function openLogs() {
 }
 
 async function clearLogs() {
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'clearLogs' })
-  });
-
+  await sendData({ action: 'clearLogs' });
   isAllLogsLoaded = false;
   openLogs();
 }
@@ -1022,4 +1003,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
-
