@@ -269,6 +269,21 @@
     </div>
   </div>
 
+  <!-- Custom Confirm Modal -->
+  <div id="custom-confirm" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-xs animate-pop shadow-2xl text-center">
+      <div class="w-12 h-12 mx-auto bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center text-xl mb-3 shadow-inner">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <h3 class="font-extrabold text-sm text-slate-800 mb-1">ยืนยันการลบ</h3>
+      <p id="confirm-text" class="text-xs text-slate-500 font-semibold mb-5">ต้องการลบรายการนี้ใช่หรือไม่?</p>
+      <div class="grid grid-cols-2 gap-2">
+        <button id="confirm-no" class="bg-slate-100 text-slate-600 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-200 transition">ยกเลิก</button>
+        <button id="confirm-yes" class="bg-rose-500 text-white py-2.5 rounded-xl text-xs font-extrabold hover:bg-rose-600 transition shadow-sm">ลบรายการ</button>
+      </div>
+    </div>
+  </div>
+
 <script>
 'use strict';
 
@@ -288,6 +303,30 @@ const TOTAL_STUDENTS = 40;
 let busy = false;
 
 function el(id) { return document.getElementById(id); }
+
+function showConfirm(message, onYes) {
+  el('confirm-text').textContent = message;
+  const yesBtn = el('confirm-yes');
+  const noBtn = el('confirm-no');
+  const modal = el('custom-confirm');
+
+  modal.classList.remove('hidden');
+
+  const clean = () => {
+    modal.classList.add('hidden');
+    yesBtn.onclick = null;
+    noBtn.onclick = null;
+  };
+
+  yesBtn.onclick = () => {
+    clean();
+    onYes();
+  };
+
+  noBtn.onclick = () => {
+    clean();
+  };
+}
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -331,61 +370,45 @@ async function fetchJSON(url) {
   return await res.json();
 }
 
-async function execute(label, action) {
-  if (busy) return false;
-  busy = true;
-  showLoading(label);
-  try {
-    await action();
-    return true;
-  } catch (error) {
-    console.error(error);
-    setStatus('ผิดพลาด: ' + error.message, false);
-    return false;
-  } finally {
-    busy = false;
-    hideLoading();
-  }
-}
-
 async function login() {
   let inputVal = el('username').value.trim();
   if (!inputVal) inputVal = "Guest";
 
-  await execute('กำลังเข้าสู่ระบบ...', async () => {
-    try {
-      const res = await fetchJSON(`${SCRIPT_URL}?action=checkLogin&username=${encodeURIComponent(inputVal)}&t=${Date.now()}`);
-      if (res && res.success && res.user) {
-        currentUser = {
-          username: res.user.username,
-          role: res.user.role,
-          name: res.user.name
-        };
-      } else {
-        throw new Error();
-      }
-    } catch (e) {
+  showLoading('กำลังเข้าสู่ระบบ...');
+  try {
+    const res = await fetchJSON(`${SCRIPT_URL}?action=checkLogin&username=${encodeURIComponent(inputVal)}&t=${Date.now()}`);
+    if (res && res.success && res.user) {
       currentUser = {
-        username: inputVal,
-        role: 'admin',
-        name: inputVal
+        username: res.user.username,
+        role: res.user.role,
+        name: res.user.name
       };
+    } else {
+      throw new Error();
     }
+  } catch (e) {
+    currentUser = {
+      username: inputVal,
+      role: 'admin',
+      name: inputVal
+    };
+  } finally {
+    hideLoading();
+  }
 
-    localStorage.setItem('homeworkLastUser', currentUser.username);
-    sessionStorage.setItem('homeworkUser', JSON.stringify(currentUser));
+  localStorage.setItem('homeworkLastUser', currentUser.username);
+  sessionStorage.setItem('homeworkUser', JSON.stringify(currentUser));
 
-    el('login-page').classList.add('hidden');
-    el('main-page').classList.remove('hidden');
-    el('user-display').textContent = currentUser.name;
+  el('login-page').classList.add('hidden');
+  el('main-page').classList.remove('hidden');
+  el('user-display').textContent = currentUser.name;
 
-    el('btn-logs').classList.remove('hidden');
-    el('btn-logs').classList.add('flex');
-    el('btn-options').classList.remove('hidden');
-    el('btn-options').classList.add('flex');
+  el('btn-logs').classList.remove('hidden');
+  el('btn-logs').classList.add('flex');
+  el('btn-options').classList.remove('hidden');
+  el('btn-options').classList.add('flex');
 
-    await loadAllData(false);
-  });
+  await loadAllData(false);
 }
 
 function logout() {
@@ -496,7 +519,9 @@ function createTaskCard(task) {
   `;
 
   div.querySelector('[data-action="pin"]').onclick = () => togglePin(task.id);
-  div.querySelector('[data-action="delete"]').onclick = () => deleteTask(task.id);
+  div.querySelector('[data-action="delete"]').onclick = () => {
+    showConfirm('ต้องการลบการบ้านนี้ใช่หรือไม่?', () => deleteTask(task.id));
+  };
 
   return div;
 }
@@ -818,7 +843,10 @@ function openOptions() {
     codes.forEach((c, index) => {
       const row = document.createElement('div');
       row.className = 'flex justify-between items-center bg-white p-1.5 rounded-lg border border-slate-100 mb-1';
-      row.innerHTML = `<span>${escapeHtml(c)}</span> <button onclick="deleteOption('code', ${index})" class="text-rose-500 hover:text-rose-700 px-1 text-[10px]"><i class="fa-solid fa-trash"></i></button>`;
+      row.innerHTML = `<span>${escapeHtml(c)}</span> <button data-del-code="${index}" class="text-rose-500 hover:text-rose-700 px-1 text-[10px]"><i class="fa-solid fa-trash"></i></button>`;
+      row.querySelector('button').onclick = () => {
+        showConfirm(`ต้องการลบรหัสวิชา "${c}" ใช่หรือไม่?`, () => deleteOption('code', index));
+      };
       cBox.appendChild(row);
     });
   } else {
@@ -829,7 +857,10 @@ function openOptions() {
     subjects.forEach((s, index) => {
       const row = document.createElement('div');
       row.className = 'flex justify-between items-center bg-white p-1.5 rounded-lg border border-slate-100 mb-1';
-      row.innerHTML = `<span>${escapeHtml(s)}</span> <button onclick="deleteOption('subject', ${index})" class="text-rose-500 hover:text-rose-700 px-1 text-[10px]"><i class="fa-solid fa-trash"></i></button>`;
+      row.innerHTML = `<span>${escapeHtml(s)}</span> <button data-del-sub="${index}" class="text-rose-500 hover:text-rose-700 px-1 text-[10px]"><i class="fa-solid fa-trash"></i></button>`;
+      row.querySelector('button').onclick = () => {
+        showConfirm(`ต้องการลบชื่อวิชา "${s}" ใช่หรือไม่?`, () => deleteOption('subject', index));
+      };
       sBox.appendChild(row);
     });
   } else {
@@ -857,7 +888,6 @@ async function saveOption(type) {
   }).catch(e => console.error('Sync Error:', e));
 }
 
-// ลบทันทีแบบไม่มีกล่องยืนยันกวนใจ
 async function deleteOption(type, index) {
   if (type === 'code') {
     codes.splice(index, 1);
@@ -894,7 +924,7 @@ async function openLogs() {
     topBtns.className = 'flex gap-2 mb-3';
 
     topBtns.innerHTML = `
-      <button onclick="clearLogs()" class="w-1/2 bg-rose-50 text-rose-600 rounded-xl py-2 text-xs font-bold border border-rose-100">ล้างประวัติทั้งหมด</button>
+      <button onclick="showConfirm('ล้างประวัติทั้งหมดใช่หรือไม่?', clearLogs)" class="w-1/2 bg-rose-50 text-rose-600 rounded-xl py-2 text-xs font-bold border border-rose-100">ล้างประวัติทั้งหมด</button>
       <button onclick="isAllLogsLoaded = !isAllLogsLoaded; openLogs();" class="w-1/2 bg-pink-50 text-pink-700 rounded-xl py-2 text-xs font-bold border border-pink-100">
         ${fetchAll ? 'แสดง 20 ล่าสุด' : 'โหลดทั้งหมด'}
       </button>
