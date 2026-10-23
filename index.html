@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.59 Lightning Fast)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.60 Lightning Fast)</span>
       </div>
     </div>
 
@@ -404,14 +404,18 @@ async function login() {
     try {
       const res = await fetchJSON(`${SCRIPT_URL}?action=checkLogin&username=${encodeURIComponent(inputVal)}&t=${Date.now()}`);
       if (res && res.success && res.user) {
-        currentUser = { username: res.user.username, role: res.user.role, name: res.user.name };
+        currentUser = { 
+          username: res.user.username, 
+          role: res.user.role, // ยึดสิทธิ์จากชีต Users โดยตรง
+          name: res.user.name 
+        };
       } else {
         throw new Error();
       }
     } catch (e) {
       currentUser = {
         username: inputVal,
-        role: inputVal.toLowerCase() === 'admin' ? 'admin' : 'user',
+        role: 'user', // ถ้าเชื่อมต่อไม่ได้หรือไม่มีในชีต ให้ดีפולต์เป็น user ทั่วไป
         name: inputVal
       };
     }
@@ -437,9 +441,7 @@ function logout() {
   location.reload();
 }
 
-// โหลดข้อมูลแบบรวดเร็วด้วย Cache และ Endpoint ก้อนเดียว
 async function loadAllData(showMessage = false) {
-  // โหลดข้อมูลเก่าจาก Cache มาแสดงผลทันรวดเร็วก่อน (ถ้ามี)
   const cachedData = localStorage.getItem('homeworkCacheData');
   if (cachedData) {
     try {
@@ -463,7 +465,6 @@ async function loadAllData(showMessage = false) {
       codes = res.options?.codes || [];
       subjects = res.options?.subjects || [];
 
-      // บันทึกลง Cache
       localStorage.setItem('homeworkCacheData', JSON.stringify(res));
 
       updateOptions();
@@ -478,7 +479,6 @@ async function loadAllData(showMessage = false) {
 
   if (busy) await load();
   else {
-    // ถ้าไม่มี Cache ให้แสดงโหลดแบบเต็มรูปแบบ ถ้ามีแล้วให้โหลดเงียบๆ ข้างหลังเพื่อให้ไวที่สุด
     if (!cachedData) {
       await execute('กำลังซิงค์ข้อมูล...', load);
     } else {
