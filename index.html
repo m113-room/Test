@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.68 Stable GET Sync)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.69 Stable POST Sync)</span>
       </div>
     </div>
 
@@ -643,11 +643,18 @@ function toggleForm(id) {
 }
 
 async function sendSaveRequest(action, payloadData = null) {
-  let url = `${SCRIPT_URL}?action=${action}&t=${Date.now()}`;
-  if (payloadData !== null) {
-    url += `&payload=${encodeURIComponent(JSON.stringify(payloadData))}`;
-  }
-  return await fetchJSON(url, 15000);
+  let bodyData = { action: action };
+  if (action === 'saveTasks') bodyData.tasks = payloadData;
+  if (action === 'saveEvents') bodyData.events = payloadData;
+
+  await fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(bodyData)
+  });
+
+  await new Promise(resolve => setTimeout(resolve, 1500));
 }
 
 async function addTask() {
@@ -671,8 +678,7 @@ async function addTask() {
   const updatedTasks = [task, ...tasks];
 
   const success = await execute('กำลังบันทึกการบ้าน...', async () => {
-    const res = await sendSaveRequest('saveTasks', updatedTasks);
-    if (!res || !res.success) throw new Error('บันทึกลง Sheets ไม่สำเร็จ');
+    await sendSaveRequest('saveTasks', updatedTasks);
   });
 
   if (success) {
@@ -1006,8 +1012,17 @@ async function clearLogs() {
 }
 
 function logActivity(actionText, details) {
-  let url = `${SCRIPT_URL}?action=saveLog&username=${encodeURIComponent(currentUser ? currentUser.username : 'Unknown')}&actionText=${encodeURIComponent(actionText)}&details=${encodeURIComponent(details)}&t=${Date.now()}`;
-  fetch(url, { method: 'GET', redirect: 'follow' }).catch(e => console.error('Log Error:', e));
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({
+      action: 'saveLog',
+      username: currentUser ? currentUser.username : 'Unknown',
+      actionText: actionText,
+      details: details
+    })
+  }).catch(e => console.error('Log Error:', e));
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
