@@ -424,11 +424,12 @@ async function login() {
     updateAdminUI();
 
     await loadAllData(false);
-    logActivity('เข้าสู่ระบบ', `ผู้ใช้งาน ${currentUser.name} เข้าสู่ระบบ`);
+    logActivity('เข้าสู่ระบบ', `ผู้ใช้งาน ${currentUser.name} เข้าสู่ระบบสำเร็จ`);
   });
 }
 
 function logout() {
+  logActivity('ออกจากระบบ', `ผู้ใช้งาน ${currentUser ? currentUser.name : 'Unknown'} ออกจากระบบ`);
   currentUser = null;
   sessionStorage.removeItem('homeworkUser');
   location.reload();
@@ -652,7 +653,7 @@ async function addTask() {
     renderCalendar();
     selectDate(selectedDate);
     setStatus('บันทึกการบ้านเรียบร้อย');
-    logActivity('เพิ่มการบ้าน', `${task.code} - ${task.subject}`);
+    logActivity('เพิ่มการบ้าน', `วิชา ${task.subject} (${task.code}) - ${task.detail}`);
   }
 }
 
@@ -667,10 +668,12 @@ async function togglePin(id) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
     });
+    logActivity(task.isPinned ? 'ปักหมุดการบ้าน' : 'ยกเลิกปักหมุด', `วิชา ${task.subject}`);
   }
 }
 
 async function deleteTask(id) {
+  const task = tasks.find(t => String(t.id) === String(id));
   if (!confirm('ต้องการลบการบ้านนี้ใช่หรือไม่?')) return;
 
   tasks = tasks.filter(t => String(t.id) !== String(id));
@@ -684,6 +687,10 @@ async function deleteTask(id) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
   });
+
+  if (task) {
+    logActivity('ลบการบ้าน', `วิชา ${task.subject} - ${task.detail}`);
+  }
 }
 
 async function toggleStudent(taskId, number) {
@@ -693,7 +700,9 @@ async function toggleStudent(taskId, number) {
 
   const numStr = String(number);
   const idx = task.submitted.indexOf(numStr);
-  if (idx > -1) task.submitted.splice(idx, 1);
+  const isSubmitted = idx === -1;
+  
+  if (!isSubmitted) task.submitted.splice(idx, 1);
   else task.submitted.push(numStr);
 
   renderTasks();
@@ -705,6 +714,8 @@ async function toggleStudent(taskId, number) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
   });
+
+  logActivity('เปลี่ยนสถานะส่งงาน', `เลขที่ ${numStr} วิชา ${task.subject} (${isSubmitted ? 'ส่งแล้ว' : 'ยังไม่ส่ง'})`);
 }
 
 async function addExtraStudent() {
@@ -725,6 +736,7 @@ async function addExtraStudent() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
     });
+    logActivity('เพิ่มรายชื่อคนค้างงาน', `เลขที่ ${number} ในวิชา ${task.subject}`);
   }
 
   el('student-number').value = '';
@@ -805,6 +817,8 @@ async function addEvent() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'saveEvents', events: dailyEvents })
   });
+
+  logActivity('เพิ่มกิจกรรม', `วันที่ ${formatDate(selectedDate)}: ${event}`);
 }
 
 function updateOptions() {
@@ -924,16 +938,23 @@ async function openLogs() {
     if (Array.isArray(logs) && logs.length > 0) {
       const listToShow = [...logs].reverse();
 
+      const logListContainer = document.createElement('div');
+      logListContainer.className = 'space-y-2 max-h-[350px] overflow-y-auto pr-1';
+
       listToShow.forEach(log => {
-        const div = document.createElement('div');
-        div.className = 'border-b py-2 text-xs';
-        div.innerHTML = `
-          <p class="font-bold text-slate-800">${escapeHtml(log.username || 'System')} • ${escapeHtml(log.actionText || '-')}</p>
-          <p class="text-slate-600 text-[11px] font-medium">${escapeHtml(log.details || '')}</p>
-          <p class="text-slate-500 text-[10px] mt-0.5 font-semibold">${log.timestamp ? new Date(log.timestamp).toLocaleString('th-TH') : '-'}</p>
+        const item = document.createElement('div');
+        item.className = 'bg-slate-50 border border-slate-100 p-2.5 rounded-xl text-xs space-y-1';
+        item.innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="font-extrabold text-pink-600 bg-pink-50 px-2 py-0.5 rounded-md text-[10px] border border-pink-100">${escapeHtml(log.actionText || 'กิจกรรม')}</span>
+            <span class="text-[10px] text-slate-400 font-semibold">${log.timestamp ? new Date(log.timestamp).toLocaleString('th-TH') : '-'}</span>
+          </div>
+          <p class="text-slate-800 font-semibold text-[11px]">${escapeHtml(log.details || '-')}</p>
+          <p class="text-[10px] text-slate-500">โดย: <span class="font-bold text-slate-700">${escapeHtml(log.username || 'System')}</span></p>
         `;
-        container.appendChild(div);
+        logListContainer.appendChild(item);
       });
+      container.appendChild(logListContainer);
     } else {
       container.innerHTML += '<p class="text-xs text-slate-500 text-center py-4 font-bold">ไม่มีประวัติการใช้งาน</p>';
     }
