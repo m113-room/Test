@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.61 Secure Mode)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.62 Strict Security)</span>
       </div>
     </div>
 
@@ -401,25 +401,25 @@ async function login() {
   if (!inputVal) inputVal = "Guest";
 
   await execute('กำลังเข้าสู่ระบบ...', async () => {
+    let verifiedRole = 'user';
+    let verifiedName = inputVal;
+
     try {
       const res = await fetchJSON(`${SCRIPT_URL}?action=checkLogin&username=${encodeURIComponent(inputVal)}&t=${Date.now()}`);
       if (res && res.success && res.user) {
-        currentUser = { 
-          username: res.user.username, 
-          role: res.user.role, // ยึดสิทธิ์จากชีต Users เท่านั้น
-          name: res.user.name 
-        };
-      } else {
-        throw new Error();
+        verifiedRole = res.user.role; // ยึดสิทธิ์จากชีต Users เท่านั้น
+        verifiedName = res.user.name;
       }
     } catch (e) {
-      // หากเกิดข้อผิดพลาด ให้บังคับเป็นสิทธิ์ user ทั่วไปทันที
-      currentUser = {
-        username: inputVal,
-        role: 'user',
-        name: inputVal
-      };
+      console.error(e);
     }
+
+    // บังคับเด็ดขาด: ห้ามเป็น admin เด็ดขาด เว้นแต่ในชีต Users จะระบุไว้ว่าเป็น admin จริงๆ
+    currentUser = {
+      username: inputVal,
+      role: (verifiedRole === 'admin' || verifiedRole === 'creator') ? verifiedRole : 'user',
+      name: verifiedName
+    };
 
     localStorage.setItem('homeworkLastUser', currentUser.username);
     sessionStorage.setItem('homeworkUser', JSON.stringify(currentUser));
