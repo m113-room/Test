@@ -890,17 +890,25 @@ async function saveOption(type) {
     return;
   }
 
+  if (type === 'code' && code && !codes.includes(code)) {
+    codes.push(code);
+  }
+  if (type === 'subject' && subject && !subjects.includes(subject)) {
+    subjects.push(subject);
+  }
+
+  updateOptions();
+  openOptions();
+
   await execute('กำลังเพิ่มข้อมูล...', async () => {
     await fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'saveOption', code: code, subject: subject })
+      body: JSON.stringify({ action: 'saveAllOptions', codes: codes, subjects: subjects })
     });
     await loadAllData(false);
   });
-
-  openOptions();
 }
 
 async function deleteOption(type, index) {
