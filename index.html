@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.67 Stable Sync)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.68 Stable GET Sync)</span>
       </div>
     </div>
 
@@ -346,7 +346,7 @@ function setStatus(message, success = true) {
     (success ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100');
 }
 
-async function fetchJSON(url, timeoutMs = 10000) {
+async function fetchJSON(url, timeoutMs = 12000) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -642,6 +642,14 @@ function toggleForm(id) {
   if(el(id)) el(id).classList.toggle('hidden');
 }
 
+async function sendSaveRequest(action, payloadData = null) {
+  let url = `${SCRIPT_URL}?action=${action}&t=${Date.now()}`;
+  if (payloadData !== null) {
+    url += `&payload=${encodeURIComponent(JSON.stringify(payloadData))}`;
+  }
+  return await fetchJSON(url, 15000);
+}
+
 async function addTask() {
   const task = {
     id: String(Date.now()),
@@ -663,11 +671,8 @@ async function addTask() {
   const updatedTasks = [task, ...tasks];
 
   const success = await execute('กำลังบันทึกการบ้าน...', async () => {
-    await fetch(SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'saveTasks', tasks: updatedTasks })
-    });
+    const res = await sendSaveRequest('saveTasks', updatedTasks);
+    if (!res || !res.success) throw new Error('บันทึกลง Sheets ไม่สำเร็จ');
   });
 
   if (success) {
@@ -696,11 +701,7 @@ async function togglePin(id) {
     cachedData.tasks = tasks;
     localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
 
-    fetch(SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
-    });
+    sendSaveRequest('saveTasks', tasks);
     logActivity(task.isPinned ? 'ปักหมุดการบ้าน' : 'ยกเลิกปักหมุด', `วิชา ${task.subject}`);
   }
 }
@@ -718,11 +719,7 @@ async function deleteTask(id) {
   cachedData.tasks = tasks;
   localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
 
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
-  });
+  sendSaveRequest('saveTasks', tasks);
 
   if (task) {
     logActivity('ลบการบ้าน', `วิชา ${task.subject} - ${task.detail}`);
@@ -748,11 +745,7 @@ async function toggleStudent(taskId, number) {
   cachedData.tasks = tasks;
   localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
 
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
-  });
+  sendSaveRequest('saveTasks', tasks);
 
   logActivity('เปลี่ยนสถานะส่งงาน', `เลขที่ ${numStr} วิชา ${task.subject} (${isSubmitted ? 'ส่งแล้ว' : 'ยังไม่ส่ง'})`);
 }
@@ -774,11 +767,7 @@ async function addExtraStudent() {
     cachedData.tasks = tasks;
     localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
 
-    fetch(SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'saveTasks', tasks: tasks })
-    });
+    sendSaveRequest('saveTasks', tasks);
     logActivity('เพิ่มรายชื่อคนค้างงาน', `เลขที่ ${number} ในวิชา ${task.subject}`);
   }
 
@@ -858,11 +847,7 @@ async function addEvent() {
   cachedData.events = dailyEvents;
   localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
 
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action: 'saveEvents', events: dailyEvents })
-  });
+  sendSaveRequest('saveEvents', dailyEvents);
 
   logActivity('เพิ่มกิจกรรม', `วันที่ ${formatDate(selectedDate)}: ${event}`);
 }
@@ -1013,11 +998,7 @@ async function clearLogs() {
   if (!confirm('ล้างประวัติทั้งหมดใช่หรือไม่?')) return;
 
   await execute('กำลังล้างประวัติ...', async () => {
-    await fetch(SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'clearLogs' })
-    });
+    await sendSaveRequest('clearLogs');
   });
 
   isAllLogsLoaded = false;
@@ -1025,16 +1006,8 @@ async function clearLogs() {
 }
 
 function logActivity(actionText, details) {
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({
-      action: 'saveLog',
-      username: currentUser ? currentUser.username : 'Unknown',
-      actionText: actionText,
-      details: details
-    })
-  }).catch(e => console.error('Log Error:', e));
+  let url = `${SCRIPT_URL}?action=saveLog&username=${encodeURIComponent(currentUser ? currentUser.username : 'Unknown')}&actionText=${encodeURIComponent(actionText)}&details=${encodeURIComponent(details)}&t=${Date.now()}`;
+  fetch(url, { method: 'GET', redirect: 'follow' }).catch(e => console.error('Log Error:', e));
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
