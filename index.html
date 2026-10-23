@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.63 Strict Block)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.64 Strict Users Check)</span>
       </div>
     </div>
 
@@ -371,7 +371,7 @@ async function execute(label, action) {
   } catch (error) {
     console.error(error);
     setStatus('ผิดพลาด: ' + error.message, false);
-    showAlert('เกิดข้อผิดพลาด:\n' + error.message);
+    showAlert(error.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
     return false;
   } finally {
     busy = false;
@@ -398,47 +398,40 @@ function updateAdminUI() {
 
 async function login() {
   let inputVal = el('username').value.trim();
-  if (!inputVal) inputVal = "Guest";
-
-  // ป้องกันการพิมพ์ชื่อ admin ตั้งแต่หน้าบ้าน
-  if (inputVal.toLowerCase() === 'admin') {
-    showAlert('ไม่พบชื่อบัญชีนี้');
+  if (!inputVal) {
+    showAlert('กรุณากรอกชื่อผู้ใช้งาน');
     return;
   }
 
-  await execute('กำลังเข้าสู่ระบบ...', async () => {
-    let verifiedRole = 'user';
-    let verifiedName = inputVal;
+  if (inputVal.toLowerCase() === 'admin') {
+    showAlert('ไม่พบบัญชี');
+    return;
+  }
 
-    try {
-      const res = await fetchJSON(`${SCRIPT_URL}?action=checkLogin&username=${encodeURIComponent(inputVal)}&t=${Date.now()}`);
-      if (res && res.success && res.user) {
-        verifiedRole = res.user.role;
-        verifiedName = res.user.name;
-      } else if (res && res.error) {
-        throw new Error(res.error);
-      }
-    } catch (e) {
-      throw new Error(e.message || 'ไม่สามารถเข้าสู่ระบบได้');
+  await execute('กำลังตรวจสอบสิทธิ์...', async () => {
+    const res = await fetchJSON(`${SCRIPT_URL}?action=checkLogin&username=${encodeURIComponent(inputVal)}&t=${Date.now()}`);
+    
+    if (res && res.success && res.user) {
+      currentUser = {
+        username: res.user.username,
+        role: res.user.role,
+        name: res.user.name
+      };
+
+      localStorage.setItem('homeworkLastUser', currentUser.username);
+      sessionStorage.setItem('homeworkUser', JSON.stringify(currentUser));
+
+      el('login-page').classList.add('hidden');
+      el('main-page').classList.remove('hidden');
+      el('user-display').textContent = currentUser.name;
+
+      updateAdminUI();
+
+      await loadAllData(false);
+      logActivity('เข้าสู่ระบบ', `ผู้ใช้งาน ${currentUser.name} เข้าสู่ระบบสำเร็จ`);
+    } else {
+      throw new Error(res.error || 'ไม่พบบัญชี');
     }
-
-    currentUser = {
-      username: inputVal,
-      role: (verifiedRole === 'admin' || verifiedRole === 'creator') ? verifiedRole : 'user',
-      name: verifiedName
-    };
-
-    localStorage.setItem('homeworkLastUser', currentUser.username);
-    sessionStorage.setItem('homeworkUser', JSON.stringify(currentUser));
-
-    el('login-page').classList.add('hidden');
-    el('main-page').classList.remove('hidden');
-    el('user-display').textContent = currentUser.name;
-
-    updateAdminUI();
-
-    await loadAllData(false);
-    logActivity('เข้าสู่ระบบ', `ผู้ใช้งาน ${currentUser.name} เข้าสู่ระบบสำเร็จ`);
   });
 }
 
