@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.58 Smile Face)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.59 Lightning Fast)</span>
       </div>
     </div>
 
@@ -346,10 +346,19 @@ function setStatus(message, success = true) {
     (success ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100');
 }
 
-async function fetchJSON(url) {
-  const res = await fetch(url, { method: 'GET', redirect: 'follow' });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return await res.json();
+async function fetchJSON(url, timeoutMs = 10000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { method: 'GET', redirect: 'follow', signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') throw new Error('การเชื่อมต่อหมดเวลา (Timeout)');
+    throw err;
+  }
 }
 
 async function execute(label, action) {
@@ -374,7 +383,6 @@ function isAdmin() { return currentUser && ['admin', 'creator'].includes(current
 
 function updateAdminUI() {
   const isUserAdmin = isAdmin();
-  
   if (isUserAdmin) {
     el('btn-logs').classList.remove('hidden');
     el('btn-logs').classList.add('flex');
@@ -390,19 +398,13 @@ function updateAdminUI() {
 
 async function login() {
   let inputVal = el('username').value.trim();
-  if (!inputVal) {
-    inputVal = "Guest";
-  }
+  if (!inputVal) inputVal = "Guest";
 
   await execute('กำลังเข้าสู่ระบบ...', async () => {
     try {
       const res = await fetchJSON(`${SCRIPT_URL}?action=checkLogin&username=${encodeURIComponent(inputVal)}&t=${Date.now()}`);
       if (res && res.success && res.user) {
-        currentUser = {
-          username: res.user.username,
-          role: res.user.role,
-          name: res.user.name
-        };
+        currentUser = { username: res.user.username, role: res.user.role, name: res.user.name };
       } else {
         throw new Error();
       }
@@ -435,33 +437,54 @@ function logout() {
   location.reload();
 }
 
+// โหลดข้อมูลแบบรวดเร็วด้วย Cache และ Endpoint ก้อนเดียว
 async function loadAllData(showMessage = false) {
+  // โหลดข้อมูลเก่าจาก Cache มาแสดงผลทันรวดเร็วก่อน (ถ้ามี)
+  const cachedData = localStorage.getItem('homeworkCacheData');
+  if (cachedData) {
+    try {
+      const parsed = JSON.parse(cachedData);
+      tasks = parsed.tasks || [];
+      dailyEvents = parsed.events || {};
+      codes = parsed.options?.codes || [];
+      subjects = parsed.options?.subjects || [];
+      updateOptions();
+      renderTasks();
+      renderCalendar();
+      selectDate(selectedDate);
+    } catch(e) {}
+  }
+
   const load = async () => {
-    const [tasksRes, eventsRes, optionsRes] = await Promise.allSettled([
-      fetchJSON(`${SCRIPT_URL}?t=${Date.now()}`),
-      fetchJSON(`${SCRIPT_URL}?action=getEvents&t=${Date.now()}`),
-      fetchJSON(`${SCRIPT_URL}?action=getOptions&t=${Date.now()}`)
-    ]);
+    const res = await fetchJSON(`${SCRIPT_URL}?t=${Date.now()}`);
+    if (res) {
+      tasks = Array.isArray(res.tasks) ? res.tasks : [];
+      dailyEvents = res.events || {};
+      codes = res.options?.codes || [];
+      subjects = res.options?.subjects || [];
 
-    tasks = (tasksRes.status === 'fulfilled' && Array.isArray(tasksRes.value)) ? tasksRes.value : [];
-    dailyEvents = (eventsRes.status === 'fulfilled' && eventsRes.value) ? eventsRes.value : {};
-    
-    if (optionsRes.status === 'fulfilled' && optionsRes.value) {
-      codes = optionsRes.value.codes || [];
-      subjects = optionsRes.value.subjects || [];
+      // บันทึกลง Cache
+      localStorage.setItem('homeworkCacheData', JSON.stringify(res));
+
+      updateOptions();
+      renderTasks();
+      renderCalendar();
+      selectDate(selectedDate);
+
+      setStatus('ซิงค์ข้อมูลสำเร็จ • ' + new Date().toLocaleTimeString('th-TH'));
+      if (showMessage) showAlert('ซิงค์ข้อมูลสำเร็จ');
     }
-
-    updateOptions();
-    renderTasks();
-    renderCalendar();
-    selectDate(selectedDate);
-
-    setStatus('ซิงค์ข้อมูลสำเร็จ • ' + new Date().toLocaleTimeString('th-TH'));
-    if (showMessage) showAlert('ซิงค์ข้อมูลสำเร็จ');
   };
 
   if (busy) await load();
-  else await execute('กำลังซิงค์ข้อมูล...', load);
+  else {
+    // ถ้าไม่มี Cache ให้แสดงโหลดแบบเต็มรูปแบบ ถ้ามีแล้วให้โหลดเงียบๆ ข้างหลังเพื่อให้ไวที่สุด
+    if (!cachedData) {
+      await execute('กำลังซิงค์ข้อมูล...', load);
+    } else {
+      load().catch(e => console.error(e));
+    }
+  }
 }
 
 function switchTab(tab) {
