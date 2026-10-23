@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.64)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.65 Sync Fixed)</span>
       </div>
     </div>
 
@@ -371,7 +371,7 @@ async function execute(label, action) {
   } catch (error) {
     console.error(error);
     setStatus('ผิดพลาด: ' + error.message, false);
-    showAlert(error.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+    showAlert(error.message || 'เกิดข้อผิดพลาด');
     return false;
   } finally {
     busy = false;
@@ -408,7 +408,7 @@ async function login() {
     return;
   }
 
-  await execute('กำลังตรวจสอบบัญชี...', async () => {
+  await execute('กำลังตรวจสอบสิทธิ์...', async () => {
     const res = await fetchJSON(`${SCRIPT_URL}?action=checkLogin&username=${encodeURIComponent(inputVal)}&t=${Date.now()}`);
     
     if (res && res.success && res.user) {
@@ -439,6 +439,7 @@ function logout() {
   logActivity('ออกจากระบบ', `ผู้ใช้งาน ${currentUser ? currentUser.name : 'Unknown'} ออกจากระบบ`);
   currentUser = null;
   sessionStorage.removeItem('homeworkUser');
+  localStorage.removeItem('homeworkCacheData');
   location.reload();
 }
 
