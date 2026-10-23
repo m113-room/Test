@@ -375,7 +375,7 @@ function formatDate(value) {
   return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-function showLoading(text = 'กำลังโหลด...') {
+function showLoading(text = 'กำลังซิงค์...') {
   el('loading-text').textContent = text;
   el('loading-overlay').classList.remove('hidden');
 }
@@ -399,7 +399,7 @@ async function login() {
   let inputVal = el('username').value.trim();
   if (!inputVal) inputVal = "Guest";
 
-  showLoading('กำลังเข้าสู่ระบบ...');
+  showLoading('กำลังซิงค์...');
   try {
     const res = await fetchJSON(`${SCRIPT_URL}?action=checkLogin&username=${encodeURIComponent(inputVal)}&t=${Date.now()}`);
     if (res && res.success && res.user) {
@@ -444,31 +444,35 @@ function logout() {
 
 async function loadAllData(showMessage = false) {
   const load = async () => {
-    const [tasksRes, eventsRes, optionsRes] = await Promise.allSettled([
-      fetchJSON(`${SCRIPT_URL}?t=${Date.now()}`),
-      fetchJSON(`${SCRIPT_URL}?action=getEvents&t=${Date.now()}`),
-      fetchJSON(`${SCRIPT_URL}?action=getOptions&t=${Date.now()}`)
-    ]);
+    showLoading('กำลังซิงค์...');
+    try {
+      const [tasksRes, eventsRes, optionsRes] = await Promise.allSettled([
+        fetchJSON(`${SCRIPT_URL}?t=${Date.now()}`),
+        fetchJSON(`${SCRIPT_URL}?action=getEvents&t=${Date.now()}`),
+        fetchJSON(`${SCRIPT_URL}?action=getOptions&t=${Date.now()}`)
+      ]);
 
-    tasks = (tasksRes.status === 'fulfilled' && Array.isArray(tasksRes.value)) ? tasksRes.value : [];
-    dailyEvents = (eventsRes.status === 'fulfilled' && eventsRes.value) ? eventsRes.value : {};
-    
-    if (optionsRes.status === 'fulfilled' && optionsRes.value) {
-      codes = optionsRes.value.codes || [];
-      subjects = optionsRes.value.subjects || [];
+      tasks = (tasksRes.status === 'fulfilled' && Array.isArray(tasksRes.value)) ? tasksRes.value : [];
+      dailyEvents = (eventsRes.status === 'fulfilled' && eventsRes.value) ? eventsRes.value : {};
+      
+      if (optionsRes.status === 'fulfilled' && optionsRes.value) {
+        codes = optionsRes.value.codes || [];
+        subjects = optionsRes.value.subjects || [];
+      }
+
+      updateOptions();
+      renderTasks();
+      renderCalendar();
+      selectDate(selectedDate);
+
+      setStatus('ซิงค์ข้อมูลสำเร็จ • ' + new Date().toLocaleTimeString('th-TH'));
+      if (showMessage) showAlert('ซิงค์ข้อมูลสำเร็จ');
+    } finally {
+      hideLoading();
     }
-
-    updateOptions();
-    renderTasks();
-    renderCalendar();
-    selectDate(selectedDate);
-
-    setStatus('ซิงค์ข้อมูลสำเร็จ • ' + new Date().toLocaleTimeString('th-TH'));
-    if (showMessage) showAlert('ซิงค์ข้อมูลสำเร็จ');
   };
 
-  if (busy) await load();
-  else await load();
+  await load();
 }
 
 function switchTab(tab) {
@@ -1018,3 +1022,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
