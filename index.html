@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.60 Lightning Fast)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.61 Secure Mode)</span>
       </div>
     </div>
 
@@ -406,16 +406,17 @@ async function login() {
       if (res && res.success && res.user) {
         currentUser = { 
           username: res.user.username, 
-          role: res.user.role, // ยึดสิทธิ์จากชีต Users โดยตรง
+          role: res.user.role, // ยึดสิทธิ์จากชีต Users เท่านั้น
           name: res.user.name 
         };
       } else {
         throw new Error();
       }
     } catch (e) {
+      // หากเกิดข้อผิดพลาด ให้บังคับเป็นสิทธิ์ user ทั่วไปทันที
       currentUser = {
         username: inputVal,
-        role: 'user', // ถ้าเชื่อมต่อไม่ได้หรือไม่มีในชีต ให้ดีפולต์เป็น user ทั่วไป
+        role: 'user',
         name: inputVal
       };
     }
