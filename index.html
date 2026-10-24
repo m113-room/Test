@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.74 Assign & Due Date Tracking)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.75 Arabic Numeral Date Fixed)</span>
       </div>
     </div>
 
@@ -325,12 +325,15 @@ function dateKey(date) {
     String(date.getDate()).padStart(2, '0');
 }
 
+// ฟังก์ชันแปลงวันที่เป็นเลขอาราบิกทั้งหมด (th-TH ปกติ)
 function formatDate(value) {
   if (!value) return '-';
-  const dateStr = String(value).substring(0, 10);
-  const d = new Date(dateStr + 'T12:00:00');
-  if (isNaN(d.getTime())) return dateStr;
-  return d.toLocaleDateString('th-TH-u-nu-thai', { day: 'numeric', month: 'short', year: 'numeric' });
+  const str = String(value);
+  const d = new Date(str.includes('T') ? str : str.substring(0, 10) + 'T12:00:00');
+  if (!isNaN(d.getTime())) {
+    return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+  return str;
 }
 
 function showLoading(text = 'กำลังโหลด...') {
