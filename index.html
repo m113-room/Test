@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.2.01 Duplicate Task Check)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.2.02 Default Tab Pending)</span>
       </div>
     </div>
 
@@ -439,6 +439,7 @@ async function login() {
       el('user-display').textContent = currentUser.name;
 
       updateAdminUI();
+      switchTab('pending'); // กำหนดให้เปิดเข้าหน้า "ภาพรวมงานค้าง" เป็นหน้าแรกเสมอ
 
       await loadAllData(false);
       logActivity('เข้าสู่ระบบ', `ผู้ใช้งาน ${currentUser.name} เข้าสู่ระบบสำเร็จ`);
@@ -720,7 +721,6 @@ async function addTask() {
     return;
   }
 
-  // ตรวจสอบการบันทึกงานซ้ำ (เช็ครหัสวิชา + รายละเอียดการบ้านซ้ำกัน)
   const isDuplicate = tasks.some(t => 
     t.code.toLowerCase() === task.code.toLowerCase() && 
     t.detail.toLowerCase() === task.detail.toLowerCase()
@@ -823,7 +823,6 @@ async function addExtraStudent() {
 
   if (!Array.isArray(task.extraUnsubmitted)) task.extraUnsubmitted = [];
   
-  // เช็คว่าเลขที่นี้ถูกเพิ่มเป็นคนค้างซ้ำหรือไม่
   if (task.extraUnsubmitted.includes(number)) {
     showAlert('แจ้งเตือน: มีรายชื่อเลขที่นี้ในรายการคนค้างอยู่แล้ว!');
     return;
@@ -964,7 +963,6 @@ async function addEvent() {
   if (!dailyEvents[selectedDate]) dailyEvents[selectedDate] = [];
   else if (!Array.isArray(dailyEvents[selectedDate])) dailyEvents[selectedDate] = [dailyEvents[selectedDate]];
 
-  // เช็คกิจกรรมซ้ำในวันเดียวกัน
   if (dailyEvents[selectedDate].includes(event)) {
     showAlert('แจ้งเตือน: มีกิจกรรมนี้ในวันนี้อยู่แล้ว!');
     return;
@@ -1191,6 +1189,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       el('user-display').textContent = currentUser.name;
       
       updateAdminUI();
+      switchTab('pending'); // กำหนดหน้าแรกเป็น "ภาพรวมงานค้าง" เมื่อเปิดแอปด้วย session เดิม
 
       await loadAllData(false);
     } catch (error) {
