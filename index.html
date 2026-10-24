@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.98 Fix Date Matcher)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.2.01 Duplicate Task Check)</span>
       </div>
     </div>
 
@@ -720,6 +720,17 @@ async function addTask() {
     return;
   }
 
+  // ตรวจสอบการบันทึกงานซ้ำ (เช็ครหัสวิชา + รายละเอียดการบ้านซ้ำกัน)
+  const isDuplicate = tasks.some(t => 
+    t.code.toLowerCase() === task.code.toLowerCase() && 
+    t.detail.toLowerCase() === task.detail.toLowerCase()
+  );
+
+  if (isDuplicate) {
+    showAlert('แจ้งเตือน: มีการบันทึกงานซ้ำในระบบแล้ว!');
+    return;
+  }
+
   const updatedTasks = [task, ...tasks];
 
   const success = await execute('กำลังบันทึกการบ้าน...', async () => {
@@ -739,6 +750,7 @@ async function addTask() {
     selectDate(selectedDate);
     setStatus('บันทึกการบ้านเรียบร้อย');
     logActivity('เพิ่มการบ้าน', `วิชา ${task.subject} (${task.code}) - ${task.detail}`);
+    showAlert('บันทึกการบ้านสำเร็จแล้ว');
   }
 }
 
@@ -810,17 +822,24 @@ async function addExtraStudent() {
   if (!task) return;
 
   if (!Array.isArray(task.extraUnsubmitted)) task.extraUnsubmitted = [];
-  if (!task.extraUnsubmitted.includes(number)) {
-    task.extraUnsubmitted.push(number);
-    renderTasks();
-    
-    const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
-    cachedData.tasks = tasks;
-    localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
-
-    sendSaveRequest('saveTasks', tasks);
-    logActivity('เพิ่มรายชื่อคนค้างงาน', `เลขที่ ${number} ในวิชา ${task.subject}`);
+  
+  // เช็คว่าเลขที่นี้ถูกเพิ่มเป็นคนค้างซ้ำหรือไม่
+  if (task.extraUnsubmitted.includes(number)) {
+    showAlert('แจ้งเตือน: มีรายชื่อเลขที่นี้ในรายการคนค้างอยู่แล้ว!');
+    return;
   }
+
+  task.extraUnsubmitted.push(number);
+  renderTasks();
+    
+  const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
+  cachedData.tasks = tasks;
+  localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
+
+  sendSaveRequest('saveTasks', tasks);
+  logActivity('เพิ่มรายชื่อคนค้างงาน', `เลขที่ ${number} ในวิชา ${task.subject}`);
+
+  showAlert('เพิ่มรายชื่อคนค้างสำเร็จแล้ว');
 
   el('student-number').value = '';
   el('student-form').classList.add('hidden');
@@ -945,6 +964,12 @@ async function addEvent() {
   if (!dailyEvents[selectedDate]) dailyEvents[selectedDate] = [];
   else if (!Array.isArray(dailyEvents[selectedDate])) dailyEvents[selectedDate] = [dailyEvents[selectedDate]];
 
+  // เช็คกิจกรรมซ้ำในวันเดียวกัน
+  if (dailyEvents[selectedDate].includes(event)) {
+    showAlert('แจ้งเตือน: มีกิจกรรมนี้ในวันนี้อยู่แล้ว!');
+    return;
+  }
+
   dailyEvents[selectedDate].push(event);
 
   selectDate(selectedDate);
@@ -958,6 +983,8 @@ async function addEvent() {
   sendSaveRequest('saveEvents', dailyEvents);
 
   logActivity('เพิ่มกิจกรรม', `วันที่ ${formatDate(selectedDate)}: ${event}`);
+
+  showAlert('เพิ่มกิจกรรมสำเร็จแล้ว');
 }
 
 async function deleteEvent(key, index) {
