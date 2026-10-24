@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.91 Calendar Tasks Restored)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.92 Calendar Task Students Restored)</span>
       </div>
     </div>
 
@@ -576,11 +576,21 @@ function createTaskCard(task) {
         <span class="text-emerald-600">ส่งแล้ว ${completed}/${total} (${percent}%)</span>
         <span class="text-rose-500">ยังไม่ส่ง (${unsubmitted.length})</span>
       </div>
+      <div class="flex flex-wrap gap-1.5" data-students></div>
     </div>
   `;
 
   div.querySelector('[data-action="pin"]').onclick = () => togglePin(task.id);
   div.querySelector('[data-action="delete"]').onclick = () => deleteTask(task.id);
+
+  const students = div.querySelector('[data-students]');
+  unsubmitted.forEach(number => {
+    const button = document.createElement('button');
+    button.className = 'bg-rose-50 text-rose-600 px-2.5 py-1 rounded-lg text-[11px] font-bold border border-rose-100 hover:bg-rose-100 transition shadow-xs';
+    button.textContent = number;
+    button.onclick = () => toggleStudent(task.id, number);
+    students.appendChild(button);
+  });
 
   return div;
 }
