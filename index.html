@@ -172,7 +172,7 @@
             <span style="color: #3b82f6;">FRI</span>
             <span style="color: #a855f7;">SAT</span>
           </div>
-          <div id="calendar-days" class="grid grid-cols-7 gap-1"></div>
+          <div id="calendar-days" class="grid grid-cols-7 gap-1.5"></div>
         </div>
 
         <div class="bg-slate-50/60 border border-slate-100 rounded-2xl p-3.5">
@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.80 Calendar Dots Fixed)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.81 Enlarged Calendar Cells)</span>
       </div>
     </div>
 
@@ -833,11 +833,13 @@ function renderCalendar() {
   for (let day = 1; day <= totalDays; day++) {
     const key = dateKey(new Date(year, month, day));
     const button = document.createElement('button');
-    button.className = 'h-10 rounded-xl text-xs font-bold transition flex flex-col items-center justify-center relative p-1 ' +
-      (key === selectedDate ? 'bg-[#38bdf8] text-white shadow-sm' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-100');
+    // ปรับความสูงช่องปฏิทินจาก h-10 เป็น h-14 เพื่อขยายขนาดช่องให้ใหญ่ขึ้น
+    button.className = 'h-14 rounded-2xl text-xs font-bold transition flex flex-col items-center justify-center relative p-1 ' +
+      (key === selectedDate ? 'bg-[#38bdf8] text-white shadow-md' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-100');
     button.onclick = () => selectDate(key);
 
     const dayText = document.createElement('span');
+    dayText.className = 'text-sm font-extrabold';
     dayText.textContent = day;
     button.appendChild(dayText);
 
@@ -853,17 +855,17 @@ function renderCalendar() {
 
     if (hasTask || hasEvent) {
       const dotsContainer = document.createElement('div');
-      dotsContainer.className = 'flex gap-1 mt-0.5 items-center justify-center';
+      dotsContainer.className = 'flex gap-1 mt-1 items-center justify-center';
 
       if (hasTask) {
         const pinkDot = document.createElement('span');
-        pinkDot.className = 'w-1.5 h-1.5 rounded-full bg-pink-500';
+        pinkDot.className = 'w-2 h-2 rounded-full bg-pink-500 shadow-sm';
         dotsContainer.appendChild(pinkDot);
       }
 
       if (hasEvent) {
         const blueDot = document.createElement('span');
-        blueDot.className = 'w-1.5 h-1.5 rounded-full bg-sky-400';
+        blueDot.className = 'w-2 h-2 rounded-full bg-sky-400 shadow-sm';
         dotsContainer.appendChild(blueDot);
       }
 
