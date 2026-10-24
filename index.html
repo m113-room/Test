@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.94 Complete Version)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.95 Calendar Clean View)</span>
       </div>
     </div>
 
@@ -522,8 +522,8 @@ function renderTasks() {
   if(el('tracking-count')) el('tracking-count').textContent = tasks.length + ' ITEMS';
 
   tasks.forEach(task => {
-    if (task.isPinned) pinned.appendChild(createTaskCard(task));
-    else list.appendChild(createTaskCard(task));
+    if (task.isPinned) pinned.appendChild(createTaskCard(task, false));
+    else list.appendChild(createTaskCard(task, false));
 
     tracking.appendChild(createTrackingCard(task));
 
@@ -538,7 +538,7 @@ function renderTasks() {
   if (!tracking.children.length) tracking.innerHTML = '<p class="text-xs text-slate-500 text-center py-6 font-bold">ไม่มีรายการงานค้าง</p>';
 }
 
-function createTaskCard(task) {
+function createTaskCard(task, hideStudents = false) {
   const div = document.createElement('div');
   div.className = 'bg-white border border-slate-100 rounded-2xl p-3.5 shadow-sm space-y-2';
 
@@ -546,6 +546,28 @@ function createTaskCard(task) {
   const total = TOTAL_STUDENTS + (task.extraUnsubmitted || []).filter(n => Number(n) > TOTAL_STUDENTS).length;
   const completed = Math.max(0, total - unsubmitted.length);
   const percent = total ? Math.round(completed / total * 100) : 0;
+
+  let studentsSection = '';
+  if (!hideStudents) {
+    studentsSection = `
+      <div class="pt-1.5 border-t border-slate-100">
+        <div class="flex justify-between items-center text-[10px] font-extrabold mb-2">
+          <span class="text-emerald-600">ส่งแล้ว ${completed}/${total} (${percent}%)</span>
+          <span class="text-rose-500">ยังไม่ส่ง (${unsubmitted.length})</span>
+        </div>
+        <div class="flex flex-wrap gap-1.5" data-students></div>
+      </div>
+    `;
+  } else {
+    studentsSection = `
+      <div class="pt-1.5 border-t border-slate-100">
+        <div class="flex justify-between items-center text-[10px] font-extrabold">
+          <span class="text-emerald-600">ส่งแล้ว ${completed}/${total} (${percent}%)</span>
+          <span class="text-rose-500">ยังไม่ส่ง (${unsubmitted.length})</span>
+        </div>
+      </div>
+    `;
+  }
 
   div.innerHTML = `
     <div class="flex justify-between items-start gap-2">
@@ -570,27 +592,22 @@ function createTaskCard(task) {
         </button>
       </div>
     </div>
-
-    <div class="pt-1.5 border-t border-slate-100">
-      <div class="flex justify-between items-center text-[10px] font-extrabold mb-2">
-        <span class="text-emerald-600">ส่งแล้ว ${completed}/${total} (${percent}%)</span>
-        <span class="text-rose-500">ยังไม่ส่ง (${unsubmitted.length})</span>
-      </div>
-      <div class="flex flex-wrap gap-1.5" data-students></div>
-    </div>
+    ${studentsSection}
   `;
 
   div.querySelector('[data-action="pin"]').onclick = () => togglePin(task.id);
   div.querySelector('[data-action="delete"]').onclick = () => deleteTask(task.id);
 
-  const students = div.querySelector('[data-students]');
-  unsubmitted.forEach(number => {
-    const button = document.createElement('button');
-    button.className = 'bg-rose-50 text-rose-600 px-2.5 py-1 rounded-lg text-[11px] font-bold border border-rose-100 hover:bg-rose-100 transition shadow-xs';
-    button.textContent = number;
-    button.onclick = () => toggleStudent(task.id, number);
-    students.appendChild(button);
-  });
+  if (!hideStudents) {
+    const students = div.querySelector('[data-students]');
+    unsubmitted.forEach(number => {
+      const button = document.createElement('button');
+      button.className = 'bg-rose-50 text-rose-600 px-2.5 py-1 rounded-lg text-[11px] font-bold border border-rose-100 hover:bg-rose-100 transition shadow-xs';
+      button.textContent = number;
+      button.onclick = () => toggleStudent(task.id, number);
+      students.appendChild(button);
+    });
+  }
 
   return div;
 }
@@ -899,7 +916,8 @@ function selectDate(key) {
   });
   el('selected-date-count').textContent = matches.length + ' รายการ';
 
-  matches.forEach(task => container.appendChild(createTaskCard(task)));
+  // ส่งค่า true เฉพาะในหน้าปฏิทิน เพื่อซ่อนปุ่มเลขที่นักเรียนแต่ยังแสดงหัวข้อสรุปการส่งงาน
+  matches.forEach(task => container.appendChild(createTaskCard(task, true)));
   if (!matches.length) container.innerHTML = '<p class="text-xs text-slate-500 text-center py-2 font-bold">ไม่มีรายการในวันนี้</p>';
 
   const eventList = el('event-list');
@@ -951,7 +969,7 @@ async function addEvent() {
 }
 
 async function deleteEvent(key, index) {
-  if (!confirm('ต้องการลบกิจกรรมนี้ใช่หรือไม่?')) return;
+  if (!confirm('ต้องการลบการบ้านนี้ใช่หรือไม่?')) return;
 
   const rawEvent = dailyEvents[key];
   const events = Array.isArray(rawEvent) ? rawEvent : (rawEvent ? [rawEvent] : []);
