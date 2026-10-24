@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.79 Full Stable Features)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.80 Calendar Dots Fixed)</span>
       </div>
     </div>
 
@@ -848,7 +848,8 @@ function renderCalendar() {
     });
 
     const rawEvent = dailyEvents[key];
-    const hasEvent = rawEvent ? (Array.isArray(rawEvent) ? rawEvent.length > 0 : Boolean(rawEvent)) : false;
+    const eventsArr = Array.isArray(rawEvent) ? rawEvent : (rawEvent ? [rawEvent] : []);
+    const hasEvent = eventsArr.length > 0 && eventsArr.some(e => String(e).trim() !== '');
 
     if (hasTask || hasEvent) {
       const dotsContainer = document.createElement('div');
