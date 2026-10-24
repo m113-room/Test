@@ -247,13 +247,13 @@
 
     </main>
 
-    <!-- ปุ่มการส่งการบ้านและเวอร์ชันด้านล่างสุด เพิ่มระยะห่างด้านบนให้ไม่เบียด -->
+    <!-- ปุ่มการส่งการบ้านและเวอร์ชันด้านล่างสุด -->
     <div class="w-full text-center pt-3 pb-2 space-y-2">
       <button onclick="showAlert('ระบบส่งการบ้านเปิดใช้งานปกติ')" class="bg-white/95 backdrop-blur-md text-slate-700 text-xs font-bold px-8 py-2.5 rounded-full border border-white shadow-sm hover:bg-white transition">
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.90 Bottom Spacing Fixed)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.91 Calendar Tasks Restored)</span>
       </div>
     </div>
 
@@ -576,21 +576,11 @@ function createTaskCard(task) {
         <span class="text-emerald-600">ส่งแล้ว ${completed}/${total} (${percent}%)</span>
         <span class="text-rose-500">ยังไม่ส่ง (${unsubmitted.length})</span>
       </div>
-      <div class="flex flex-wrap gap-1.5" data-students></div>
     </div>
   `;
 
   div.querySelector('[data-action="pin"]').onclick = () => togglePin(task.id);
   div.querySelector('[data-action="delete"]').onclick = () => deleteTask(task.id);
-
-  const students = div.querySelector('[data-students]');
-  unsubmitted.forEach(number => {
-    const button = document.createElement('button');
-    button.className = 'bg-rose-50 text-rose-600 px-2.5 py-1 rounded-lg text-[11px] font-bold border border-rose-100 hover:bg-rose-100 transition shadow-xs';
-    button.textContent = number;
-    button.onclick = () => toggleStudent(task.id, number);
-    students.appendChild(button);
-  });
 
   return div;
 }
