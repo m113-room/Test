@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.75 Arabic Numeral Date Fixed)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.76 Calendar Fixed)</span>
       </div>
     </div>
 
@@ -325,7 +325,6 @@ function dateKey(date) {
     String(date.getDate()).padStart(2, '0');
 }
 
-// ฟังก์ชันแปลงวันที่เป็นเลขอาราบิกทั้งหมด (th-TH ปกติ)
 function formatDate(value) {
   if (!value) return '-';
   const str = String(value);
@@ -857,8 +856,8 @@ function selectDate(key) {
   container.innerHTML = '';
 
   const matches = tasks.filter(task => {
-    const assign = String(task.assignDate || '').substring(0, 10);
-    const due = String(task.dueDate || '').substring(0, 10);
+    const assign = task.assignDate ? String(task.assignDate).substring(0, 10) : '';
+    const due = task.dueDate ? String(task.dueDate).substring(0, 10) : '';
     return assign === key || due === key;
   });
   el('selected-date-count').textContent = matches.length + ' รายการ';
@@ -1091,4 +1090,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
-
