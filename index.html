@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.95 Calendar Clean View)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.96 Calendar Fix)</span>
       </div>
     </div>
 
@@ -912,11 +912,10 @@ function selectDate(key) {
   const matches = tasks.filter(task => {
     const assign = task.assignDate ? String(task.assignDate).substring(0, 10) : '';
     const due = task.dueDate ? String(task.dueDate).substring(0, 10) : '';
-    return assign === key || due === key;
+    return assign === key || due === key || (assign <= key && due >= key);
   });
   el('selected-date-count').textContent = matches.length + ' รายการ';
 
-  // ส่งค่า true เฉพาะในหน้าปฏิทิน เพื่อซ่อนปุ่มเลขที่นักเรียนแต่ยังแสดงหัวข้อสรุปการส่งงาน
   matches.forEach(task => container.appendChild(createTaskCard(task, true)));
   if (!matches.length) container.innerHTML = '<p class="text-xs text-slate-500 text-center py-2 font-bold">ไม่มีรายการในวันนี้</p>';
 
@@ -969,7 +968,7 @@ async function addEvent() {
 }
 
 async function deleteEvent(key, index) {
-  if (!confirm('ต้องการลบการบ้านนี้ใช่หรือไม่?')) return;
+  if (!confirm('ต้องการลบกิจกรรมนี้ใช่หรือไม่?')) return;
 
   const rawEvent = dailyEvents[key];
   const events = Array.isArray(rawEvent) ? rawEvent : (rawEvent ? [rawEvent] : []);
