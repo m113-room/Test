@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.71 Thai Numeral Date)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.74 Assign & Due Date Tracking)</span>
       </div>
     </div>
 
@@ -325,7 +325,6 @@ function dateKey(date) {
     String(date.getDate()).padStart(2, '0');
 }
 
-// ฟังก์ชันแปลงวันที่แสดงผลเป็นเลขไทย
 function formatDate(value) {
   if (!value) return '-';
   const dateStr = String(value).substring(0, 10);
@@ -539,7 +538,12 @@ function renderTasks() {
 
 function createTaskCard(task) {
   const div = document.createElement('div');
-  div.className = 'bg-white border border-slate-100 rounded-2xl p-3.5 shadow-sm';
+  div.className = 'bg-white border border-slate-100 rounded-2xl p-3.5 shadow-sm space-y-2';
+
+  const unsubmitted = getUnsubmitted(task);
+  const total = TOTAL_STUDENTS + (task.extraUnsubmitted || []).filter(n => Number(n) > TOTAL_STUDENTS).length;
+  const completed = Math.max(0, total - unsubmitted.length);
+  const percent = total ? Math.round(completed / total * 100) : 0;
 
   div.innerHTML = `
     <div class="flex justify-between items-start gap-2">
@@ -549,7 +553,10 @@ function createTaskCard(task) {
         </span>
         <h3 class="font-extrabold text-xs text-slate-800 mt-1">${escapeHtml(task.subject)}</h3>
         <p class="text-[11px] text-slate-600 mt-0.5 font-medium">${escapeHtml(task.detail)}</p>
-        <p class="text-[10px] text-rose-500 font-bold mt-1.5">กำหนดส่ง: ${formatDate(task.dueDate)}</p>
+        <div class="flex gap-3 mt-1.5 text-[10px] font-bold">
+          <span class="text-slate-500">วันสั่ง: ${formatDate(task.assignDate)}</span>
+          <span class="text-rose-500">กำหนดส่ง: ${formatDate(task.dueDate)}</span>
+        </div>
       </div>
 
       <div class="flex gap-1.5">
@@ -561,10 +568,27 @@ function createTaskCard(task) {
         </button>
       </div>
     </div>
+
+    <div class="pt-1 border-t border-slate-100">
+      <div class="flex justify-between items-center text-[10px] font-extrabold mb-1">
+        <span class="text-emerald-600">ส่งแล้ว ${completed}/${total} (${percent}%)</span>
+        <span class="text-rose-500">ยังไม่ส่ง (${unsubmitted.length})</span>
+      </div>
+      <div class="flex flex-wrap gap-1" data-students></div>
+    </div>
   `;
 
   div.querySelector('[data-action="pin"]').onclick = () => togglePin(task.id);
   div.querySelector('[data-action="delete"]').onclick = () => deleteTask(task.id);
+
+  const students = div.querySelector('[data-students]');
+  unsubmitted.forEach(number => {
+    const button = document.createElement('button');
+    button.className = 'bg-rose-50 text-rose-600 px-2 py-0.5 rounded-lg text-[10px] font-bold border border-rose-100 hover:bg-rose-100 transition';
+    button.textContent = number;
+    button.onclick = () => toggleStudent(task.id, number);
+    students.appendChild(button);
+  });
 
   return div;
 }
@@ -597,8 +621,15 @@ function createTrackingCard(task) {
   div.innerHTML = `
     <div class="flex justify-between items-start gap-2">
       <div>
-        <h3 class="font-extrabold text-xs text-slate-800">${escapeHtml(task.subject)}</h3>
+        <span class="text-[10px] bg-purple-50 text-purple-600 px-2 py-0.5 rounded-md font-extrabold border border-purple-100">
+          ${escapeHtml(task.code)}
+        </span>
+        <h3 class="font-extrabold text-xs text-slate-800 mt-1">${escapeHtml(task.subject)}</h3>
         <p class="text-[11px] text-slate-600 mt-0.5 font-medium">${escapeHtml(task.detail)}</p>
+        <div class="flex gap-3 mt-1.5 text-[10px] font-bold">
+          <span class="text-slate-500">วันสั่ง: ${formatDate(task.assignDate)}</span>
+          <span class="text-rose-500">กำหนดส่ง: ${formatDate(task.dueDate)}</span>
+        </div>
       </div>
       <div class="flex gap-1.5">
         <button data-action="pin" class="text-amber-500 hover:text-amber-600 p-1" title="ปักหมุด">
