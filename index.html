@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.84 Solid Blue Active Frame)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.85 Blue Outline Frame)</span>
       </div>
     </div>
 
@@ -834,9 +834,10 @@ function renderCalendar() {
     const key = dateKey(new Date(year, month, day));
     const button = document.createElement('button');
     
+    // ตั้งค่ากรอบเส้นขอบสีฟ้าสดเมื่อถูกเลือก
     button.className = 'h-14 rounded-2xl transition flex flex-col items-center justify-start pt-2.5 relative p-1 ' +
       (key === selectedDate 
-        ? 'bg-[#38bdf8] text-white shadow-md font-black' 
+        ? 'border-2 border-[#38bdf8] bg-white text-[#38bdf8] font-black shadow-sm' 
         : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-100');
     button.onclick = () => selectDate(key);
 
@@ -861,17 +862,13 @@ function renderCalendar() {
 
       if (hasTask) {
         const pinkDot = document.createElement('span');
-        pinkDot.className = key === selectedDate 
-          ? 'w-1.5 h-1.5 rounded-full bg-pink-200 shadow-sm' 
-          : 'w-1.5 h-1.5 rounded-full bg-pink-500 shadow-sm';
+        pinkDot.className = 'w-1.5 h-1.5 rounded-full bg-pink-500 shadow-sm';
         dotsContainer.appendChild(pinkDot);
       }
 
       if (hasEvent) {
         const blueDot = document.createElement('span');
-        blueDot.className = key === selectedDate 
-          ? 'w-1.5 h-1.5 rounded-full bg-white shadow-sm' 
-          : 'w-1.5 h-1.5 rounded-full bg-sky-400 shadow-sm';
+        blueDot.className = 'w-1.5 h-1.5 rounded-full bg-sky-400 shadow-sm';
         dotsContainer.appendChild(blueDot);
       }
 
