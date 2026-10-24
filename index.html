@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.69 Stable POST Sync)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.70 Date Fixed)</span>
       </div>
     </div>
 
@@ -325,10 +325,12 @@ function dateKey(date) {
     String(date.getDate()).padStart(2, '0');
 }
 
+// ปรับแก้การตัดข้อความวันที่ ป้องกันปัญหาวันที่ยาวเกินไป
 function formatDate(value) {
   if (!value) return '-';
-  const d = new Date(String(value).substring(0, 10) + 'T12:00:00');
-  if (isNaN(d.getTime())) return String(value);
+  const dateStr = String(value).substring(0, 10);
+  const d = new Date(dateStr + 'T12:00:00');
+  if (isNaN(d.getTime())) return dateStr;
   return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
@@ -820,7 +822,11 @@ function selectDate(key) {
   const container = el('selected-date-tasks');
   container.innerHTML = '';
 
-  const matches = tasks.filter(task => task.assignDate === key || task.dueDate === key);
+  const matches = tasks.filter(task => {
+    const assign = String(task.assignDate || '').substring(0, 10);
+    const due = String(task.dueDate || '').substring(0, 10);
+    return assign === key || due === key;
+  });
   el('selected-date-count').textContent = matches.length + ' รายการ';
 
   matches.forEach(task => container.appendChild(createTaskCard(task)));
