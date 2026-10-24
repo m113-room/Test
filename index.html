@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.76 Calendar Fixed)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.78 Event Delete Added)</span>
       </div>
     </div>
 
@@ -833,10 +833,40 @@ function renderCalendar() {
   for (let day = 1; day <= totalDays; day++) {
     const key = dateKey(new Date(year, month, day));
     const button = document.createElement('button');
-    button.textContent = day;
-    button.className = 'h-9 rounded-xl text-xs font-bold transition ' +
+    button.className = 'h-10 rounded-xl text-xs font-bold transition flex flex-col items-center justify-center relative p-1 ' +
       (key === selectedDate ? 'bg-[#38bdf8] text-white shadow-sm' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-100');
     button.onclick = () => selectDate(key);
+
+    const dayText = document.createElement('span');
+    dayText.textContent = day;
+    button.appendChild(dayText);
+
+    const hasTask = tasks.some(t => {
+      const assign = t.assignDate ? String(t.assignDate).substring(0, 10) : '';
+      const due = t.dueDate ? String(t.dueDate).substring(0, 10) : '';
+      return assign === key || due === key;
+    });
+    const hasEvent = (dailyEvents[key] || []).length > 0;
+
+    if (hasTask || hasEvent) {
+      const dotsContainer = document.createElement('div');
+      dotsContainer.className = 'flex gap-1 mt-0.5 items-center justify-center';
+
+      if (hasTask) {
+        const pinkDot = document.createElement('span');
+        pinkDot.className = 'w-1.5 h-1.5 rounded-full bg-pink-500';
+        dotsContainer.appendChild(pinkDot);
+      }
+
+      if (hasEvent) {
+        const blueDot = document.createElement('span');
+        blueDot.className = 'w-1.5 h-1.5 rounded-full bg-sky-400';
+        dotsContainer.appendChild(blueDot);
+      }
+
+      button.appendChild(dotsContainer);
+    }
+
     container.appendChild(button);
   }
 }
@@ -867,11 +897,23 @@ function selectDate(key) {
 
   const eventList = el('event-list');
   eventList.innerHTML = '';
-  (dailyEvents[key] || []).forEach(event => {
-    const p = document.createElement('p');
-    p.className = 'bg-sky-50 text-sky-800 rounded-xl p-2 text-xs border border-sky-100 font-bold';
-    p.textContent = event;
-    eventList.appendChild(p);
+  
+  const events = dailyEvents[key] || [];
+  events.forEach((event, index) => {
+    const div = document.createElement('div');
+    div.className = 'bg-sky-50 text-sky-800 rounded-xl p-2 text-xs border border-sky-100 font-bold flex justify-between items-center';
+    
+    const span = document.createElement('span');
+    span.textContent = event;
+    div.appendChild(span);
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'text-rose-500 hover:text-rose-700 px-1.5 py-0.5 text-xs';
+    deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+    deleteBtn.onclick = () => deleteEvent(key, index);
+    div.appendChild(deleteBtn);
+
+    eventList.appendChild(div);
   });
 
   if (!eventList.children.length) eventList.innerHTML = '<p class="text-[11px] text-slate-500 font-semibold">ไม่มีกิจกรรมพิเศษ</p>';
@@ -895,6 +937,25 @@ async function addEvent() {
   sendSaveRequest('saveEvents', dailyEvents);
 
   logActivity('เพิ่มกิจกรรม', `วันที่ ${formatDate(selectedDate)}: ${event}`);
+}
+
+async function deleteEvent(key, index) {
+  if (!confirm('ต้องการลบกิจกรรมนี้ใช่หรือไม่?')) return;
+
+  const events = dailyEvents[key];
+  if (events) {
+    const removed = events.splice(index, 1);
+    if (events.length === 0) delete dailyEvents[key];
+
+    selectDate(selectedDate);
+
+    const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
+    cachedData.events = dailyEvents;
+    localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
+
+    sendSaveRequest('saveEvents', dailyEvents);
+    logActivity('ลบกิจกรรม', `วันที่ ${formatDate(key)}: ${removed}`);
+  }
 }
 
 function updateOptions() {
