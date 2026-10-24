@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.78 Event Delete Added)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.79 Full Stable Features)</span>
       </div>
     </div>
 
@@ -846,7 +846,9 @@ function renderCalendar() {
       const due = t.dueDate ? String(t.dueDate).substring(0, 10) : '';
       return assign === key || due === key;
     });
-    const hasEvent = (dailyEvents[key] || []).length > 0;
+
+    const rawEvent = dailyEvents[key];
+    const hasEvent = rawEvent ? (Array.isArray(rawEvent) ? rawEvent.length > 0 : Boolean(rawEvent)) : false;
 
     if (hasTask || hasEvent) {
       const dotsContainer = document.createElement('div');
@@ -898,7 +900,9 @@ function selectDate(key) {
   const eventList = el('event-list');
   eventList.innerHTML = '';
   
-  const events = dailyEvents[key] || [];
+  const rawEvent = dailyEvents[key];
+  const events = Array.isArray(rawEvent) ? rawEvent : (rawEvent ? [rawEvent] : []);
+
   events.forEach((event, index) => {
     const div = document.createElement('div');
     div.className = 'bg-sky-50 text-sky-800 rounded-xl p-2 text-xs border border-sky-100 font-bold flex justify-between items-center';
@@ -924,6 +928,8 @@ async function addEvent() {
   if (!event) return;
 
   if (!dailyEvents[selectedDate]) dailyEvents[selectedDate] = [];
+  else if (!Array.isArray(dailyEvents[selectedDate])) dailyEvents[selectedDate] = [dailyEvents[selectedDate]];
+
   dailyEvents[selectedDate].push(event);
 
   selectDate(selectedDate);
@@ -942,10 +948,13 @@ async function addEvent() {
 async function deleteEvent(key, index) {
   if (!confirm('ต้องการลบกิจกรรมนี้ใช่หรือไม่?')) return;
 
-  const events = dailyEvents[key];
-  if (events) {
+  const rawEvent = dailyEvents[key];
+  const events = Array.isArray(rawEvent) ? rawEvent : (rawEvent ? [rawEvent] : []);
+
+  if (events.length > 0) {
     const removed = events.splice(index, 1);
     if (events.length === 0) delete dailyEvents[key];
+    else dailyEvents[key] = events;
 
     selectDate(selectedDate);
 
