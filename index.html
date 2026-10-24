@@ -253,7 +253,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.2.02 Default Tab Pending)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.67)</span>
       </div>
     </div>
 
@@ -421,7 +421,7 @@ async function login() {
     return;
   }
 
-  await execute('กำลังตรวจสอบสิทธิ์...', async () => {
+  await execute('กำลังตรวจสอบขื่อผู้ใช้...', async () => {
     const res = await fetchJSON(`${SCRIPT_URL}?action=checkLogin&username=${encodeURIComponent(inputVal)}&t=${Date.now()}`);
     
     if (res && res.success && res.user) {
