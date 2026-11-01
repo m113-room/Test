@@ -278,7 +278,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.2.10 Calendar Tasks Integration)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.2.11 Calendar Date Timezone Fix)</span>
       </div>
     </div>
 
@@ -353,10 +353,15 @@ function dateKey(date) {
 function normalizeDateStr(value) {
   if (!value) return '';
   const str = String(value).trim();
-  if (str.includes('T')) return str.substring(0, 10);
-  if (str.length >= 10 && str.charAt(4) === '-' && str.charAt(7) === '-') return str.substring(0, 10);
+  if (str.length === 10 && str.charAt(4) === '-' && str.charAt(7) === '-') {
+    return str;
+  }
   const d = new Date(str);
-  if (!isNaN(d.getTime())) return dateKey(d);
+  if (!isNaN(d.getTime())) {
+    return d.getFullYear() + '-' +
+      String(d.getMonth() + 1).padStart(2, '0') + '-' +
+      String(d.getDate()).padStart(2, '0');
+  }
   return str;
 }
 
