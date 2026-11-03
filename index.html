@@ -236,6 +236,7 @@
           <datalist id="subject-options"></datalist>
 
           <input id="task-detail" placeholder="รายละเอียดการบ้าน" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white">
+          <input id="task-image" placeholder="ลิงก์รูปภาพประกอบ (ถ้ามี เช่น URL รูป)" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white">
           
           <div class="grid grid-cols-2 gap-2">
             <div class="flex items-center bg-white border border-slate-200 rounded-xl px-2.5 py-1.5">
@@ -278,7 +279,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.2.11 Calendar Date Timezone Fix)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.2.12 Image Support Enabled)</span>
       </div>
     </div>
 
@@ -623,6 +624,14 @@ function createTaskCard(task) {
   const completed = Math.max(0, total - unsubmitted.length);
   const percent = total ? Math.round(completed / total * 100) : 0;
 
+  const imageHtml = task.imageUrl ? `
+    <div class="mt-2">
+      <a href="${escapeHtml(task.imageUrl)}" target="_blank" class="block">
+        <img src="${escapeHtml(task.imageUrl)}" alt="รูปภาพประกอบ" class="w-full h-32 object-cover rounded-xl border border-slate-100 hover:opacity-95 transition">
+      </a>
+    </div>
+  ` : '';
+
   div.innerHTML = `
     <div class="flex justify-between items-start gap-2">
       <div>
@@ -631,6 +640,7 @@ function createTaskCard(task) {
         </span>
         <h3 class="font-extrabold text-xs text-slate-800 mt-1">${escapeHtml(task.subject)}</h3>
         <p class="text-[11px] text-slate-600 mt-0.5 font-medium">${escapeHtml(task.detail)}</p>
+        ${imageHtml}
         <div class="flex gap-3 mt-1.5 text-[10px] font-bold">
           <span class="text-slate-500">วันสั่ง: ${formatDate(task.assignDate)}</span>
           <span class="text-rose-500">กำหนดส่ง: ${formatDate(task.dueDate)}</span>
@@ -696,6 +706,14 @@ function createTrackingCard(task) {
   const completed = Math.max(0, total - unsubmitted.length);
   const percent = total ? Math.round(completed / total * 100) : 0;
 
+  const imageHtml = task.imageUrl ? `
+    <div class="mt-2">
+      <a href="${escapeHtml(task.imageUrl)}" target="_blank" class="block">
+        <img src="${escapeHtml(task.imageUrl)}" alt="รูปภาพประกอบ" class="w-full h-32 object-cover rounded-xl border border-slate-100 hover:opacity-95 transition">
+      </a>
+    </div>
+  ` : '';
+
   div.innerHTML = `
     <div class="flex justify-between items-start gap-2">
       <div>
@@ -704,6 +722,7 @@ function createTrackingCard(task) {
         </span>
         <h3 class="font-extrabold text-xs text-slate-800 mt-1">${escapeHtml(task.subject)}</h3>
         <p class="text-[11px] text-slate-600 mt-0.5 font-medium">${escapeHtml(task.detail)}</p>
+        ${imageHtml}
         <div class="flex gap-3 mt-1.5 text-[10px] font-bold">
           <span class="text-slate-500">วันสั่ง: ${formatDate(task.assignDate)}</span>
           <span class="text-rose-500">กำหนดส่ง: ${formatDate(task.dueDate)}</span>
@@ -774,6 +793,7 @@ async function addTask() {
     code: el('task-code').value.trim(),
     subject: el('task-subject').value.trim(),
     detail: el('task-detail').value.trim(),
+    imageUrl: el('task-image').value.trim(),
     assignDate: el('task-assign-date').value,
     dueDate: el('task-due-date').value,
     isPinned: false,
@@ -808,7 +828,7 @@ async function addTask() {
     cachedData.tasks = tasks;
     localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
 
-    ['task-code', 'task-subject', 'task-detail', 'task-assign-date', 'task-due-date'].forEach(id => el(id).value = '');
+    ['task-code', 'task-subject', 'task-detail', 'task-image', 'task-assign-date', 'task-due-date'].forEach(id => el(id).value = '');
     el('task-form').classList.add('hidden');
     renderTasks();
     renderCalendar();
