@@ -177,6 +177,15 @@
       </section>
 
       <section id="view-calendar" class="hidden">
+        <button onclick="toggleForm('event-form')" class="w-full bg-[#38bdf8] text-white font-extrabold py-3 rounded-2xl text-xs mb-4 shadow-sm hover:opacity-95 transition">
+          + เพิ่มกิจกรรม
+        </button>
+
+        <div id="event-form" class="hidden bg-sky-50 border border-sky-100 rounded-2xl p-3.5 mb-4 space-y-2.5">
+          <input id="event-input" class="w-full border rounded-xl p-2.5 text-xs bg-white" placeholder="ชื่อกิจกรรม">
+          <button onclick="addEvent()" class="w-full bg-sky-500 text-white rounded-xl py-2 text-xs font-bold">บันทึกกิจกรรม</button>
+        </div>
+
         <div class="flex justify-between items-center mb-3">
           <h2 id="calendar-month-year" class="text-xs font-extrabold text-slate-700"></h2>
           <div class="flex gap-1 text-[10px] font-bold">
@@ -238,7 +247,7 @@
       </div>
     </div>
 
-    <!-- Embedded Popup Modal ตามความต้องการ -->
+    <!-- Embedded Popup Modal -->
     <div id="modal-popup" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
       <div class="bg-white rounded-3xl p-6 w-full max-w-xs shadow-2xl text-center space-y-3 animate-pop">
         <div id="modal-icon" class="text-3xl text-pink-500">✅</div>
@@ -255,7 +264,7 @@
   </div>
 
   <script>
-    // ⚠️ อย่าลืมใส่ Web App URL ของคุณที่ได้จากการ Deploy Apps Script ตรงนี้
+    // ⚠️ ใส่ Web App URL ของคุณที่ได้จากการ Deploy Apps Script ตรงนี้
     const API_URL = "ใส่_Web_App_URL_ของคุณตรงนี้";
     let currentUser = null;
     let appData = { tasks: [], events: {} };
@@ -364,6 +373,11 @@
       else modal.classList.add('hidden');
     }
 
+    function toggleForm(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('hidden');
+    }
+
     async function handleAddTask(e) {
       e.preventDefault();
       const subject = document.getElementById('new-task-subject').value;
@@ -372,7 +386,7 @@
       const fileInput = document.getElementById('new-task-file');
 
       let imageObj = null;
-      if (fileInput.files.length > 0) {
+      if (fileInput && fileInput.files.length > 0) {
         const file = fileInput.files[0];
         imageObj = await toBase64(file);
       }
@@ -390,7 +404,7 @@
         document.getElementById('new-task-subject').value = '';
         document.getElementById('new-task-desc').value = '';
         document.getElementById('new-task-due').value = '';
-        document.getElementById('new-task-file').value = '';
+        if (fileInput) fileInput.value = '';
         renderTasks(appData.tasks);
         showModal("สำเร็จ", "บันทึกการบ้านและอัปโหลดรูปภาพเรียบร้อยแล้ว");
       } catch(err) {
