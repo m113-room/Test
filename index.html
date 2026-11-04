@@ -523,21 +523,6 @@ function logout() {
 }
 
 async function loadAllData(showMessage = false) {
-  const cachedData = localStorage.getItem('homeworkCacheData');
-  if (cachedData) {
-    try {
-      const parsed = JSON.parse(cachedData);
-      tasks = parsed.tasks || [];
-      dailyEvents = parsed.events || {};
-      codes = parsed.options?.codes || [];
-      subjects = parsed.options?.subjects || [];
-      updateOptions();
-      renderTasks();
-      renderCalendar();
-      selectDate(selectedDate);
-    } catch(e) {}
-  }
-
   const load = async () => {
     const res = await fetchJSON(`${SCRIPT_URL}?t=${Date.now()}`);
     if (res) {
@@ -560,11 +545,7 @@ async function loadAllData(showMessage = false) {
 
   if (busy) await load();
   else {
-    if (!cachedData) {
-      await execute('กำลังซิงค์ข้อมูล...', load);
-    } else {
-      load().catch(e => console.error(e));
-    }
+    await execute('กำลังซิงค์ข้อมูล...', load);
   }
 }
 
@@ -664,7 +645,7 @@ function createTaskCard(task) {
   const completed = Math.max(0, total - unsubmitted.length);
   const percent = total ? Math.round(completed / total * 100) : 0;
 
-  const formattedTime = task.createdAt ? new Date(task.createdAt).toLocaleString('th-TH', {dateStyle: 'short', timeStyle: 'short'}) : '-';
+  const formattedTime = task.createdAt ? new Date(task.createdAt).toLocaleString('th-TH', {dateStyle: 'short', timeStyle: 'short'}) : '';
 
   div.innerHTML = `
     <div class="flex justify-between items-start gap-2">
@@ -678,9 +659,7 @@ function createTaskCard(task) {
           <span class="text-slate-500">วันสั่ง: ${formatDate(task.assignDate)}</span>
           <span class="text-rose-500">กำหนดส่ง: ${formatDate(task.dueDate)}</span>
         </div>
-        <div class="text-[10px] text-slate-400 mt-1 font-semibold">
-          <i class="fa-solid fa-user-pen"></i> เพิ่มโดย: ${escapeHtml(task.createdBy || 'ระบบ')} (${formattedTime})
-        </div>
+        ${(task.createdBy || formattedTime) ? `<div class="text-[10px] text-slate-400 mt-1 font-semibold"><i class="fa-solid fa-user-pen"></i> เพิ่มโดย: ${escapeHtml(task.createdBy || 'ระบบ')} ${formattedTime ? `(${formattedTime})` : ''}</div>` : ''}
       </div>
 
       <div class="flex items-center gap-2">
@@ -745,7 +724,7 @@ function createTrackingCard(task) {
   const completed = Math.max(0, total - unsubmitted.length);
   const percent = total ? Math.round(completed / total * 100) : 0;
 
-  const formattedTime = task.createdAt ? new Date(task.createdAt).toLocaleString('th-TH', {dateStyle: 'short', timeStyle: 'short'}) : '-';
+  const formattedTime = task.createdAt ? new Date(task.createdAt).toLocaleString('th-TH', {dateStyle: 'short', timeStyle: 'short'}) : '';
 
   div.innerHTML = `
     <div class="flex justify-between items-start gap-2">
@@ -759,9 +738,7 @@ function createTrackingCard(task) {
           <span class="text-slate-500">วันสั่ง: ${formatDate(task.assignDate)}</span>
           <span class="text-rose-500">กำหนดส่ง: ${formatDate(task.dueDate)}</span>
         </div>
-        <div class="text-[10px] text-slate-400 mt-1 font-semibold">
-          <i class="fa-solid fa-user-pen"></i> เพิ่มโดย: ${escapeHtml(task.createdBy || 'ระบบ')} (${formattedTime})
-        </div>
+        ${(task.createdBy || formattedTime) ? `<div class="text-[10px] text-slate-400 mt-1 font-semibold"><i class="fa-solid fa-user-pen"></i> เพิ่มโดย: ${escapeHtml(task.createdBy || 'ระบบ')} ${formattedTime ? `(${formattedTime})` : ''}</div>` : ''}
       </div>
       <div class="flex items-center gap-2">
         ${task.imageUrl ? `<a href="${task.imageUrl}" target="_blank"><img src="${task.imageUrl}" class="w-12 h-12 object-cover rounded-xl border border-slate-200 hover:opacity-95 transition" title="ดูรูปภาพ"></a>` : ''}
@@ -886,9 +863,6 @@ async function addTask() {
 
   if (success) {
     tasks = updatedTasks;
-    const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
-    cachedData.tasks = tasks;
-    localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
 
     ['task-code', 'task-subject', 'task-detail', 'task-assign-date', 'task-due-date'].forEach(id => el(id).value = '');
     clearFileSelection();
@@ -910,11 +884,6 @@ async function togglePin(id) {
   if (task) {
     task.isPinned = !task.isPinned;
     renderTasks();
-    
-    const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
-    cachedData.tasks = tasks;
-    localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
-
     sendSaveRequest('saveTasks', tasks);
     logActivity(task.isPinned ? 'ปักหมุดการบ้าน' : 'ยกเลิกปักหมุด', `วิชา ${task.subject}`);
   }
@@ -928,10 +897,6 @@ async function deleteTask(id) {
   renderTasks();
   renderCalendar();
   selectDate(selectedDate);
-
-  const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
-  cachedData.tasks = tasks;
-  localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
 
   sendSaveRequest('saveTasks', tasks);
 
@@ -955,10 +920,6 @@ async function toggleStudent(taskId, number) {
   renderTasks();
   selectDate(selectedDate);
 
-  const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
-  cachedData.tasks = tasks;
-  localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
-
   sendSaveRequest('saveTasks', tasks);
 
   logActivity('เปลี่ยนสถานะส่งงาน', `เลขที่ ${numStr} วิชา ${task.subject} (${isSubmitted ? 'ส่งแล้ว' : 'ยังไม่ส่ง'})`);
@@ -981,10 +942,6 @@ async function addExtraStudent() {
 
   task.extraUnsubmitted.push(number);
   renderTasks();
-    
-  const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
-  cachedData.tasks = tasks;
-  localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
 
   sendSaveRequest('saveTasks', tasks);
   logActivity('เพิ่มรายชื่อคนค้างงาน', `เลขที่ ${number} ในวิชา ${task.subject}`);
@@ -1125,14 +1082,8 @@ async function addEvent() {
   el('event-input').value = '';
   el('event-form').classList.add('hidden');
 
-  const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
-  cachedData.events = dailyEvents;
-  localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
-
   sendSaveRequest('saveEvents', dailyEvents);
-
   logActivity('เพิ่มกิจกรรม', `วันที่ ${formatDate(selectedDate)}: ${event}`);
-
   showAlert('เพิ่มกิจกรรมสำเร็จแล้ว');
 }
 
@@ -1148,11 +1099,6 @@ async function deleteEvent(key, index) {
     else dailyEvents[key] = events;
 
     selectDate(selectedDate);
-
-    const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
-    cachedData.events = dailyEvents;
-    localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
-
     sendSaveRequest('saveEvents', dailyEvents);
     logActivity('ลบกิจกรรม', `วันที่ ${formatDate(key)}: ${removed}`);
   }
