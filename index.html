@@ -50,8 +50,8 @@
       cursor: not-allowed;
     }
 
-    input, select, textarea { outline: none; }
-    input:focus, select:focus, textarea:focus { border-color: #ec4899 !important; box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.2); }
+    input, select { outline: none; }
+    input:focus, select:focus { border-color: #ec4899 !important; box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.2); }
   </style>
 </head>
 
@@ -60,7 +60,7 @@
   <div id="loading-overlay" class="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-[100] hidden flex items-center justify-center">
     <div class="bg-white rounded-3xl p-6 shadow-2xl text-center min-w-[180px]">
       <div class="w-8 h-8 border-4 border-pink-400 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-      <p id="loading-text" class="text-xs font-bold text-slate-600">กำลังอัปโหลดและบันทึก...</p>
+      <p id="loading-text" class="text-xs font-bold text-slate-600">กำลังโหลด...</p>
     </div>
   </div>
 
@@ -153,7 +153,6 @@
         </div>
       </div>
 
-      <!-- Tab Views -->
       <section id="view-pending">
         <div class="bg-amber-50/70 border border-amber-100 rounded-2xl p-3.5 mb-4">
           <h2 class="text-xs font-extrabold text-amber-600 mb-2 flex items-center gap-1.5">
@@ -165,12 +164,6 @@
         <div class="flex justify-between items-center mb-3">
           <h2 class="text-xs font-extrabold text-pink-500">ภาพรวมงานค้าง</h2>
           <span id="task-count" class="text-[10px] font-extrabold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">0 ITEMS</span>
-        </div>
-
-        <div id="admin-action-box" class="mb-4 hidden">
-          <button onclick="toggleAddTaskModal(true)" class="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-extrabold py-3 rounded-2xl text-xs shadow-md shadow-pink-200 hover:opacity-95 transition">
-            <i class="fa-solid fa-plus"></i> เพิ่มการบ้านใหม่ (พร้อมแนบรูป)
-          </button>
         </div>
 
         <div id="task-list" class="space-y-2.5"></div>
@@ -206,65 +199,19 @@
           </div>
           <div id="calendar-days" class="grid grid-cols-7 gap-1.5"></div>
         </div>
+
+        <div class="bg-slate-50/60 border border-slate-100 rounded-2xl p-3.5"></div>
       </section>
 
       <section id="view-tracking" class="hidden">
-        <div class="bg-slate-50/60 border border-slate-100 rounded-2xl p-3.5 text-center text-xs text-slate-500">
-          ระบบติดตามสถานะการส่งการบ้าน
-        </div>
+        <!-- Tracking View -->
       </section>
 
     </main>
 
-    <!-- Modal เพิ่มการบ้าน (รองรับรูปภาพ) -->
-    <div id="task-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-      <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-slate-100 animate-pop">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="font-extrabold text-slate-800 text-sm"><i class="fa-solid fa-plus-circle text-pink-500"></i> เพิ่มการบ้านใหม่</h3>
-          <button onclick="toggleAddTaskModal(false)" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-base"></i></button>
-        </div>
-        <form onsubmit="handleAddTask(event)" class="space-y-3">
-          <div>
-            <label class="text-[11px] font-bold text-slate-600">รหัสวิชา / ชื่อวิชา</label>
-            <input id="new-task-subject" type="text" required placeholder="เช่น TH101 ภาษาไทย" class="w-full mt-1 p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold">
-          </div>
-          <div>
-            <label class="text-[11px] font-bold text-slate-600">รายละเอียดงาน</label>
-            <textarea id="new-task-desc" required rows="2" placeholder="รายละเอียดการบ้าน..." class="w-full mt-1 p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold"></textarea>
-          </div>
-          <div>
-            <label class="text-[11px] font-bold text-slate-600">กำหนดส่ง</label>
-            <input id="new-task-due" type="date" required class="w-full mt-1 p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold">
-          </div>
-          <div>
-            <label class="text-[11px] font-bold text-slate-600">แนบรูปภาพประกอบ (ถ้ามี)</label>
-            <input id="new-task-file" type="file" accept="image/*" class="w-full mt-1 text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-pink-50 file:text-pink-600 hover:file:bg-pink-100">
-          </div>
-          <button type="submit" class="w-full py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-extrabold text-xs shadow-md shadow-pink-200 hover:opacity-95 transition mt-2">
-            บันทึกการบ้าน
-          </button>
-        </form>
-      </div>
-    </div>
-
-    <!-- Embedded Popup Modal -->
-    <div id="modal-popup" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
-      <div class="bg-white rounded-3xl p-6 w-full max-w-xs shadow-2xl text-center space-y-3 animate-pop">
-        <div id="modal-icon" class="text-3xl text-pink-500">✅</div>
-        <h3 id="modal-title" class="font-extrabold text-slate-800 text-sm">สำเร็จ</h3>
-        <p id="modal-message" class="text-xs text-slate-600">ดำเนินการเรียบร้อยแล้ว</p>
-        <button onclick="closeModal()" class="w-full py-2.5 bg-pink-500 text-white rounded-xl font-extrabold text-xs shadow-md shadow-pink-200">ตกลง</button>
-      </div>
-    </div>
-
-    <footer class="text-center text-[10px] font-bold text-slate-500/80 mt-4">
-      M113-Room Homework System &copy; 2026
-    </footer>
-
   </div>
 
   <script>
-    // ⚠️ ใส่ Web App URL ของคุณที่ได้จากการ Deploy Apps Script ตรงนี้
     const API_URL = "ใส่_Web_App_URL_ของคุณตรงนี้";
     let currentUser = null;
     let appData = { tasks: [], events: {} };
@@ -273,7 +220,6 @@
       const username = document.getElementById('username').value.trim();
       if (!username) return alert('กรุณากรอกชื่อผู้ใช้งาน');
       
-      showLoading(true, 'กำลังเข้าสู่ระบบ...');
       try {
         const res = await fetch(`${API_URL}?action=checkLogin&username=${encodeURIComponent(username)}`);
         const result = await res.json();
@@ -282,13 +228,11 @@
           document.getElementById('login-page').classList.add('hidden');
           document.getElementById('main-page').classList.remove('hidden');
           document.getElementById('user-display').innerText = `${currentUser.name} (${currentUser.role})`;
-          
           if (currentUser.role === 'admin') {
-            document.getElementById('admin-action-box').classList.remove('hidden');
             document.getElementById('btn-logs').classList.remove('hidden');
             document.getElementById('btn-options').classList.remove('hidden');
           }
-          await loadAllData(false);
+          loadAllData();
         } else {
           alert(result.error || 'ไม่พบบัญชีผู้ใช้');
         }
@@ -297,15 +241,6 @@
         document.getElementById('login-page').classList.add('hidden');
         document.getElementById('main-page').classList.remove('hidden');
         document.getElementById('user-display').innerText = `${currentUser.name} (${currentUser.role})`;
-        if (currentUser.role === 'admin') {
-          document.getElementById('admin-action-box').classList.remove('hidden');
-          document.getElementById('btn-logs').classList.remove('hidden');
-        }
-        renderTasks([
-          { id: 1, subject: "TH101 ภาษาไทย", desc: "คัดลายมือบทที่ 3", dueDate: "2026-11-10", imageUrl: "" }
-        ]);
-      } finally {
-        showLoading(false);
       }
     }
 
@@ -316,8 +251,7 @@
       document.getElementById('username').value = '';
     }
 
-    async function loadAllData(showMsg = true) {
-      if (showMsg) showLoading(true, 'กำลังโหลดข้อมูล...');
+    async function loadAllData() {
       try {
         const res = await fetch(API_URL);
         const data = await res.json();
@@ -325,11 +259,8 @@
         appData.events = data.events || {};
         renderTasks(appData.tasks);
         renderCalendar();
-        if (showMsg) showModal("สำเร็จ", "อัปเดตข้อมูลล่าสุดเรียบร้อยแล้ว");
       } catch(e) {
-        console.log("Using local data cache");
-      } finally {
-        if (showMsg) showLoading(false);
+        console.log("Error loading data");
       }
     }
 
@@ -340,7 +271,6 @@
       });
       document.getElementById(`view-${tab}`).classList.remove('hidden');
       document.getElementById(`tab-${tab}`).className = "py-2.5 rounded-xl text-xs font-extrabold bg-white text-pink-600 shadow-sm transition";
-      
       if (tab === 'calendar') renderCalendar();
     }
 
@@ -367,60 +297,9 @@
       `).join('');
     }
 
-    function toggleAddTaskModal(show) {
-      const modal = document.getElementById('task-modal');
-      if (show) modal.classList.remove('hidden');
-      else modal.classList.add('hidden');
-    }
-
     function toggleForm(id) {
       const el = document.getElementById(id);
       if (el) el.classList.toggle('hidden');
-    }
-
-    async function handleAddTask(e) {
-      e.preventDefault();
-      const subject = document.getElementById('new-task-subject').value;
-      const desc = document.getElementById('new-task-desc').value;
-      const dueDate = document.getElementById('new-task-due').value;
-      const fileInput = document.getElementById('new-task-file');
-
-      let imageObj = null;
-      if (fileInput && fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        imageObj = await toBase64(file);
-      }
-
-      const newTask = { id: Date.now(), subject, desc, dueDate, imageObj };
-      appData.tasks.push(newTask);
-
-      showLoading(true, 'กำลังอัปโหลดรูปภาพและบันทึกข้อมูล...');
-      try {
-        await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'saveTasks', tasks: appData.tasks })
-        });
-        toggleAddTaskModal(false);
-        document.getElementById('new-task-subject').value = '';
-        document.getElementById('new-task-desc').value = '';
-        document.getElementById('new-task-due').value = '';
-        if (fileInput) fileInput.value = '';
-        renderTasks(appData.tasks);
-        showModal("สำเร็จ", "บันทึกการบ้านและอัปโหลดรูปภาพเรียบร้อยแล้ว");
-      } catch(err) {
-        showModal("แจ้งเตือน", "เกิดข้อผิดพลาดในการบันทึก", "❌");
-      } finally {
-        showLoading(false);
-      }
-    }
-
-    function toBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve({ name: file.name, type: file.type, data: reader.result });
-        reader.onerror = error => reject(error);
-      });
     }
 
     let currentMonth = new Date().getMonth();
@@ -450,24 +329,6 @@
       if (currentMonth > 11) { currentMonth = 0; currentYear++; }
       if (currentMonth < 0) { currentMonth = 11; currentYear--; }
       renderCalendar();
-    }
-
-    function showLoading(show, text = "กำลังประมวลผล...") {
-      const overlay = document.getElementById('loading-overlay');
-      document.getElementById('loading-text').innerText = text;
-      if (show) overlay.classList.remove('hidden');
-      else overlay.classList.add('hidden');
-    }
-
-    function showModal(title, message, icon="✅") {
-      document.getElementById('modal-title').innerText = title;
-      document.getElementById('modal-message').innerText = message;
-      document.getElementById('modal-icon').innerText = icon;
-      document.getElementById('modal-popup').classList.remove('hidden');
-    }
-
-    function closeModal() {
-      document.getElementById('modal-popup').classList.add('hidden');
     }
 
     switchTab('pending');
