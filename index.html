@@ -664,6 +664,8 @@ function createTaskCard(task) {
   const completed = Math.max(0, total - unsubmitted.length);
   const percent = total ? Math.round(completed / total * 100) : 0;
 
+  const formattedTime = task.createdAt ? new Date(task.createdAt).toLocaleString('th-TH', {dateStyle: 'short', timeStyle: 'short'}) : '-';
+
   div.innerHTML = `
     <div class="flex justify-between items-start gap-2">
       <div>
@@ -675,6 +677,9 @@ function createTaskCard(task) {
         <div class="flex gap-3 mt-1.5 text-[10px] font-bold">
           <span class="text-slate-500">วันสั่ง: ${formatDate(task.assignDate)}</span>
           <span class="text-rose-500">กำหนดส่ง: ${formatDate(task.dueDate)}</span>
+        </div>
+        <div class="text-[10px] text-slate-400 mt-1 font-semibold">
+          <i class="fa-solid fa-user-pen"></i> เพิ่มโดย: ${escapeHtml(task.createdBy || 'ระบบ')} (${formattedTime})
         </div>
       </div>
 
@@ -740,6 +745,8 @@ function createTrackingCard(task) {
   const completed = Math.max(0, total - unsubmitted.length);
   const percent = total ? Math.round(completed / total * 100) : 0;
 
+  const formattedTime = task.createdAt ? new Date(task.createdAt).toLocaleString('th-TH', {dateStyle: 'short', timeStyle: 'short'}) : '-';
+
   div.innerHTML = `
     <div class="flex justify-between items-start gap-2">
       <div>
@@ -751,6 +758,9 @@ function createTrackingCard(task) {
         <div class="flex gap-3 mt-1.5 text-[10px] font-bold">
           <span class="text-slate-500">วันสั่ง: ${formatDate(task.assignDate)}</span>
           <span class="text-rose-500">กำหนดส่ง: ${formatDate(task.dueDate)}</span>
+        </div>
+        <div class="text-[10px] text-slate-400 mt-1 font-semibold">
+          <i class="fa-solid fa-user-pen"></i> เพิ่มโดย: ${escapeHtml(task.createdBy || 'ระบบ')} (${formattedTime})
         </div>
       </div>
       <div class="flex items-center gap-2">
@@ -863,7 +873,9 @@ async function addTask() {
     imageObj: imageObj,
     isPinned: false,
     submitted: [],
-    extraUnsubmitted: []
+    extraUnsubmitted: [],
+    createdAt: new Date().toISOString(),
+    createdBy: currentUser ? currentUser.name : 'Unknown'
   };
 
   const updatedTasks = [task, ...tasks];
@@ -1351,4 +1363,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
-
