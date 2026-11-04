@@ -237,7 +237,6 @@
 
           <input id="task-detail" placeholder="รายละเอียดการบ้าน" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white">
           
-          <!-- ช่องแนบรูปภาพประกอบเพิ่มเข้ามาที่นี่ -->
           <div>
             <label class="text-[10px] font-bold text-slate-600 block mb-1">แนบรูปภาพประกอบ (ถ้ามี)</label>
             <input id="task-file" type="file" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-pink-50 file:text-pink-600 hover:file:bg-pink-100">
@@ -853,7 +852,6 @@ async function addTask() {
     logActivity('เพิ่มการบ้าน', `วิชา ${task.subject} (${task.code}) - ${task.detail}`);
     showAlert('บันทึกการบ้านสำเร็จแล้ว');
     
-    // โหลดข้อมูลล่าสุดจากเซิร์ฟเวอร์เพื่อให้ได้ลิงก์รูปภาพที่อัปโหลดเสร็จแล้ว
     loadAllData(false);
   }
 }
