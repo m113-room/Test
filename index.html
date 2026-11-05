@@ -52,6 +52,23 @@
 
     input, select { outline: none; }
     input:focus, select:focus { border-color: #ec4899 !important; box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.2); }
+
+    /* ปรับแต่งปุ่ม Browse / Choose File ให้เป็นภาษาไทย */
+    input[type="file"]::file-selector-button {
+      background-color: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 11px;
+      cursor: pointer;
+      margin-right: 8px;
+      transition: background-color 0.2s;
+    }
+    input[type="file"]::file-selector-button:hover {
+      background-color: #e2e8f0;
+    }
   </style>
 </head>
 
@@ -240,7 +257,7 @@
           <div class="grid grid-cols-2 gap-2">
             <div class="flex items-center bg-white border border-slate-200 rounded-xl px-2.5 py-1.5">
               <span class="text-[10px] font-bold text-slate-500 mr-2 leading-tight">วัน<br>สั่ง:</span>
-              <input id="task-assign-date" type="date" class="w-full text-xs bg-transparent border-0 p-0">
+              <input id="task-assign-date" type="date" onchange="document.getElementById('task-due-date').min = this.value;" class="w-full text-xs bg-transparent border-0 p-0">
             </div>
             <div class="flex items-center bg-white border border-slate-200 rounded-xl px-2.5 py-1.5">
               <span class="text-[10px] font-bold text-slate-500 mr-2 leading-tight">วัน<br>ส่ง:</span>
@@ -250,7 +267,7 @@
 
           <div>
             <label class="block text-[10px] font-bold text-slate-500 mb-1">แนบรูปภาพประกอบ (ถ้ามี):</label>
-            <input id="task-image" type="file" accept="image/*" class="w-full text-xs p-1.5 border border-slate-200 rounded-xl bg-white">
+            <input id="task-image" type="file" accept="image/*" class="w-full text-xs p-1.5 border border-slate-200 rounded-xl bg-white" data-browse="เลือกไฟล์">
           </div>
 
           <button onclick="addTask()" class="w-full bg-purple-600 text-white py-3 rounded-2xl font-extrabold text-xs shadow-sm hover:opacity-95 transition mt-2">
@@ -283,7 +300,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.69)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.71)</span>
       </div>
     </div>
 
@@ -370,7 +387,6 @@ function normalizeDateStr(value) {
   return str;
 }
 
-// ฟังก์ชันแปลงวันที่เป็นภาษาไทยและปี พ.ศ. 2569 อย่างสมบูรณ์
 function formatDate(value) {
   if (!value) return '-';
   const str = String(value).trim();
@@ -560,7 +576,7 @@ async function loadAllData(showMessage = false) {
   if (busy) await load();
   else {
     if (!cachedData) {
-      await execute('กำลังซิงค์ข้อมูล...', load);
+      await execute('กำลังซิงค์', load);
     } else {
       load().catch(e => console.error(e));
     }
@@ -845,10 +861,16 @@ async function addTask() {
   const code = el('task-code').value.trim();
   const subject = el('task-subject').value.trim();
   const detail = el('task-detail').value.trim();
+  const assignDate = el('task-assign-date').value;
   const dueDate = el('task-due-date').value;
 
-  if (!code || !subject || !detail || !dueDate) {
+  if (!code || !subject || !detail || !assignDate || !dueDate) {
     showAlert('กรุณากรอกข้อมูลให้ครบ');
+    return;
+  }
+
+  if (new Date(dueDate) < new Date(assignDate)) {
+    showAlert('วันกำหนดส่งต้องไม่น้อยกว่าวันที่สั่งการบ้าน');
     return;
   }
 
@@ -874,7 +896,7 @@ async function addTask() {
     code: code,
     subject: subject,
     detail: detail,
-    assignDate: el('task-assign-date').value,
+    assignDate: assignDate,
     dueDate: dueDate,
     isPinned: false,
     submitted: [],
@@ -884,7 +906,7 @@ async function addTask() {
 
   const updatedTasks = [task, ...tasks];
 
-  const success = await execute('กำลังบันทึกการบ้าน...', async () => {
+  const success = await execute('กำลังบันทึกการบ้านเเละอัพโหลดรูป', async () => {
     await sendSaveRequest('saveTasks', updatedTasks);
   });
 
