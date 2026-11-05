@@ -53,7 +53,7 @@
     input, select { outline: none; }
     input:focus, select:focus { border-color: #ec4899 !important; box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.2); }
 
-    /* ปรับแต่งปุ่ม Browse / Choose File ให้เป็นภาษาไทย */
+    /* ปรับแต่งปุ่มเลือกไฟล์เป็นภาษาไทย */
     input[type="file"]::file-selector-button {
       background-color: #f1f5f9;
       color: #475569;
@@ -267,7 +267,7 @@
 
           <div>
             <label class="block text-[10px] font-bold text-slate-500 mb-1">แนบรูปภาพประกอบ (ถ้ามี):</label>
-            <input id="task-image" type="file" accept="image/*" class="w-full text-xs p-1.5 border border-slate-200 rounded-xl bg-white" data-browse="เลือกไฟล์">
+            <input id="task-image" type="file" accept="image/*" class="w-full text-xs p-1.5 border border-slate-200 rounded-xl bg-white">
           </div>
 
           <button onclick="addTask()" class="w-full bg-purple-600 text-white py-3 rounded-2xl font-extrabold text-xs shadow-sm hover:opacity-95 transition mt-2">
@@ -300,7 +300,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.71)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.72)</span>
       </div>
     </div>
 
@@ -671,6 +671,7 @@ function createTaskCard(task) {
   const completed = Math.max(0, total - unsubmitted.length);
   const percent = total ? Math.round(completed / total * 100) : 0;
 
+  // โค้ดแสดงรูปภาพประกอบ (รองรับทั้ง imageUrl และ =s0)
   const imageHTML = task.imageUrl ? `
     <div class="mt-2">
       <a href="${task.imageUrl}" target="_blank">
@@ -753,6 +754,7 @@ function createTrackingCard(task) {
   const completed = Math.max(0, total - unsubmitted.length);
   const percent = total ? Math.round(completed / total * 100) : 0;
 
+  // โค้ดแสดงรูปภาพประกอบในส่วนงานค้าง
   const imageHTML = task.imageUrl ? `
     <div class="mt-2">
       <a href="${task.imageUrl}" target="_blank">
