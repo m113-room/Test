@@ -50,8 +50,8 @@
       cursor: not-allowed;
     }
 
-    input, select, textarea { outline: none; }
-    input:focus, select:focus, textarea:focus { border-color: #ec4899 !important; box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.2); }
+    input, select { outline: none; }
+    input:focus, select:focus { border-color: #ec4899 !important; box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.2); }
   </style>
 </head>
 
@@ -147,10 +147,8 @@
           <select id="filter-date-mode" onchange="renderTasks()"
             class="flex-1 py-2 px-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700">
             <option value="all">ค่าเริ่มต้น (สร้างล่าสุด)</option>
-            <option value="due-soon">กำหนดส่ง: ใกล้สุดไปไกลสุด</option>
-            <option value="due-far">กำหนดส่ง: ไกลสุดไปใกล้สุด</option>
-            <option value="assign-new">วันที่สั่ง: ใหม่ไปเก่า</option>
-            <option value="assign-old">วันที่สั่ง: เก่าไปใหม่</option>
+            <option value="due-soon">กำหนดส่งใกล้ที่สุด (เร็วไปช้า)</option>
+            <option value="assign-new">วันที่สั่งล่าสุด (ใหม่ไปเก่า)</option>
           </select>
         </div>
       </div>
@@ -227,6 +225,7 @@
           </button>
         </div>
 
+        <!-- ฟอร์มเพิ่มการบ้าน (แนบช่องอัปโหลดรูปภาพแล้ว) -->
         <div id="task-form" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-4 space-y-3 shadow-sm">
           <h3 class="text-xs font-bold text-pink-600 mb-1">เพิ่มรายการการบ้าน</h3>
           
@@ -239,18 +238,6 @@
 
           <input id="task-detail" placeholder="รายละเอียดการบ้าน" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white">
           
-          <div>
-            <label class="text-[10px] font-bold text-slate-600 block mb-1">แนบรูปภาพประกอบ (ถ้ามี)</label>
-            <input id="task-file" type="file" accept="image/*" onchange="updateFileName(this)" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-pink-50 file:text-pink-600 hover:file:bg-pink-100">
-            
-            <div id="file-name-display" class="flex items-center justify-between bg-pink-50 border border-pink-100 rounded-xl px-3 py-2 mt-2 text-xs text-pink-700 font-bold hidden">
-              <span class="truncate"><i class="fa-solid fa-image"></i> ไฟล์: <span id="file-name-text"></span></span>
-              <button type="button" onclick="clearFileSelection()" class="text-rose-500 hover:text-rose-700 ml-2 px-2 py-0.5 bg-white rounded-lg border border-rose-100 text-[11px] shadow-xs transition">
-                <i class="fa-solid fa-xmark"></i> ลบไฟล์
-              </button>
-            </div>
-          </div>
-
           <div class="grid grid-cols-2 gap-2">
             <div class="flex items-center bg-white border border-slate-200 rounded-xl px-2.5 py-1.5">
               <span class="text-[10px] font-bold text-slate-500 mr-2 leading-tight">วัน<br>สั่ง:</span>
@@ -260,6 +247,12 @@
               <span class="text-[10px] font-bold text-slate-500 mr-2 leading-tight">วัน<br>ส่ง:</span>
               <input id="task-due-date" type="date" class="w-full text-xs bg-transparent border-0 p-0">
             </div>
+          </div>
+
+          <!-- เพิ่มช่องแนบรูปภาพ -->
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 mb-1">แนบรูปภาพประกอบ (ถ้ามี):</label>
+            <input id="task-image" type="file" accept="image/*" class="w-full text-xs p-1.5 border border-slate-200 rounded-xl bg-white">
           </div>
 
           <button onclick="addTask()" class="w-full bg-purple-600 text-white py-3 rounded-2xl font-extrabold text-xs shadow-sm hover:opacity-95 transition mt-2">
@@ -323,7 +316,7 @@
 <script>
 'use strict';
 
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwoD6vLsi-9kaBOLnQ984FPtHl2BzKkmJWTyL79Y_LV1_3UWfsTLjBuvh14GAQa6hiMcg/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxPMdLygwBXKBmasT3GM-MsfhlPvaVpd31_epFbbcNFWyGghIBLEevaZO0b5Rbq9c2iQA/exec';
 
 let currentUser = null;
 let tasks = [];
@@ -347,25 +340,6 @@ function showAlert(message) {
 
 function closeAlert() {
   el('custom-alert').classList.add('hidden');
-}
-
-function updateFileName(input) {
-  const display = el('file-name-display');
-  const text = el('file-name-text');
-  if (input.files && input.files[0]) {
-    text.textContent = input.files[0].name;
-    display.classList.remove('hidden');
-  } else {
-    text.textContent = '';
-    display.classList.add('hidden');
-  }
-}
-
-function clearFileSelection() {
-  const fileInput = el('task-file');
-  fileInput.value = '';
-  el('file-name-display').classList.add('hidden');
-  el('file-name-text').textContent = '';
 }
 
 function escapeHtml(value) {
@@ -523,6 +497,21 @@ function logout() {
 }
 
 async function loadAllData(showMessage = false) {
+  const cachedData = localStorage.getItem('homeworkCacheData');
+  if (cachedData) {
+    try {
+      const parsed = JSON.parse(cachedData);
+      tasks = parsed.tasks || [];
+      dailyEvents = parsed.events || {};
+      codes = parsed.options?.codes || [];
+      subjects = parsed.options?.subjects || [];
+      updateOptions();
+      renderTasks();
+      renderCalendar();
+      selectDate(selectedDate);
+    } catch(e) {}
+  }
+
   const load = async () => {
     const res = await fetchJSON(`${SCRIPT_URL}?t=${Date.now()}`);
     if (res) {
@@ -545,7 +534,11 @@ async function loadAllData(showMessage = false) {
 
   if (busy) await load();
   else {
-    await execute('กำลังซิงค์ข้อมูล...', load);
+    if (!cachedData) {
+      await execute('กำลังซิงค์ข้อมูล...', load);
+    } else {
+      load().catch(e => console.error(e));
+    }
   }
 }
 
@@ -599,18 +592,10 @@ function renderTasks() {
       const dateA = a.dueDate ? new Date(a.dueDate).getTime() : 0;
       const dateB = b.dueDate ? new Date(b.dueDate).getTime() : 0;
       return dateA - dateB;
-    } else if (dateMode === 'due-far') {
-      const dateA = a.dueDate ? new Date(a.dueDate).getTime() : 0;
-      const dateB = b.dueDate ? new Date(b.dueDate).getTime() : 0;
-      return dateB - dateA;
     } else if (dateMode === 'assign-new') {
       const dateA = a.assignDate ? new Date(a.assignDate).getTime() : 0;
       const dateB = b.assignDate ? new Date(b.assignDate).getTime() : 0;
       return dateB - dateA;
-    } else if (dateMode === 'assign-old') {
-      const dateA = a.assignDate ? new Date(a.assignDate).getTime() : 0;
-      const dateB = b.assignDate ? new Date(b.assignDate).getTime() : 0;
-      return dateA - dateB;
     } else {
       return Number(b.id || 0) - Number(a.id || 0);
     }
@@ -645,33 +630,37 @@ function createTaskCard(task) {
   const completed = Math.max(0, total - unsubmitted.length);
   const percent = total ? Math.round(completed / total * 100) : 0;
 
-  const formattedTime = task.createdAt ? new Date(task.createdAt).toLocaleString('th-TH', {dateStyle: 'short', timeStyle: 'short'}) : '';
+  // เพิ่มส่วนแสดงรูปภาพการบ้าน (ถ้ามี)
+  const imageHTML = task.imageUrl ? `
+    <div class="mt-2">
+      <a href="${task.imageUrl}" target="_blank">
+        <img src="${task.imageUrl}" alt="รูปการบ้าน" class="max-h-36 rounded-xl border border-slate-200 object-cover">
+      </a>
+    </div>
+  ` : '';
 
   div.innerHTML = `
     <div class="flex justify-between items-start gap-2">
-      <div>
+      <div class="flex-1">
         <span class="text-[10px] bg-pink-50 text-pink-600 px-2 py-0.5 rounded-md font-extrabold border border-pink-100">
           ${escapeHtml(task.code)}
         </span>
         <h3 class="font-extrabold text-xs text-slate-800 mt-1">${escapeHtml(task.subject)}</h3>
         <p class="text-[11px] text-slate-600 mt-0.5 font-medium">${escapeHtml(task.detail)}</p>
+        ${imageHTML}
         <div class="flex gap-3 mt-1.5 text-[10px] font-bold">
           <span class="text-slate-500">วันสั่ง: ${formatDate(task.assignDate)}</span>
           <span class="text-rose-500">กำหนดส่ง: ${formatDate(task.dueDate)}</span>
         </div>
-        ${(task.createdBy || formattedTime) ? `<div class="text-[10px] text-slate-400 mt-1 font-semibold"><i class="fa-solid fa-user-pen"></i> เพิ่มโดย: ${escapeHtml(task.createdBy || 'ระบบ')} ${formattedTime ? `(${formattedTime})` : ''}</div>` : ''}
       </div>
 
-      <div class="flex items-center gap-2">
-        ${task.imageUrl ? `<a href="${task.imageUrl}" target="_blank"><img src="${task.imageUrl}" class="w-12 h-12 object-cover rounded-xl border border-slate-200 hover:opacity-95 transition" title="ดูรูปภาพ"></a>` : ''}
-        <div class="flex gap-1.5">
-          <button data-action="pin" class="text-amber-500 hover:text-amber-600 p-1" title="ปักหมุด">
-            <i class="fa-solid fa-thumbtack"></i>
-          </button>
-          <button data-action="delete" class="text-rose-500 hover:text-rose-600 p-1" title="ลบ">
-            <i class="fa-solid fa-trash"></i>
-          </button>
-        </div>
+      <div class="flex gap-1.5">
+        <button data-action="pin" class="text-amber-500 hover:text-amber-600 p-1" title="ปักหมุด">
+          <i class="fa-solid fa-thumbtack"></i>
+        </button>
+        <button data-action="delete" class="text-rose-500 hover:text-rose-600 p-1" title="ลบ">
+          <i class="fa-solid fa-trash"></i>
+        </button>
       </div>
     </div>
 
@@ -724,32 +713,35 @@ function createTrackingCard(task) {
   const completed = Math.max(0, total - unsubmitted.length);
   const percent = total ? Math.round(completed / total * 100) : 0;
 
-  const formattedTime = task.createdAt ? new Date(task.createdAt).toLocaleString('th-TH', {dateStyle: 'short', timeStyle: 'short'}) : '';
+  const imageHTML = task.imageUrl ? `
+    <div class="mt-2">
+      <a href="${task.imageUrl}" target="_blank">
+        <img src="${task.imageUrl}" alt="รูปการบ้าน" class="max-h-36 rounded-xl border border-slate-200 object-cover">
+      </a>
+    </div>
+  ` : '';
 
   div.innerHTML = `
     <div class="flex justify-between items-start gap-2">
-      <div>
+      <div class="flex-1">
         <span class="text-[10px] bg-purple-50 text-purple-600 px-2 py-0.5 rounded-md font-extrabold border border-purple-100">
           ${escapeHtml(task.code)}
         </span>
         <h3 class="font-extrabold text-xs text-slate-800 mt-1">${escapeHtml(task.subject)}</h3>
         <p class="text-[11px] text-slate-600 mt-0.5 font-medium">${escapeHtml(task.detail)}</p>
+        ${imageHTML}
         <div class="flex gap-3 mt-1.5 text-[10px] font-bold">
           <span class="text-slate-500">วันสั่ง: ${formatDate(task.assignDate)}</span>
           <span class="text-rose-500">กำหนดส่ง: ${formatDate(task.dueDate)}</span>
         </div>
-        ${(task.createdBy || formattedTime) ? `<div class="text-[10px] text-slate-400 mt-1 font-semibold"><i class="fa-solid fa-user-pen"></i> เพิ่มโดย: ${escapeHtml(task.createdBy || 'ระบบ')} ${formattedTime ? `(${formattedTime})` : ''}</div>` : ''}
       </div>
-      <div class="flex items-center gap-2">
-        ${task.imageUrl ? `<a href="${task.imageUrl}" target="_blank"><img src="${task.imageUrl}" class="w-12 h-12 object-cover rounded-xl border border-slate-200 hover:opacity-95 transition" title="ดูรูปภาพ"></a>` : ''}
-        <div class="flex gap-1.5">
-          <button data-action="pin" class="text-amber-500 hover:text-amber-600 p-1" title="ปักหมุด">
-            <i class="fa-solid fa-thumbtack"></i>
-          </button>
-          <button data-action="delete" class="text-rose-500 hover:text-rose-600 p-1" title="ลบ">
-            <i class="fa-solid fa-trash"></i>
-          </button>
-        </div>
+      <div class="flex gap-1.5">
+        <button data-action="pin" class="text-amber-500 hover:text-amber-600 p-1" title="ปักหมุด">
+          <i class="fa-solid fa-thumbtack"></i>
+        </button>
+        <button data-action="delete" class="text-rose-500 hover:text-rose-600 p-1" title="ลบ">
+          <i class="fa-solid fa-trash"></i>
+        </button>
       </div>
     </div>
 
@@ -802,12 +794,27 @@ async function sendSaveRequest(action, payloadData = null) {
   await new Promise(resolve => setTimeout(resolve, 1500));
 }
 
-function toBase64(file) {
+// ฟังก์ชันแปลงรูปภาพเป็น Base64
+function handleImageUpload(fileInputId) {
   return new Promise((resolve, reject) => {
+    const fileInput = document.getElementById(fileInputId);
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+      resolve(null);
+      return;
+    }
+    const file = fileInput.files[0];
     const reader = new FileReader();
+    reader.onload = function(e) {
+      resolve({
+        data: e.target.result,
+        type: file.type,
+        name: file.name
+      });
+    };
+    reader.onerror = function(error) {
+      reject(error);
+    };
     reader.readAsDataURL(file);
-    reader.onload = () => resolve({ name: file.name, type: file.type, data: reader.result });
-    reader.onerror = error => reject(error);
   });
 }
 
@@ -815,9 +822,7 @@ async function addTask() {
   const code = el('task-code').value.trim();
   const subject = el('task-subject').value.trim();
   const detail = el('task-detail').value.trim();
-  const assignDate = el('task-assign-date').value;
   const dueDate = el('task-due-date').value;
-  const fileInput = el('task-file');
 
   if (!code || !subject || !detail || !dueDate) {
     showAlert('กรุณากรอกข้อมูลให้ครบ');
@@ -835,9 +840,10 @@ async function addTask() {
   }
 
   let imageObj = null;
-  if (fileInput && fileInput.files.length > 0) {
-    const file = fileInput.files[0];
-    imageObj = await toBase64(file);
+  try {
+    imageObj = await handleImageUpload('task-image');
+  } catch(e) {
+    console.error("Image Parse Error:", e);
   }
 
   const task = {
@@ -845,37 +851,37 @@ async function addTask() {
     code: code,
     subject: subject,
     detail: detail,
-    assignDate: assignDate,
+    assignDate: el('task-assign-date').value,
     dueDate: dueDate,
-    imageObj: imageObj,
     isPinned: false,
     submitted: [],
     extraUnsubmitted: [],
-    createdAt: new Date().toISOString(),
-    createdBy: currentUser ? currentUser.name : 'Unknown'
+    imageObj: imageObj
   };
 
   const updatedTasks = [task, ...tasks];
 
-  const success = await execute('กำลังอัปโหลดและบันทึกการบ้าน...', async () => {
+  const success = await execute('กำลังบันทึกการบ้าน...', async () => {
     await sendSaveRequest('saveTasks', updatedTasks);
   });
 
   if (success) {
+    delete task.imageObj; // เคลียร์ object รูปหลังส่งเสร็จ
     tasks = updatedTasks;
+    const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
+    cachedData.tasks = tasks;
+    localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
 
-    ['task-code', 'task-subject', 'task-detail', 'task-assign-date', 'task-due-date'].forEach(id => el(id).value = '');
-    clearFileSelection();
-    
+    ['task-code', 'task-subject', 'task-detail', 'task-assign-date', 'task-due-date', 'task-image'].forEach(id => {
+      if(el(id)) el(id).value = '';
+    });
     el('task-form').classList.add('hidden');
     renderTasks();
     renderCalendar();
     selectDate(selectedDate);
     setStatus('บันทึกการบ้านเรียบร้อย');
     logActivity('เพิ่มการบ้าน', `วิชา ${task.subject} (${task.code}) - ${task.detail}`);
-    showAlert('อัปโหลดสำเร็จและบันทึกการบ้านเรียบร้อยแล้ว!');
-    
-    loadAllData(false);
+    showAlert('บันทึกการบ้านสำเร็จแล้ว');
   }
 }
 
@@ -884,6 +890,11 @@ async function togglePin(id) {
   if (task) {
     task.isPinned = !task.isPinned;
     renderTasks();
+    
+    const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
+    cachedData.tasks = tasks;
+    localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
+
     sendSaveRequest('saveTasks', tasks);
     logActivity(task.isPinned ? 'ปักหมุดการบ้าน' : 'ยกเลิกปักหมุด', `วิชา ${task.subject}`);
   }
@@ -897,6 +908,10 @@ async function deleteTask(id) {
   renderTasks();
   renderCalendar();
   selectDate(selectedDate);
+
+  const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
+  cachedData.tasks = tasks;
+  localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
 
   sendSaveRequest('saveTasks', tasks);
 
@@ -920,6 +935,10 @@ async function toggleStudent(taskId, number) {
   renderTasks();
   selectDate(selectedDate);
 
+  const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
+  cachedData.tasks = tasks;
+  localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
+
   sendSaveRequest('saveTasks', tasks);
 
   logActivity('เปลี่ยนสถานะส่งงาน', `เลขที่ ${numStr} วิชา ${task.subject} (${isSubmitted ? 'ส่งแล้ว' : 'ยังไม่ส่ง'})`);
@@ -942,6 +961,10 @@ async function addExtraStudent() {
 
   task.extraUnsubmitted.push(number);
   renderTasks();
+    
+  const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
+  cachedData.tasks = tasks;
+  localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
 
   sendSaveRequest('saveTasks', tasks);
   logActivity('เพิ่มรายชื่อคนค้างงาน', `เลขที่ ${number} ในวิชา ${task.subject}`);
@@ -1082,8 +1105,14 @@ async function addEvent() {
   el('event-input').value = '';
   el('event-form').classList.add('hidden');
 
+  const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
+  cachedData.events = dailyEvents;
+  localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
+
   sendSaveRequest('saveEvents', dailyEvents);
+
   logActivity('เพิ่มกิจกรรม', `วันที่ ${formatDate(selectedDate)}: ${event}`);
+
   showAlert('เพิ่มกิจกรรมสำเร็จแล้ว');
 }
 
@@ -1099,6 +1128,11 @@ async function deleteEvent(key, index) {
     else dailyEvents[key] = events;
 
     selectDate(selectedDate);
+
+    const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
+    cachedData.events = dailyEvents;
+    localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
+
     sendSaveRequest('saveEvents', dailyEvents);
     logActivity('ลบกิจกรรม', `วันที่ ${formatDate(key)}: ${removed}`);
   }
