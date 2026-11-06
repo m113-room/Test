@@ -283,7 +283,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.75)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.76)</span>
       </div>
     </div>
 
@@ -321,7 +321,7 @@ let tasks = [];
 let dailyEvents = {};
 let codes = [];
 let subjects = [];
-let subjectMap = {}; // แม็ปข้อมูล รหัสวิชา <-> ชื่อวิชา/ครูผู้สอน
+let subjectMap = {};
 let currentTab = 'pending';
 let calendarDate = new Date();
 let selectedDate = dateKey(new Date());
@@ -569,21 +569,15 @@ async function loadAllData(showMessage = false) {
   }
 }
 
-// สร้างตารางจับคู่รหัสวิชา ชื่อวิชา และครูผู้สอนจาก Google Sheets
 function buildSubjectMap(options) {
   subjectMap = {};
   if (!options) return;
-  
-  // รองรับโครงสร้างข้อมูลหลากหลายแบบที่ส่งมาจาก Apps Script
   const rawCodes = options.codes || [];
   const rawSubjects = options.subjects || [];
   
-  // หาก Sheets ส่งมาเป็นอาเรย์ของออบเจกต์ หรือ อาเรย์ข้อความ
   for (let i = 0; i < Math.max(rawCodes.length, rawSubjects.length); i++) {
     let c = typeof rawCodes[i] === 'object' ? (rawCodes[i].code || rawCodes[i].val || '') : String(rawCodes[i] || '');
     let s = typeof rawSubjects[i] === 'object' ? (rawSubjects[i].subject || rawSubjects[i].name || rawSubjects[i].val || '') : String(rawSubjects[i] || '');
-    
-    // ดึงข้อมูลเพิ่มเติมถ้ามีในออบเจกต์ (เช่น ชื่อครูผู้สอน)
     let teacher = '';
     if (typeof rawCodes[i] === 'object' && rawCodes[i].teacher) teacher = rawCodes[i].teacher;
     if (typeof rawSubjects[i] === 'object' && rawSubjects[i].teacher) teacher = rawSubjects[i].teacher;
@@ -596,7 +590,6 @@ function buildSubjectMap(options) {
     }
   }
 
-  // ค้นหาข้อมูลวิชาจากรายการการบ้านเก่าที่มีในระบบเพิ่มเติมด้วย
   tasks.forEach(t => {
     if (t.code && t.subject) {
       const item = { code: t.code, subject: t.subject, teacher: t.teacher || '' };
@@ -606,15 +599,12 @@ function buildSubjectMap(options) {
   });
 }
 
-// ฟังก์ชันเติมข้อมูลอัตโนมัติเมื่อพิมพ์รหัสวิชา, ชื่อวิชา หรือครูผู้สอน
 function autoFillSubject(type) {
   const codeInput = el('task-code');
   const subjectInput = el('task-subject');
-  
   const query = (type === 'code' ? codeInput.value : subjectInput.value).toLowerCase().trim();
   if (!query) return;
 
-  // ค้นหาใน subjectMap
   let found = null;
   for (let key in subjectMap) {
     if (key.includes(query) || query.includes(key)) {
@@ -1086,10 +1076,10 @@ function renderCalendar() {
     dayText.textContent = day;
     button.appendChild(dayText);
 
+    // เช็คเฉพาะ "วันกำหนดส่ง (dueDate)" เท่านั้นสำหรับจุดสีชมพู
     const hasTask = tasks.some(t => {
-      const assign = normalizeDateStr(t.assignDate);
       const due = normalizeDateStr(t.dueDate);
-      return assign === key || due === key;
+      return due === key;
     });
 
     const rawEvent = dailyEvents[key];
@@ -1368,7 +1358,7 @@ async function openLogs() {
     } else {
       container.innerHTML += '<p class="text-xs text-slate-500 text-center py-4 font-bold">ไม่มีประวัติการใช้งาน</p>';
     }
-  }	catch (error) {
+  } catch (error) {
     el('modal-content').textContent = error.message;
   }
 }
