@@ -229,8 +229,8 @@
           <h3 class="text-xs font-bold text-pink-600 mb-1">เพิ่มรายการการบ้าน</h3>
           
           <div class="grid grid-cols-2 gap-2">
-            <input id="task-code" list="code-options" placeholder="รหัสวิชา" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white">
-            <input id="task-subject" list="subject-options" placeholder="ชื่อวิชา" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white">
+            <input id="task-code" list="code-options" placeholder="รหัสวิชา" oninput="autoFillSubject('code')" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white">
+            <input id="task-subject" list="subject-options" placeholder="ชื่อวิชา" oninput="autoFillSubject('subject')" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white">
           </div>
           <datalist id="code-options"></datalist>
           <datalist id="subject-options"></datalist>
@@ -283,7 +283,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.74)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.75)</span>
       </div>
     </div>
 
@@ -321,6 +321,7 @@ let tasks = [];
 let dailyEvents = {};
 let codes = [];
 let subjects = [];
+let subjectMap = {}; // แม็ปข้อมูล รหัสวิชา <-> ชื่อวิชา/ครูผู้สอน
 let currentTab = 'pending';
 let calendarDate = new Date();
 let selectedDate = dateKey(new Date());
@@ -529,6 +530,7 @@ async function loadAllData(showMessage = false) {
       dailyEvents = parsed.events || {};
       codes = parsed.options?.codes || [];
       subjects = parsed.options?.subjects || [];
+      buildSubjectMap(parsed.options);
       updateOptions();
       renderTasks();
       renderCalendar();
@@ -543,6 +545,7 @@ async function loadAllData(showMessage = false) {
       dailyEvents = res.events || {};
       codes = res.options?.codes || [];
       subjects = res.options?.subjects || [];
+      buildSubjectMap(res.options);
 
       localStorage.setItem('homeworkCacheData', JSON.stringify(res));
 
@@ -563,6 +566,66 @@ async function loadAllData(showMessage = false) {
     } else {
       load().catch(e => console.error(e));
     }
+  }
+}
+
+// สร้างตารางจับคู่รหัสวิชา ชื่อวิชา และครูผู้สอนจาก Google Sheets
+function buildSubjectMap(options) {
+  subjectMap = {};
+  if (!options) return;
+  
+  // รองรับโครงสร้างข้อมูลหลากหลายแบบที่ส่งมาจาก Apps Script
+  const rawCodes = options.codes || [];
+  const rawSubjects = options.subjects || [];
+  
+  // หาก Sheets ส่งมาเป็นอาเรย์ของออบเจกต์ หรือ อาเรย์ข้อความ
+  for (let i = 0; i < Math.max(rawCodes.length, rawSubjects.length); i++) {
+    let c = typeof rawCodes[i] === 'object' ? (rawCodes[i].code || rawCodes[i].val || '') : String(rawCodes[i] || '');
+    let s = typeof rawSubjects[i] === 'object' ? (rawSubjects[i].subject || rawSubjects[i].name || rawSubjects[i].val || '') : String(rawSubjects[i] || '');
+    
+    // ดึงข้อมูลเพิ่มเติมถ้ามีในออบเจกต์ (เช่น ชื่อครูผู้สอน)
+    let teacher = '';
+    if (typeof rawCodes[i] === 'object' && rawCodes[i].teacher) teacher = rawCodes[i].teacher;
+    if (typeof rawSubjects[i] === 'object' && rawSubjects[i].teacher) teacher = rawSubjects[i].teacher;
+
+    if (c || s) {
+      const item = { code: c, subject: s, teacher: teacher };
+      if (c) subjectMap[c.toLowerCase().trim()] = item;
+      if (s) subjectMap[s.toLowerCase().trim()] = item;
+      if (teacher) subjectMap[teacher.toLowerCase().trim()] = item;
+    }
+  }
+
+  // ค้นหาข้อมูลวิชาจากรายการการบ้านเก่าที่มีในระบบเพิ่มเติมด้วย
+  tasks.forEach(t => {
+    if (t.code && t.subject) {
+      const item = { code: t.code, subject: t.subject, teacher: t.teacher || '' };
+      subjectMap[t.code.toLowerCase().trim()] = item;
+      subjectMap[t.subject.toLowerCase().trim()] = item;
+    }
+  });
+}
+
+// ฟังก์ชันเติมข้อมูลอัตโนมัติเมื่อพิมพ์รหัสวิชา, ชื่อวิชา หรือครูผู้สอน
+function autoFillSubject(type) {
+  const codeInput = el('task-code');
+  const subjectInput = el('task-subject');
+  
+  const query = (type === 'code' ? codeInput.value : subjectInput.value).toLowerCase().trim();
+  if (!query) return;
+
+  // ค้นหาใน subjectMap
+  let found = null;
+  for (let key in subjectMap) {
+    if (key.includes(query) || query.includes(key)) {
+      found = subjectMap[key];
+      break;
+    }
+  }
+
+  if (found) {
+    if (found.code) codeInput.value = found.code;
+    if (found.subject) subjectInput.value = found.subject;
   }
 }
 
@@ -645,7 +708,6 @@ function renderTasks() {
   if (!tracking.children.length) tracking.innerHTML = '<p class="text-xs text-slate-500 text-center py-6 font-bold">ไม่พบรายการงานค้างที่ค้นหา</p>';
 }
 
-// หน้า "ภาพรวมงานค้าง" (แสดงเฉพาะข้อความส่งแล้วและบาร์สีเขียว ไม่มีปุ่มกดเลขที่)
 function createTaskCard(task) {
   const div = document.createElement('div');
   div.className = 'bg-white border border-slate-100 rounded-2xl p-3.5 shadow-sm space-y-2';
@@ -721,7 +783,6 @@ function getUnsubmitted(task) {
   return result;
 }
 
-// หน้า "งานค้าง" (ยังคงแสดงปุ่มกดเช็คสถานะเลขที่นักเรียนตามปกติ)
 function createTrackingCard(task) {
   const div = document.createElement('div');
   div.className = 'bg-white rounded-2xl border border-slate-100 p-3.5 space-y-2.5 shadow-sm';
@@ -1307,7 +1368,7 @@ async function openLogs() {
     } else {
       container.innerHTML += '<p class="text-xs text-slate-500 text-center py-4 font-bold">ไม่มีประวัติการใช้งาน</p>';
     }
-  } catch (error) {
+  }	catch (error) {
     el('modal-content').textContent = error.message;
   }
 }
