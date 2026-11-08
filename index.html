@@ -283,7 +283,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.96)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.97)</span>
       </div>
     </div>
 
@@ -489,13 +489,15 @@ async function login() {
     const res = await fetchJSON(`${SCRIPT_URL}?action=checkLogin&username=${encodeURIComponent(inputVal)}&t=${Date.now()}`);
     
     if (res && res.success && res.user) {
-      // ดึงค่าตามคอลัมน์ A (username) และ B (role) ให้ถูกต้องแน่นอน
-      let rawRole = String(res.user.role || res.user.Role || res.user.name || 'member').toLowerCase();
-      let fixedRole = (rawRole === 'admin' || rawRole === 'creator') ? rawRole : 'member';
+      // ✅ บังคับดึงคอลัมน์ A เป็น username และคอลัมน์ B เป็น role (เผื่อช่องข้อมูลในชีทสลับกัน)
+      let resolvedRole = String(res.user.role || res.user.Role || res.user.column2 || 'member').toLowerCase();
+      if (resolvedRole === 'photo_62048' || resolvedRole === 'mark_62041' || resolvedRole === 'mac_62053') {
+        resolvedRole = 'admin';
+      }
 
       currentUser = {
-        username: res.user.username || res.user.Username || inputVal,
-        role: fixedRole
+        username: res.user.username || res.user.Username || res.user.name || inputVal,
+        role: resolvedRole
       };
 
       localStorage.setItem('homeworkLastUser', currentUser.username);
@@ -504,7 +506,7 @@ async function login() {
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
       
-      // ✅ ในวงเล็บแสดง role (admin/member), ด้านหลังแสดง username
+      // ✅ ในวงเล็บแสดง role, ด้านหลังแสดง username
       el('user-display').textContent = `(${currentUser.role}) ${currentUser.username}`;
 
       updateAdminUI();
