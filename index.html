@@ -283,7 +283,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.92)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.95)</span>
       </div>
     </div>
 
@@ -455,7 +455,7 @@ async function execute(label, action) {
 }
 
 function isAdmin() { 
-  return currentUser && ['admin', 'creator'].includes(String(currentUser.role).toLowerCase()); 
+  return currentUser && ['admin', 'creator'].includes(String(currentUser.role || currentUser.Role || '').toLowerCase()); 
 }
 
 function updateAdminUI() {
@@ -490,9 +490,8 @@ async function login() {
     
     if (res && res.success && res.user) {
       currentUser = {
-        username: res.user.username,
-        role: res.user.role,
-        name: res.user.name
+        username: res.user.username || res.user.Username || inputVal,
+        role: res.user.role || res.user.Role || res.user.column2 || 'member'
       };
 
       localStorage.setItem('homeworkLastUser', currentUser.username);
@@ -501,9 +500,9 @@ async function login() {
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
       
-      // ✅ ดึงค่า role จากชีทมาแสดงในวงเล็บโดยอัตโนมัติ
-      const userRole = (currentUser.role || 'member').toLowerCase();
-      const userName = currentUser.username || currentUser.name || 'User';
+      // ✅ ในวงเล็บแสดง role, ด้านหลังแสดง username
+      const userRole = String(currentUser.role).toLowerCase();
+      const userName = currentUser.username;
       el('user-display').textContent = `(${userRole}) ${userName}`;
 
       updateAdminUI();
@@ -1433,9 +1432,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
       
-      // ✅ ดึงค่า role จากชีทมาแสดงในวงเล็บโดยอัตโนมัติ
-      const userRole = (currentUser.role || 'member').toLowerCase();
-      const userName = currentUser.username || currentUser.name || 'User';
+      const userRole = String(currentUser.role || 'member').toLowerCase();
+      const userName = currentUser.username || 'User';
       el('user-display').textContent = `(${userRole}) ${userName}`;
       
       updateAdminUI();
