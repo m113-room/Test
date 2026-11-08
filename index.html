@@ -283,7 +283,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.90)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.91)</span>
       </div>
     </div>
 
@@ -501,7 +501,6 @@ async function login() {
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
       
-      // ✅ บังคับแสดงผลวงเล็บเป็น member และชื่อดึงจาก input หรือข้อมูลที่พิมพ์เข้ามา
       const userRole = 'member';
       const userName = currentUser.username || inputVal;
       el('user-display').textContent = `(${userRole}) ${userName}`;
@@ -976,22 +975,49 @@ async function togglePin(id) {
 
 async function deleteTask(id) {
   const task = tasks.find(t => String(t.id) === String(id));
-  if (!confirm('ต้องการลบการบ้านนี้ใช่หรือไม่?')) return;
+  if (!task) return;
 
-  tasks = tasks.filter(t => String(t.id) !== String(id));
-  renderTasks();
-  renderCalendar();
-  selectDate(selectedDate);
+  const modalContent = `
+    <div class="text-center space-y-4">
+      <div class="w-12 h-12 mx-auto bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center text-xl shadow-inner">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <div>
+        <h4 class="font-extrabold text-sm text-slate-800">ยืนยันการลบการบ้าน</h4>
+        <p class="text-xs text-slate-500 mt-1">วิชา: ${escapeHtml(task.subject)}<br>${escapeHtml(task.detail)}</p>
+      </div>
+      <div class="grid grid-cols-2 gap-2 pt-2">
+        <button onclick="closeModal()" class="w-full bg-slate-100 text-slate-600 py-2.5 rounded-xl text-xs font-extrabold hover:bg-slate-200 transition">
+          ยกเลิก
+        </button>
+        <button id="confirm-delete-btn" class="w-full bg-rose-500 text-white py-2.5 rounded-xl text-xs font-extrabold hover:bg-rose-600 transition shadow-sm">
+          ลบข้อมูล
+        </button>
+      </div>
+    </div>
+  `;
 
-  const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
-  cachedData.tasks = tasks;
-  localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
+  openModal('แจ้งเตือน', modalContent);
 
-  sendSaveRequest('saveTasks', tasks);
+  document.getElementById('confirm-delete-btn').onclick = async () => {
+    closeModal();
 
-  if (task) {
-    logActivity('ลบการบ้าน', `วิชา ${task.subject} - ${task.detail}`);
-  }
+    tasks = tasks.filter(t => String(t.id) !== String(id));
+    renderTasks();
+    renderCalendar();
+    selectDate(selectedDate);
+
+    const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
+    cachedData.tasks = tasks;
+    localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
+
+    sendSaveRequest('saveTasks', tasks);
+
+    if (task) {
+      logActivity('ลบการบ้าน', `วิชา ${task.subject} - ${task.detail}`);
+    }
+    showAlert('ลบการบ้านเรียบร้อยแล้ว');
+  };
 }
 
 async function toggleStudent(taskId, number) {
