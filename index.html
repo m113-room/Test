@@ -283,7 +283,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.88)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.90)</span>
       </div>
     </div>
 
@@ -501,16 +501,16 @@ async function login() {
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
       
-      // ✅ บังคับสลับตำแหน่งให้ถูกต้อง 100% ตรงนี้ครับ
-      const targetName = currentUser.username || currentUser.role || 'User';
-      const targetRole = 'member';
-      el('user-display').textContent = `(${targetRole}) ${targetName}`;
+      // ✅ บังคับแสดงผลวงเล็บเป็น member และชื่อดึงจาก input หรือข้อมูลที่พิมพ์เข้ามา
+      const userRole = 'member';
+      const userName = currentUser.username || inputVal;
+      el('user-display').textContent = `(${userRole}) ${userName}`;
 
       updateAdminUI();
       switchTab('pending');
 
       await loadAllData(false);
-      logActivity('เข้าสู่ระบบ', `ผู้ใช้งาน ${targetName} เข้าสู่ระบบสำเร็จ`);
+      logActivity('เข้าสู่ระบบ', `ผู้ใช้งาน ${userName} เข้าสู่ระบบสำเร็จ`);
     } else {
       throw new Error(res.error || 'ไม่พบบัญชี');
     }
@@ -1406,9 +1406,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
       
-      const targetName = currentUser.username || currentUser.role || 'User';
-      const targetRole = 'member';
-      el('user-display').textContent = `(${targetRole}) ${targetName}`;
+      const userRole = 'member';
+      const userName = currentUser.username || currentUser.name || 'User';
+      el('user-display').textContent = `(${userRole}) ${userName}`;
       
       updateAdminUI();
       switchTab('pending');
