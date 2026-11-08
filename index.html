@@ -283,7 +283,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.83)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.84)</span>
       </div>
     </div>
 
@@ -501,7 +501,7 @@ async function login() {
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
       
-      // 👉 แสดงยศจริงในวงเล็บ ตามด้วยชื่อผู้ใช้
+      // 👉 วงเล็บยศ อยู่ข้างนอกตามด้วยชื่อผู้ใช้
       const userRole = currentUser.role ? currentUser.role.toLowerCase() : 'member';
       el('user-display').textContent = `(${userRole}) ${currentUser.name}`;
 
@@ -1193,7 +1193,7 @@ async function addEvent() {
 }
 
 async function deleteEvent(key, index) {
-  if (!confirm('ต้องการลบกิจกรรมนี้ใช่หรือไม่?')) return;
+  if (!confirm('ต้องการลบการบ้านนี้ใช่หรือไม่?')) return;
 
   const rawEvent = dailyEvents[key];
   const events = Array.isArray(rawEvent) ? rawEvent : (rawEvent ? [rawEvent] : []);
@@ -1405,7 +1405,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
       
-      // 👉 แสดงยศจริงในวงเล็บ ตามด้วยชื่อผู้ใช้
+      // 👉 วงเล็บยศ อยู่ข้างนอกตามด้วยชื่อผู้ใช้
       const userRole = currentUser.role ? currentUser.role.toLowerCase() : 'member';
       el('user-display').textContent = `(${userRole}) ${currentUser.name}`;
       
