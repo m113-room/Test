@@ -283,7 +283,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.91)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.92)</span>
       </div>
     </div>
 
@@ -501,15 +501,16 @@ async function login() {
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
       
-      const userRole = 'member';
-      const userName = currentUser.username || inputVal;
+      // ✅ ดึงค่า role จากชีทมาแสดงในวงเล็บโดยอัตโนมัติ
+      const userRole = (currentUser.role || 'member').toLowerCase();
+      const userName = currentUser.username || currentUser.name || 'User';
       el('user-display').textContent = `(${userRole}) ${userName}`;
 
       updateAdminUI();
       switchTab('pending');
 
       await loadAllData(false);
-      logActivity('เข้าสู่ระบบ', `ผู้ใช้งาน ${userName} เข้าสู่ระบบสำเร็จ`);
+      logActivity('เข้าสู่ระบบ', `ผู้ใช้งาน ${userName} (${userRole}) เข้าสู่ระบบสำเร็จ`);
     } else {
       throw new Error(res.error || 'ไม่พบบัญชี');
     }
@@ -1432,7 +1433,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
       
-      const userRole = 'member';
+      // ✅ ดึงค่า role จากชีทมาแสดงในวงเล็บโดยอัตโนมัติ
+      const userRole = (currentUser.role || 'member').toLowerCase();
       const userName = currentUser.username || currentUser.name || 'User';
       el('user-display').textContent = `(${userRole}) ${userName}`;
       
