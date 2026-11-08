@@ -283,7 +283,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.77)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.78)</span>
       </div>
     </div>
 
@@ -698,7 +698,7 @@ function renderTasks() {
   if (!tracking.children.length) tracking.innerHTML = '<p class="text-xs text-slate-500 text-center py-6 font-bold">ไม่พบรายการงานค้างที่ค้นหา</p>';
 }
 
-// หน้า "ภาพรวมงานค้าง" (แสดงเฉพาะข้อความส่งแล้วและบาร์สีเขียว ไม่มีปุ่มกดเลขที่)
+// ฟังก์ชันสร้างการ์ด (ตรวจสอบให้แน่ใจว่า task.imageUrl มีค่าจริงและไม่ใช่ค่าว่าง ถึงจะสร้างแท็กรูปภาพ)
 function createTaskCard(task) {
   const div = document.createElement('div');
   div.className = 'bg-white border border-slate-100 rounded-2xl p-3.5 shadow-sm space-y-2';
@@ -708,7 +708,8 @@ function createTaskCard(task) {
   const completed = Math.max(0, total - unsubmitted.length);
   const percent = total ? Math.round(completed / total * 100) : 0;
 
-  const imageHTML = (task.imageUrl && task.imageUrl.trim() !== "") ? `
+  const hasImage = task.imageUrl && String(task.imageUrl).trim() !== "" && String(task.imageUrl).startsWith('http');
+  const imageHTML = hasImage ? `
     <div class="mt-2">
       <a href="${task.imageUrl}" target="_blank">
         <img src="${task.imageUrl}" alt="รูปการบ้าน" class="max-h-36 rounded-xl border border-slate-200 object-cover">
@@ -774,7 +775,6 @@ function getUnsubmitted(task) {
   return result;
 }
 
-// หน้า "งานค้าง" (ยังคงแสดงปุ่มกดเช็คสถานะเลขที่นักเรียนตามปกติ)
 function createTrackingCard(task) {
   const div = document.createElement('div');
   div.className = 'bg-white rounded-2xl border border-slate-100 p-3.5 space-y-2.5 shadow-sm';
@@ -784,7 +784,8 @@ function createTrackingCard(task) {
   const completed = Math.max(0, total - unsubmitted.length);
   const percent = total ? Math.round(completed / total * 100) : 0;
 
-  const imageHTML = (task.imageUrl && task.imageUrl.trim() !== "") ? `
+  const hasImage = task.imageUrl && String(task.imageUrl).trim() !== "" && String(task.imageUrl).startsWith('http');
+  const imageHTML = hasImage ? `
     <div class="mt-2">
       <a href="${task.imageUrl}" target="_blank">
         <img src="${task.imageUrl}" alt="รูปการบ้าน" class="max-h-36 rounded-xl border border-slate-200 object-cover">
@@ -1078,7 +1079,6 @@ function renderCalendar() {
     dayText.textContent = day;
     button.appendChild(dayText);
 
-    // เช็คเฉพาะ "วันกำหนดส่ง (dueDate)" เท่านั้นสำหรับจุดสีชมพู
     const hasTask = tasks.some(t => {
       const due = normalizeDateStr(t.dueDate);
       return due === key;
