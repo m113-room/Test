@@ -283,7 +283,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.82)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.83)</span>
       </div>
     </div>
 
@@ -501,13 +501,9 @@ async function login() {
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
       
-      let rawRole = currentUser.role ? currentUser.role.toLowerCase() : 'user';
-      if (rawRole === 'creator' || rawRole === 'admin') {
-        rawRole = 'admin';
-      } else {
-        rawRole = 'member/user';
-      }
-      el('user-display').textContent = `(${rawRole}) ${currentUser.name}`;
+      // 👉 แสดงยศจริงในวงเล็บ ตามด้วยชื่อผู้ใช้
+      const userRole = currentUser.role ? currentUser.role.toLowerCase() : 'member';
+      el('user-display').textContent = `(${userRole}) ${currentUser.name}`;
 
       updateAdminUI();
       switchTab('pending');
@@ -1409,13 +1405,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
       
-      let rawRole = currentUser.role ? currentUser.role.toLowerCase() : 'user';
-      if (rawRole === 'creator' || rawRole === 'admin') {
-        rawRole = 'admin';
-      } else {
-        rawRole = 'member/user';
-      }
-      el('user-display').textContent = `(${rawRole}) ${currentUser.name}`;
+      // 👉 แสดงยศจริงในวงเล็บ ตามด้วยชื่อผู้ใช้
+      const userRole = currentUser.role ? currentUser.role.toLowerCase() : 'member';
+      el('user-display').textContent = `(${userRole}) ${currentUser.name}`;
       
       updateAdminUI();
       switchTab('pending');
