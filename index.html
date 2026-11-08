@@ -283,7 +283,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.80)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.81)</span>
       </div>
     </div>
 
@@ -500,7 +500,9 @@ async function login() {
 
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
-      el('user-display').textContent = currentUser.name;
+      
+      const userRole = currentUser.role ? currentUser.role.toLowerCase() : 'member';
+      el('user-display').textContent = `(${userRole}) ${currentUser.name}`;
 
       updateAdminUI();
       switchTab('pending');
@@ -926,7 +928,7 @@ async function addTask() {
     isPinned: false,
     submitted: [],
     extraUnsubmitted: [],
-    imageObj: imageObj // ✅ ส่งอ็อบเจกต์รูปภาพไปพร้อมกับข้อมูลงาน
+    imageObj: imageObj
   };
 
   const updatedTasks = [task, ...tasks];
@@ -1401,7 +1403,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       currentUser = JSON.parse(saved);
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
-      el('user-display').textContent = currentUser.name;
+      
+      const userRole = currentUser.role ? currentUser.role.toLowerCase() : 'member';
+      el('user-display').textContent = `(${userRole}) ${currentUser.name}`;
       
       updateAdminUI();
       switchTab('pending');
