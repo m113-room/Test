@@ -109,7 +109,8 @@
           <button id="btn-options" onclick="openOptions()" title="จัดการวิชา" class="w-8 h-8 rounded-full bg-sky-50 text-sky-600 items-center justify-center text-xs hover:bg-sky-100 transition hidden">
             <i class="fa-solid fa-list-check"></i>
           </button>
-          <button onclick="loadAllData(true)" title="รีเฟรช" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs hover:bg-slate-200 transition">
+          <!-- ปุ่มรีเฟรชเรียกฟังก์ชันซิงค์พร้อมป๊อปอัพ -->
+          <button onclick="syncDataWithPopup()" title="รีเฟรช" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs hover:bg-slate-200 transition">
             <i class="fa-solid fa-rotate"></i>
           </button>
           <button onclick="logout()" class="px-3 py-1.5 bg-rose-50 text-rose-500 rounded-xl text-[11px] font-extrabold hover:bg-rose-100 transition ml-1">
@@ -283,7 +284,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.97)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.98)</span>
       </div>
     </div>
 
@@ -489,15 +490,9 @@ async function login() {
     const res = await fetchJSON(`${SCRIPT_URL}?action=checkLogin&username=${encodeURIComponent(inputVal)}&t=${Date.now()}`);
     
     if (res && res.success && res.user) {
-      // ✅ บังคับดึงคอลัมน์ A เป็น username และคอลัมน์ B เป็น role (เผื่อช่องข้อมูลในชีทสลับกัน)
-      let resolvedRole = String(res.user.role || res.user.Role || res.user.column2 || 'member').toLowerCase();
-      if (resolvedRole === 'photo_62048' || resolvedRole === 'mark_62041' || resolvedRole === 'mac_62053') {
-        resolvedRole = 'admin';
-      }
-
       currentUser = {
-        username: res.user.username || res.user.Username || res.user.name || inputVal,
-        role: resolvedRole
+        username: res.user.username || res.user.Username || inputVal,
+        role: String(res.user.role || 'member').toLowerCase()
       };
 
       localStorage.setItem('homeworkLastUser', currentUser.username);
@@ -506,7 +501,6 @@ async function login() {
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
       
-      // ✅ ในวงเล็บแสดง role, ด้านหลังแสดง username
       el('user-display').textContent = `(${currentUser.role}) ${currentUser.username}`;
 
       updateAdminUI();
@@ -526,6 +520,20 @@ function logout() {
   sessionStorage.removeItem('homeworkUser');
   localStorage.removeItem('homeworkCacheData');
   location.reload();
+}
+
+// ฟังก์ชันกดรีเฟรชพร้อมแสดงป๊อปอัพ "กำลังซิงค์ข้อมูล..."
+async function syncDataWithPopup() {
+  showLoading('กำลังซิงค์ข้อมูล...');
+  try {
+    await loadAllData(false);
+    showAlert('ซิงค์ข้อมูลสำเร็จ');
+  } catch (e) {
+    console.error(e);
+    showAlert('เกิดข้อผิดพลาดในการซิงค์');
+  } finally {
+    hideLoading();
+  }
 }
 
 async function loadAllData(showMessage = false) {
@@ -1303,7 +1311,7 @@ function openOptions() {
         </div>
       </div>
 
-      <button onclick="loadAllData(true); closeModal();" class="w-full bg-sky-50 text-sky-600 border border-sky-100 py-2 rounded-xl text-xs font-bold mt-2">
+      <button onclick="syncDataWithPopup(); closeModal();" class="w-full bg-sky-50 text-sky-600 border border-sky-100 py-2 rounded-xl text-xs font-bold mt-2">
         รีเฟรชรายการตัวเลือก
       </button>
     </div>
