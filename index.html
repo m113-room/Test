@@ -283,7 +283,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.95)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.96)</span>
       </div>
     </div>
 
@@ -455,7 +455,7 @@ async function execute(label, action) {
 }
 
 function isAdmin() { 
-  return currentUser && ['admin', 'creator'].includes(String(currentUser.role || currentUser.Role || '').toLowerCase()); 
+  return currentUser && ['admin', 'creator'].includes(String(currentUser.role || '').toLowerCase()); 
 }
 
 function updateAdminUI() {
@@ -489,9 +489,13 @@ async function login() {
     const res = await fetchJSON(`${SCRIPT_URL}?action=checkLogin&username=${encodeURIComponent(inputVal)}&t=${Date.now()}`);
     
     if (res && res.success && res.user) {
+      // ดึงค่าตามคอลัมน์ A (username) และ B (role) ให้ถูกต้องแน่นอน
+      let rawRole = String(res.user.role || res.user.Role || res.user.name || 'member').toLowerCase();
+      let fixedRole = (rawRole === 'admin' || rawRole === 'creator') ? rawRole : 'member';
+
       currentUser = {
         username: res.user.username || res.user.Username || inputVal,
-        role: res.user.role || res.user.Role || res.user.column2 || 'member'
+        role: fixedRole
       };
 
       localStorage.setItem('homeworkLastUser', currentUser.username);
@@ -500,16 +504,14 @@ async function login() {
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
       
-      // ✅ ในวงเล็บแสดง role, ด้านหลังแสดง username
-      const userRole = String(currentUser.role).toLowerCase();
-      const userName = currentUser.username;
-      el('user-display').textContent = `(${userRole}) ${userName}`;
+      // ✅ ในวงเล็บแสดง role (admin/member), ด้านหลังแสดง username
+      el('user-display').textContent = `(${currentUser.role}) ${currentUser.username}`;
 
       updateAdminUI();
       switchTab('pending');
 
       await loadAllData(false);
-      logActivity('เข้าสู่ระบบ', `ผู้ใช้งาน ${userName} (${userRole}) เข้าสู่ระบบสำเร็จ`);
+      logActivity('เข้าสู่ระบบ', `ผู้ใช้งาน ${currentUser.username} (${currentUser.role}) เข้าสู่ระบบสำเร็จ`);
     } else {
       throw new Error(res.error || 'ไม่พบบัญชี');
     }
@@ -1432,9 +1434,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
       
-      const userRole = String(currentUser.role || 'member').toLowerCase();
-      const userName = currentUser.username || 'User';
-      el('user-display').textContent = `(${userRole}) ${userName}`;
+      el('user-display').textContent = `(${currentUser.role}) ${currentUser.username}`;
       
       updateAdminUI();
       switchTab('pending');
