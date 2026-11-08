@@ -99,6 +99,7 @@
             <h1 class="font-extrabold text-pink-500 text-lg">HOMEWORK</h1>
             <span class="bg-slate-800 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md">M113</span>
           </div>
+          <!-- จุดแสดงผลชื่อ (ไม่มีคำว่า user แข็งๆ ค้างใน HTML แล้ว ให้ JS จัดการทั้งหมด) -->
           <span id="user-display" class="inline-block mt-1 text-[11px] font-extrabold text-pink-600 bg-pink-50 px-2.5 py-0.5 rounded-full border border-pink-100"></span>
         </div>
 
@@ -283,7 +284,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.84)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.1.86)</span>
       </div>
     </div>
 
@@ -501,7 +502,6 @@ async function login() {
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
       
-      // 👉 วงเล็บยศ อยู่ข้างนอกตามด้วยชื่อผู้ใช้
       const userRole = currentUser.role ? currentUser.role.toLowerCase() : 'member';
       el('user-display').textContent = `(${userRole}) ${currentUser.name}`;
 
@@ -1193,7 +1193,7 @@ async function addEvent() {
 }
 
 async function deleteEvent(key, index) {
-  if (!confirm('ต้องการลบการบ้านนี้ใช่หรือไม่?')) return;
+  if (!confirm('ต้องการลบกิจกรรมนี้ใช่หรือไม่?')) return;
 
   const rawEvent = dailyEvents[key];
   const events = Array.isArray(rawEvent) ? rawEvent : (rawEvent ? [rawEvent] : []);
@@ -1405,7 +1405,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
       
-      // 👉 วงเล็บยศ อยู่ข้างนอกตามด้วยชื่อผู้ใช้
       const userRole = currentUser.role ? currentUser.role.toLowerCase() : 'member';
       el('user-display').textContent = `(${userRole}) ${currentUser.name}`;
       
