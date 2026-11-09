@@ -231,15 +231,13 @@
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-[10px] font-bold text-slate-500 mb-1">รหัสวิชา:</label>
-              <select id="task-code" onchange="autoFillSubject('code')" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-semibold text-slate-700">
-                <option value="">เลือกรหัสวิชา</option>
-              </select>
+              <input id="task-code" list="code-options" placeholder="พิมพ์หรือเลือกรหัส" oninput="autoFillSubject('code')" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-semibold text-slate-700">
+              <datalist id="code-options"></datalist>
             </div>
             <div>
               <label class="block text-[10px] font-bold text-slate-500 mb-1">ชื่อวิชา:</label>
-              <select id="task-subject" onchange="autoFillSubject('subject')" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-semibold text-slate-700">
-                <option value="">เลือกชื่อวิชา</option>
-              </select>
+              <input id="task-subject" list="subject-options" placeholder="พิมพ์หรือเลือกชื่อวิชา" oninput="autoFillSubject('subject')" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-semibold text-slate-700">
+              <datalist id="subject-options"></datalist>
             </div>
           </div>
 
@@ -291,7 +289,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.1.99)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.2.00)</span>
       </div>
     </div>
 
@@ -621,14 +619,14 @@ function buildSubjectMap(options) {
 }
 
 function autoFillSubject(type) {
-  const codeSelect = el('task-code');
-  const subjectSelect = el('task-subject');
-  const query = (type === 'code' ? codeSelect.value : subjectSelect.value).toLowerCase().trim();
+  const codeInput = el('task-code');
+  const subjectInput = el('task-subject');
+  const query = (type === 'code' ? codeInput.value : subjectInput.value).toLowerCase().trim();
   if (!query) return;
 
   let found = null;
   for (let key in subjectMap) {
-    if (key === query || key.includes(query)) {
+    if (key.includes(query) || query.includes(key)) {
       found = subjectMap[key];
       break;
     }
@@ -636,9 +634,9 @@ function autoFillSubject(type) {
 
   if (found) {
     if (type === 'code' && found.subject) {
-      subjectSelect.value = found.subject;
+      subjectInput.value = found.subject;
     } else if (type === 'subject' && found.code) {
-      codeSelect.value = found.code;
+      codeInput.value = found.code;
     }
   }
 }
@@ -1265,30 +1263,26 @@ async function deleteEvent(key, index) {
 }
 
 function updateOptions() {
-  const codeSelect = el('task-code');
-  const subjectSelect = el('task-subject');
+  const codeList = el('code-options');
+  const subjectList = el('subject-options');
   const filterSubjSelect = el('filter-subject');
   
-  const currentSelectedCode = codeSelect.value;
-  const currentSelectedSubject = subjectSelect.value;
   const currentSelectedFilter = filterSubjSelect.value;
 
-  codeSelect.innerHTML = '<option value="">เลือกรหัสวิชา</option>';
-  subjectSelect.innerHTML = '<option value="">เลือกชื่อวิชา</option>';
+  codeList.innerHTML = '';
+  subjectList.innerHTML = '';
   filterSubjSelect.innerHTML = '<option value="">ทุกวิชา</option>';
 
   codes.forEach(code => {
     const option = document.createElement('option');
     option.value = code;
-    option.textContent = code;
-    codeSelect.appendChild(option);
+    codeList.appendChild(option);
   });
 
   subjects.forEach(subject => {
     const option = document.createElement('option');
     option.value = subject;
-    option.textContent = subject;
-    subjectSelect.appendChild(option);
+    subjectList.appendChild(option);
 
     const filterOpt = document.createElement('option');
     filterOpt.value = subject;
@@ -1296,8 +1290,6 @@ function updateOptions() {
     filterSubjSelect.appendChild(filterOpt);
   });
 
-  codeSelect.value = currentSelectedCode;
-  subjectSelect.value = currentSelectedSubject;
   filterSubjSelect.value = currentSelectedFilter;
 }
 
