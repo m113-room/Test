@@ -231,13 +231,15 @@
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-[10px] font-bold text-slate-500 mb-1">รหัสวิชา:</label>
-              <select id="task-code" onchange="onCodeSelected()" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-semibold text-slate-700">
+              <select id="task-code" onchange="autoFillSubject('code')" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-semibold text-slate-700">
                 <option value="">-- เลือกรหัสวิชา --</option>
               </select>
             </div>
             <div>
               <label class="block text-[10px] font-bold text-slate-500 mb-1">ชื่อวิชา:</label>
-              <input id="task-subject" type="text" placeholder="พิมพ์ชื่อวิชาได้อิสระ" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-semibold text-slate-700">
+              <select id="task-subject" onchange="autoFillSubject('subject')" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-semibold text-slate-700">
+                <option value="">-- เลือกชื่อวิชา --</option>
+              </select>
             </div>
           </div>
 
@@ -289,7 +291,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.2.04)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.2.02)</span>
       </div>
     </div>
 
@@ -618,24 +620,26 @@ function buildSubjectMap(options) {
   });
 }
 
-// ช่วยดึงชื่อวิชาอัตโนมัติเมื่อเลือกรหัสวิชา แต่ผู้ใช้งานยังสามารถพิมพ์แก้ไขในช่องชื่อวิชาเองได้
-function onCodeSelected() {
+function autoFillSubject(type) {
   const codeSelect = el('task-code');
-  const subjectInput = el('task-subject');
-  const selectedCode = codeSelect.value.toLowerCase().trim();
-
-  if (!selectedCode) return;
+  const subjectSelect = el('task-subject');
+  const query = (type === 'code' ? codeSelect.value : subjectSelect.value).toLowerCase().trim();
+  if (!query) return;
 
   let found = null;
   for (let key in subjectMap) {
-    if (key === selectedCode || key.includes(selectedCode)) {
+    if (key === query || key.includes(query)) {
       found = subjectMap[key];
       break;
     }
   }
 
-  if (found && found.subject) {
-    subjectInput.value = found.subject;
+  if (found) {
+    if (type === 'code' && found.subject) {
+      subjectSelect.value = found.subject;
+    } else if (type === 'subject' && found.code) {
+      codeSelect.value = found.code;
+    }
   }
 }
 
@@ -951,6 +955,7 @@ async function addTask() {
 
   const updatedTasks = [task, ...tasks];
 
+  // ตรวจสอบว่ามีรูปภาพหรือไม่ เพื่อแสดงข้อความป๊อปอัพให้ถูกต้อง
   const loadingText = imageObj ? 'กำลังบันทึกการบ้านและอัพโหลดรูป' : 'กำลังบันทึกการบ้าน';
 
   const success = await execute(loadingText, async () => {
@@ -1264,12 +1269,15 @@ async function deleteEvent(key, index) {
 
 function updateOptions() {
   const codeSelect = el('task-code');
+  const subjectSelect = el('task-subject');
   const filterSubjSelect = el('filter-subject');
   
   const currentSelectedCode = codeSelect.value;
+  const currentSelectedSubject = subjectSelect.value;
   const currentSelectedFilter = filterSubjSelect.value;
 
   codeSelect.innerHTML = '<option value="">-- เลือกรหัสวิชา --</option>';
+  subjectSelect.innerHTML = '<option value="">-- เลือกชื่อวิชา --</option>';
   filterSubjSelect.innerHTML = '<option value="">ทุกวิชา</option>';
 
   codes.forEach(code => {
@@ -1280,6 +1288,11 @@ function updateOptions() {
   });
 
   subjects.forEach(subject => {
+    const option = document.createElement('option');
+    option.value = subject;
+    option.textContent = subject;
+    subjectSelect.appendChild(option);
+
     const filterOpt = document.createElement('option');
     filterOpt.value = subject;
     filterOpt.textContent = subject;
@@ -1287,6 +1300,7 @@ function updateOptions() {
   });
 
   codeSelect.value = currentSelectedCode;
+  subjectSelect.value = currentSelectedSubject;
   filterSubjSelect.value = currentSelectedFilter;
 }
 
