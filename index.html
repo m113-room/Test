@@ -236,8 +236,8 @@
               </select>
             </div>
             <div>
-              <label class="block text-[10px] font-bold text-slate-500 mb-1">ชื่อวิชา (ขึ้นอัตโนมัติ):</label>
-              <input id="task-subject" type="text" readonly placeholder="รอเลือกรหัสวิชา..." class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-100 font-semibold text-slate-600 cursor-not-allowed">
+              <label class="block text-[10px] font-bold text-slate-500 mb-1">ชื่อวิชา:</label>
+              <input id="task-subject" type="text" placeholder="พิมพ์ชื่อวิชาได้อิสระ" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-semibold text-slate-700">
             </div>
           </div>
 
@@ -289,7 +289,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.2.03)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.2.04)</span>
       </div>
     </div>
 
@@ -618,16 +618,13 @@ function buildSubjectMap(options) {
   });
 }
 
-// ฟังก์ชันทำงานเมื่อผู้ใช้เลือกรหัสวิชาในช่องแรกเสร็จ
+// ช่วยดึงชื่อวิชาอัตโนมัติเมื่อเลือกรหัสวิชา แต่ผู้ใช้งานยังสามารถพิมพ์แก้ไขในช่องชื่อวิชาเองได้
 function onCodeSelected() {
   const codeSelect = el('task-code');
   const subjectInput = el('task-subject');
   const selectedCode = codeSelect.value.toLowerCase().trim();
 
-  if (!selectedCode) {
-    subjectInput.value = '';
-    return;
-  }
+  if (!selectedCode) return;
 
   let found = null;
   for (let key in subjectMap) {
@@ -639,8 +636,6 @@ function onCodeSelected() {
 
   if (found && found.subject) {
     subjectInput.value = found.subject;
-  } else {
-    subjectInput.value = '';
   }
 }
 
