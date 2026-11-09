@@ -291,7 +291,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.2.01)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.2.02)</span>
       </div>
     </div>
 
@@ -955,7 +955,10 @@ async function addTask() {
 
   const updatedTasks = [task, ...tasks];
 
-  const success = await execute('กำลังบันทึกการบ้านและอัพโหลดรูป', async () => {
+  // ตรวจสอบว่ามีรูปภาพหรือไม่ เพื่อแสดงข้อความป๊อปอัพให้ถูกต้อง
+  const loadingText = imageObj ? 'กำลังบันทึกการบ้านและอัพโหลดรูป' : 'กำลังบันทึกการบ้าน';
+
+  const success = await execute(loadingText, async () => {
     await sendSaveRequest('saveTasks', updatedTasks);
   });
 
