@@ -36,6 +36,8 @@
       width: 100%;
       margin-left: auto;
       margin-right: auto;
+      overflow: hidden; /* ป้องกันเนื้อหาหรือขอบทะลุกรอบความโค้งมน */
+      transform: translateZ(0); /* ช่วยเรนเดอร์ขอบโค้งให้เนียนบนเบราว์เซอร์ */
     }
 
     @keyframes pop {
@@ -288,7 +290,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.2.07)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.2.08)</span>
       </div>
     </div>
 
@@ -1422,7 +1424,7 @@ async function clearLogs() {
   openLogs();
 }
 
-function logActivity(actionText, details) {
+def logActivity(actionText, details) {
   fetch(SCRIPT_URL, {
     method: 'POST',
     mode: 'no-cors',
