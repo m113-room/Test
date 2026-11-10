@@ -36,8 +36,8 @@
       width: 100%;
       margin-left: auto;
       margin-right: auto;
-      overflow: hidden; /* ป้องกันเนื้อหาหรือขอบทะลุกรอบความโค้งมน */
-      transform: translateZ(0); /* ช่วยเรนเดอร์ขอบโค้งให้เนียนบนเบราว์เซอร์ */
+      overflow: hidden;
+      transform: translateZ(0);
     }
 
     @keyframes pop {
@@ -232,12 +232,12 @@
           
           <div class="grid grid-cols-2 gap-2">
             <div>
-              <label class="block text-[10px] font-bold text-slate-500 mb-1">รหัสวิชา (พิมพ์อิสระ):</label>
+              <label class="block text-[10px] font-bold text-slate-500 mb-1">รหัสวิชา:</label>
               <input id="task-code" type="text" list="code-suggestions" oninput="onCodeInput()" placeholder="พิมพ์รหัสวิชา" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-semibold text-slate-700">
               <datalist id="code-suggestions"></datalist>
             </div>
             <div>
-              <label class="block text-[10px] font-bold text-slate-500 mb-1">ชื่อวิชา (พิมพ์อิสระ):</label>
+              <label class="block text-[10px] font-bold text-slate-500 mb-1">ชื่อวิชา:</label>
               <input id="task-subject" type="text" placeholder="พิมพ์ชื่อวิชา" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-semibold text-slate-700">
             </div>
           </div>
@@ -290,7 +290,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.2.08)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.2.09)</span>
       </div>
     </div>
 
@@ -1424,7 +1424,7 @@ async function clearLogs() {
   openLogs();
 }
 
-def logActivity(actionText, details) {
+function logActivity(actionText, details) {
   fetch(SCRIPT_URL, {
     method: 'POST',
     mode: 'no-cors',
