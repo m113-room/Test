@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    * { box-fsizing: border-box; }
+    * { box-sizing: border-box; }
     html, body { min-height: 100%; }
 
     body { 
@@ -125,7 +125,7 @@
       </div>
 
       <nav class="grid grid-cols-3 gap-1 bg-slate-100/80 rounded-2xl p-1 mb-4 text-center">
-        <button id="tab-pending" onclick="switchTab('pending')" class="py-2.5 rounded-xl text-xs font-extrabold transition">ภาพรวมงานค้าง</button>
+        <button id="tab-pending" onclick="switchTab('pending')" class="py-2.5 rounded-xl text-xs font-extrabold transition">ภาพรวม</button>
         <button id="tab-calendar" onclick="switchTab('calendar')" class="py-2.5 rounded-xl text-xs font-extrabold transition">ปฏิทิน</button>
         <button id="tab-tracking" onclick="switchTab('tracking')" class="py-2.5 rounded-xl text-xs font-extrabold transition">งานค้าง</button>
       </nav>
@@ -290,7 +290,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.2.09)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.2.14)</span>
       </div>
     </div>
 
@@ -461,20 +461,30 @@ async function execute(label, action) {
   }
 }
 
-function isAdmin() { 
-  return currentUser && ['admin', 'creator'].includes(String(currentUser.role || '').toLowerCase()); 
+function isFounder() {
+  if (!currentUser || !currentUser.role) return false;
+  return String(currentUser.role).toLowerCase().trim() === 'founder';
+}
+
+function isAdmin() {
+  if (!currentUser || !currentUser.role) return false;
+  const role = String(currentUser.role).toLowerCase().trim();
+  return ['founder', 'admin'].includes(role);
 }
 
 function updateAdminUI() {
-  const isUserAdmin = isAdmin();
-  if (isUserAdmin) {
+  if (isFounder()) {
     el('btn-logs').classList.remove('hidden');
     el('btn-logs').classList.add('flex');
-    el('btn-options').classList.remove('hidden');
-    el('btn-options').classList.add('flex');
   } else {
     el('btn-logs').classList.add('hidden');
     el('btn-logs').classList.remove('flex');
+  }
+
+  if (isAdmin()) {
+    el('btn-options').classList.remove('hidden');
+    el('btn-options').classList.add('flex');
+  } else {
     el('btn-options').classList.add('hidden');
     el('btn-options').classList.remove('flex');
   }
@@ -498,7 +508,7 @@ async function login() {
     if (res && res.success && res.user) {
       currentUser = {
         username: res.user.username || res.user.Username || inputVal,
-        role: String(res.user.role || 'member').toLowerCase()
+        role: String(res.user.role || 'member').toLowerCase().trim()
       };
 
       localStorage.setItem('homeworkLastUser', currentUser.username);
@@ -512,7 +522,11 @@ async function login() {
       updateAdminUI();
       switchTab('pending');
 
+      // ล้าง Cache เก่าเพื่อป้องกันข้อมูลซ้ำซ้อนตอนดึงข้อมูลใหม่
+      localStorage.removeItem('homeworkCacheData');
       await loadAllData(false);
+
+      // ส่ง Log หลังจากดึงข้อมูลเสร็จสิ้นเรียบร้อยแล้ว
       logActivity('เข้าสู่ระบบ', `ผู้ใช้งาน ${currentUser.username} (${currentUser.role}) เข้าสู่ระบบสำเร็จ`);
     } else {
       throw new Error(res.error || 'ไม่พบบัญชี');
@@ -1356,8 +1370,8 @@ function openOptions() {
 }
 
 async function openLogs() {
-  if (!isAdmin()) {
-    showAlert('คุณไม่มีสิทธิ์เข้าถึงส่วนนี้');
+  if (!isFounder()) {
+    showAlert('เฉพาะยศ Founder เท่านั้นที่สามารถดูประวัติการใช้งานได้');
     return;
   }
 
