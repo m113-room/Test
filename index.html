@@ -319,7 +319,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.2.16)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.2.17)</span>
       </div>
     </div>
 
@@ -667,24 +667,60 @@ async function saveAnnouncement() {
   cachedData.announcement = currentAnnouncement;
   localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
 
-  await sendSaveRequest('saveAnnouncement', currentAnnouncement);
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action: 'saveAnnouncement', announcement: currentAnnouncement })
+  }).catch(e => console.error('Announcement Error:', e));
+
   logActivity('ประกาศ', `ผู้ก่อตั้งเพิ่มประกาศ: ${text}`);
   showAlert('เผยแพร่ประกาศเรียบร้อยแล้ว');
 }
 
 async function deleteAnnouncement() {
-  if (!confirm('ต้องการลบประกาศนี้ใช่หรือไม่?')) return;
+  const modalContent = `
+    <div class="text-center space-y-4">
+      <div class="w-12 h-12 mx-auto bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center text-xl shadow-inner">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <div>
+        <h4 class="font-extrabold text-sm text-slate-800">ยืนยันการลบประกาศ</h4>
+        <p class="text-xs text-slate-500 mt-1">ต้องการลบข้อความประกาศนี้ใช่หรือไม่?</p>
+      </div>
+      <div class="grid grid-cols-2 gap-2 pt-2">
+        <button onclick="closeModal()" class="w-full bg-slate-100 text-slate-600 py-2.5 rounded-xl text-xs font-extrabold hover:bg-slate-200 transition">
+          ยกเลิก
+        </button>
+        <button id="confirm-delete-ann-btn" class="w-full bg-rose-500 text-white py-2.5 rounded-xl text-xs font-extrabold hover:bg-rose-600 transition shadow-sm">
+          ลบประกาศ
+        </button>
+      </div>
+    </div>
+  `;
 
-  currentAnnouncement = '';
-  renderAnnouncement();
+  openModal('แจ้งเตือน', modalContent);
 
-  const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
-  cachedData.announcement = '';
-  localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
+  document.getElementById('confirm-delete-ann-btn').onclick = async () => {
+    closeModal();
 
-  await sendSaveRequest('saveAnnouncement', '');
-  logActivity('ลบประกาศ', 'ผู้ก่อตั้งลบประกาศ');
-  showAlert('ลบประกาศเรียบร้อยแล้ว');
+    currentAnnouncement = '';
+    renderAnnouncement();
+
+    const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
+    cachedData.announcement = '';
+    localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
+
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'saveAnnouncement', announcement: '' })
+    }).catch(e => console.error('Announcement Delete Error:', e));
+
+    logActivity('ลบประกาศ', 'ผู้ก่อตั้งลบประกาศ');
+    showAlert('ลบประกาศเรียบร้อยแล้ว');
+  };
 }
 
 function buildSubjectMap(options) {
@@ -1339,25 +1375,50 @@ async function addEvent() {
 }
 
 async function deleteEvent(key, index) {
-  if (!confirm('ต้องการลบกิจกรรมนี้ใช่หรือไม่?')) return;
+  const modalContent = `
+    <div class="text-center space-y-4">
+      <div class="w-12 h-12 mx-auto bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center text-xl shadow-inner">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <div>
+        <h4 class="font-extrabold text-sm text-slate-800">ยืนยันการลบกิจกรรม</h4>
+        <p class="text-xs text-slate-500 mt-1">ต้องการลบกิจกรรมนี้ใช่หรือไม่?</p>
+      </div>
+      <div class="grid grid-cols-2 gap-2 pt-2">
+        <button onclick="closeModal()" class="w-full bg-slate-100 text-slate-600 py-2.5 rounded-xl text-xs font-extrabold hover:bg-slate-200 transition">
+          ยกเลิก
+        </button>
+        <button id="confirm-delete-evt-btn" class="w-full bg-rose-500 text-white py-2.5 rounded-xl text-xs font-extrabold hover:bg-rose-600 transition shadow-sm">
+          ลบข้อมูล
+        </button>
+      </div>
+    </div>
+  `;
 
-  const rawEvent = dailyEvents[key];
-  const events = Array.isArray(rawEvent) ? rawEvent : (rawEvent ? [rawEvent] : []);
+  openModal('แจ้งเตือน', modalContent);
 
-  if (events.length > 0) {
-    const removed = events.splice(index, 1);
-    if (events.length === 0) delete dailyEvents[key];
-    else dailyEvents[key] = events;
+  document.getElementById('confirm-delete-evt-btn').onclick = async () => {
+    closeModal();
 
-    selectDate(selectedDate);
+    const rawEvent = dailyEvents[key];
+    const events = Array.isArray(rawEvent) ? rawEvent : (rawEvent ? [rawEvent] : []);
 
-    const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
-    cachedData.events = dailyEvents;
-    localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
+    if (events.length > 0) {
+      const removed = events.splice(index, 1);
+      if (events.length === 0) delete dailyEvents[key];
+      else dailyEvents[key] = events;
 
-    sendSaveRequest('saveEvents', dailyEvents);
-    logActivity('ลบกิจกรรม', `วันที่ ${formatDate(key)}: ${removed}`);
-  }
+      selectDate(selectedDate);
+
+      const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
+      cachedData.events = dailyEvents;
+      localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
+
+      sendSaveRequest('saveEvents', dailyEvents);
+      logActivity('ลบกิจกรรม', `วันที่ ${formatDate(key)}: ${removed}`);
+      showAlert('ลบกิจกรรมเรียบร้อยแล้ว');
+    }
+  };
 }
 
 function updateOptions() {
@@ -1513,14 +1574,37 @@ async function openLogs() {
 }
 
 async function clearLogs() {
-  if (!confirm('ล้างประวัติทั้งหมดใช่หรือไม่?')) return;
+  const modalContent = `
+    <div class="text-center space-y-4">
+      <div class="w-12 h-12 mx-auto bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center text-xl shadow-inner">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <div>
+        <h4 class="font-extrabold text-sm text-slate-800">ยืนยันการล้างประวัติ</h4>
+        <p class="text-xs text-slate-500 mt-1">ต้องการล้างประวัติการใช้งานทั้งหมดใช่หรือไม่?</p>
+      </div>
+      <div class="grid grid-cols-2 gap-2 pt-2">
+        <button onclick="closeModal()" class="w-full bg-slate-100 text-slate-600 py-2.5 rounded-xl text-xs font-extrabold hover:bg-slate-200 transition">
+          ยกเลิก
+        </button>
+        <button id="confirm-clear-logs-btn" class="w-full bg-rose-500 text-white py-2.5 rounded-xl text-xs font-extrabold hover:bg-rose-600 transition shadow-sm">
+          ล้างประวัติ
+        </button>
+      </div>
+    </div>
+  `;
 
-  await execute('กำลังล้างประวัติ...', async () => {
-    await sendSaveRequest('clearLogs');
-  });
+  openModal('แจ้งเตือน', modalContent);
 
-  isAllLogsLoaded = false;
-  openLogs();
+  document.getElementById('confirm-clear-logs-btn').onclick = async () => {
+    closeModal();
+    await execute('กำลังล้างประวัติ...', async () => {
+      await sendSaveRequest('clearLogs');
+    });
+
+    isAllLogsLoaded = false;
+    openLogs();
+  };
 }
 
 function logActivity(actionText, details) {
