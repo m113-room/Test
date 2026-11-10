@@ -52,8 +52,8 @@
       cursor: not-allowed;
     }
 
-    input, select { outline: none; }
-    input:focus, select:focus { border-color: #ec4899 !important; box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.2); }
+    input, select, textarea { outline: none; }
+    input:focus, select:focus, textarea:focus { border-color: #ec4899 !important; box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.2); }
   </style>
 </head>
 
@@ -119,6 +119,35 @@
           </button>
         </div>
       </header>
+
+      <!-- Announcement Banner (แสดงเฉพาะเมื่อมีประกาศ) -->
+      <div id="announcement-banner" class="hidden bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-2xl p-3.5 mb-4 shadow-md relative overflow-hidden">
+        <div class="flex items-start gap-2.5">
+          <div class="text-base mt-0.5"><i class="fa-solid fa-bullhorn"></i></div>
+          <div class="flex-1">
+            <h4 class="text-xs font-extrabold tracking-wide uppercase mb-0.5">ประกาศจากผู้ก่อตั้ง (Founder)</h4>
+            <p id="announcement-text" class="text-xs font-semibold leading-relaxed whitespace-pre-wrap"></p>
+          </div>
+          <button id="btn-delete-announcement" onclick="deleteAnnouncement()" class="hidden text-white/80 hover:text-white p-1 text-xs" title="ลบประกาศ">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- ปุ่มเพิ่มประกาศ (แสดงเฉพาะ Founder) -->
+      <div id="founder-announcement-control" class="hidden mb-4">
+        <button onclick="toggleForm('announcement-form')" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:opacity-95 transition">
+          <i class="fa-solid fa-bullhorn"></i> + จัดการประกาศ (Founder)
+        </button>
+
+        <div id="announcement-form" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-3.5 mt-2 space-y-2.5 shadow-sm">
+          <textarea id="announcement-input" rows="3" class="w-full border border-amber-300 rounded-xl p-2.5 text-xs bg-white font-medium text-slate-700" placeholder="พิมพ์ข้อความประกาศสำคัญที่นี่..."></textarea>
+          <div class="flex gap-2">
+            <button onclick="saveAnnouncement()" class="flex-1 bg-amber-500 text-white rounded-xl py-2 text-xs font-extrabold hover:bg-amber-600 transition shadow-sm">บันทึกและเผยแพร่ประกาศ</button>
+            <button onclick="toggleForm('announcement-form')" class="bg-slate-200 text-slate-600 px-3 rounded-xl py-2 text-xs font-bold">ยกเลิก</button>
+          </div>
+        </div>
+      </div>
 
       <div id="sync-status" class="bg-slate-50 text-slate-600 p-2.5 rounded-2xl text-[11px] font-bold mb-4 text-center border border-slate-100">
         <i class="fa-solid fa-circle-info"></i> พร้อมใช้งาน
@@ -290,7 +319,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.2.14)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.2.15)</span>
       </div>
     </div>
 
@@ -326,6 +355,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxPMdLygwBXKBmasT3GM
 let currentUser = null;
 let tasks = [];
 let dailyEvents = {};
+let currentAnnouncement = '';
 let codes = [];
 let subjects = [];
 let subjectMap = {};
@@ -476,9 +506,13 @@ function updateAdminUI() {
   if (isFounder()) {
     el('btn-logs').classList.remove('hidden');
     el('btn-logs').classList.add('flex');
+    el('founder-announcement-control').classList.remove('hidden');
+    el('btn-delete-announcement').classList.remove('hidden');
   } else {
     el('btn-logs').classList.add('hidden');
     el('btn-logs').classList.remove('flex');
+    el('founder-announcement-control').classList.add('hidden');
+    el('btn-delete-announcement').classList.add('hidden');
   }
 
   if (isAdmin()) {
@@ -522,11 +556,9 @@ async function login() {
       updateAdminUI();
       switchTab('pending');
 
-      // ล้าง Cache เก่าเพื่อป้องกันข้อมูลซ้ำซ้อนตอนดึงข้อมูลใหม่
       localStorage.removeItem('homeworkCacheData');
       await loadAllData(false);
 
-      // ส่ง Log หลังจากดึงข้อมูลเสร็จสิ้นเรียบร้อยแล้ว
       logActivity('เข้าสู่ระบบ', `ผู้ใช้งาน ${currentUser.username} (${currentUser.role}) เข้าสู่ระบบสำเร็จ`);
     } else {
       throw new Error(res.error || 'ไม่พบบัญชี');
@@ -562,10 +594,12 @@ async function loadAllData(showMessage = false) {
       const parsed = JSON.parse(cachedData);
       tasks = parsed.tasks || [];
       dailyEvents = parsed.events || {};
+      currentAnnouncement = parsed.announcement || '';
       codes = parsed.options?.codes || [];
       subjects = parsed.options?.subjects || [];
       buildSubjectMap(parsed.options);
       updateOptions();
+      renderAnnouncement();
       renderTasks();
       renderCalendar();
       selectDate(selectedDate);
@@ -577,6 +611,7 @@ async function loadAllData(showMessage = false) {
     if (res) {
       tasks = Array.isArray(res.tasks) ? res.tasks : [];
       dailyEvents = res.events || {};
+      currentAnnouncement = res.announcement || '';
       codes = res.options?.codes || [];
       subjects = res.options?.subjects || [];
       buildSubjectMap(res.options);
@@ -584,6 +619,7 @@ async function loadAllData(showMessage = false) {
       localStorage.setItem('homeworkCacheData', JSON.stringify(res));
 
       updateOptions();
+      renderAnnouncement();
       renderTasks();
       renderCalendar();
       selectDate(selectedDate);
@@ -601,6 +637,54 @@ async function loadAllData(showMessage = false) {
       load().catch(e => console.error(e));
     }
   }
+}
+
+function renderAnnouncement() {
+  const banner = el('announcement-banner');
+  const textEl = el('announcement-text');
+  
+  if (currentAnnouncement && String(currentAnnouncement).trim() !== '') {
+    textEl.textContent = currentAnnouncement;
+    banner.classList.remove('hidden');
+  } else {
+    banner.classList.add('hidden');
+  }
+}
+
+async function saveAnnouncement() {
+  const text = el('announcement-input').value.trim();
+  if (!text) {
+    showAlert('กรุณากรอกข้อความประกาศ');
+    return;
+  }
+
+  currentAnnouncement = text;
+  renderAnnouncement();
+  el('announcement-form').classList.add('hidden');
+  el('announcement-input').value = '';
+
+  const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
+  cachedData.announcement = currentAnnouncement;
+  localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
+
+  await sendSaveRequest('saveAnnouncement', currentAnnouncement);
+  logActivity('ประกาศ', `ผู้ก่อตั้งเพิ่มประกาศ: ${text}`);
+  showAlert('เผยแพร่ประกาศเรียบร้อยแล้ว');
+}
+
+async function deleteAnnouncement() {
+  if (!confirm('ต้องการลบประกาศนี้ใช่หรือไม่?')) return;
+
+  currentAnnouncement = '';
+  renderAnnouncement();
+
+  const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
+  cachedData.announcement = '';
+  localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
+
+  await sendSaveRequest('saveAnnouncement', '');
+  logActivity('ลบประกาศ', 'ผู้ก่อตั้งลบประกาศ');
+  showAlert('ลบประกาศเรียบร้อยแล้ว');
 }
 
 function buildSubjectMap(options) {
@@ -877,7 +961,7 @@ function createTrackingCard(task) {
 }
 
 function toggleForm(id) {
-  ['task-form', 'student-form', 'event-form'].forEach(name => {
+  ['task-form', 'student-form', 'event-form', 'announcement-form'].forEach(name => {
     if (name !== id && el(name)) el(name).classList.add('hidden');
   });
   if(el(id)) el(id).classList.toggle('hidden');
@@ -887,6 +971,7 @@ async function sendSaveRequest(action, payloadData = null) {
   let bodyData = { action: action };
   if (action === 'saveTasks') bodyData.tasks = payloadData;
   if (action === 'saveEvents') bodyData.events = payloadData;
+  if (action === 'saveAnnouncement') bodyData.announcement = payloadData;
 
   await fetch(SCRIPT_URL, {
     method: 'POST',
