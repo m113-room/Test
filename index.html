@@ -134,8 +134,8 @@
         </div>
       </div>
 
-      <!-- ปุ่มเพิ่มประกาศ (แสดงเฉพาะ Founder) -->
-      <div id="founder-announcement-control" class="hidden mb-4">
+      <!-- ปุ่มเพิ่มประกาศ (แสดงสำหรับ Founder และ Admin) -->
+      <div id="admin-announcement-control" class="hidden mb-4">
         <button onclick="toggleForm('announcement-form')" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:opacity-95 transition">
           <i class="fa-solid fa-bullhorn"></i> + ประกาศ
         </button>
@@ -319,7 +319,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.2.17)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.2.18)</span>
       </div>
     </div>
 
@@ -506,21 +506,21 @@ function updateAdminUI() {
   if (isFounder()) {
     el('btn-logs').classList.remove('hidden');
     el('btn-logs').classList.add('flex');
-    el('founder-announcement-control').classList.remove('hidden');
-    el('btn-delete-announcement').classList.remove('hidden');
   } else {
     el('btn-logs').classList.add('hidden');
     el('btn-logs').classList.remove('flex');
-    el('founder-announcement-control').classList.add('hidden');
-    el('btn-delete-announcement').classList.add('hidden');
   }
 
   if (isAdmin()) {
     el('btn-options').classList.remove('hidden');
     el('btn-options').classList.add('flex');
+    el('admin-announcement-control').classList.remove('hidden');
+    el('btn-delete-announcement').classList.remove('hidden');
   } else {
     el('btn-options').classList.add('hidden');
     el('btn-options').classList.remove('flex');
+    el('admin-announcement-control').classList.add('hidden');
+    el('btn-delete-announcement').classList.add('hidden');
   }
 }
 
@@ -674,7 +674,7 @@ async function saveAnnouncement() {
     body: JSON.stringify({ action: 'saveAnnouncement', announcement: currentAnnouncement })
   }).catch(e => console.error('Announcement Error:', e));
 
-  logActivity('ประกาศ', `ผู้ก่อตั้งเพิ่มประกาศ: ${text}`);
+  logActivity('ประกาศ', `ผู้ดูแลระบบเพิ่มประกาศ: ${text}`);
   showAlert('เผยแพร่ประกาศเรียบร้อยแล้ว');
 }
 
@@ -718,7 +718,7 @@ async function deleteAnnouncement() {
       body: JSON.stringify({ action: 'saveAnnouncement', announcement: '' })
     }).catch(e => console.error('Announcement Delete Error:', e));
 
-    logActivity('ลบประกาศ', 'ผู้ก่อตั้งลบประกาศ');
+    logActivity('ลบประกาศ', 'ผู้ดูแลระบบลบประกาศ');
     showAlert('ลบประกาศเรียบร้อยแล้ว');
   };
 }
@@ -1581,7 +1581,7 @@ async function clearLogs() {
       </div>
       <div>
         <h4 class="font-extrabold text-sm text-slate-800">ยืนยันการล้างประวัติ</h4>
-        <p class="text-xs text-slate-500 mt-1">ต้องการล้างประวัติการใช้งานทั้งหมดใช่หรือไม่?</p>
+        <p class="text-xs text-slate-500 mt-1">ต้องการลบประวัติการใช้งานทั้งหมดใช่หรือไม่?</p>
       </div>
       <div class="grid grid-cols-2 gap-2 pt-2">
         <button onclick="closeModal()" class="w-full bg-slate-100 text-slate-600 py-2.5 rounded-xl text-xs font-extrabold hover:bg-slate-200 transition">
