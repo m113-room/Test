@@ -120,12 +120,12 @@
         </div>
       </header>
 
-      <!-- Announcement Banner (แสดงเฉพาะเมื่อมีประกาศ) -->
+      <!-- Announcement Banner -->
       <div id="announcement-banner" class="hidden bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-2xl p-3.5 mb-4 shadow-md relative overflow-hidden">
         <div class="flex items-start gap-2.5">
           <div class="text-base mt-0.5"><i class="fa-solid fa-bullhorn"></i></div>
           <div class="flex-1">
-            <h4 class="text-xs font-extrabold tracking-wide uppercase mb-0.5">ประกาศจากผู้ก่อตั้ง (Founder)</h4>
+            <h4 class="text-xs font-extrabold tracking-wide uppercase mb-0.5">ประกาศ</h4>
             <p id="announcement-text" class="text-xs font-semibold leading-relaxed whitespace-pre-wrap"></p>
           </div>
           <button id="btn-delete-announcement" onclick="deleteAnnouncement()" class="hidden text-white/80 hover:text-white p-1 text-xs" title="ลบประกาศ">
@@ -137,13 +137,13 @@
       <!-- ปุ่มเพิ่มประกาศ (แสดงเฉพาะ Founder) -->
       <div id="founder-announcement-control" class="hidden mb-4">
         <button onclick="toggleForm('announcement-form')" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:opacity-95 transition">
-          <i class="fa-solid fa-bullhorn"></i> + จัดการประกาศ (Founder)
+          <i class="fa-solid fa-bullhorn"></i> + ประกาศ
         </button>
 
         <div id="announcement-form" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-3.5 mt-2 space-y-2.5 shadow-sm">
           <textarea id="announcement-input" rows="3" class="w-full border border-amber-300 rounded-xl p-2.5 text-xs bg-white font-medium text-slate-700" placeholder="พิมพ์ข้อความประกาศสำคัญที่นี่..."></textarea>
           <div class="flex gap-2">
-            <button onclick="saveAnnouncement()" class="flex-1 bg-amber-500 text-white rounded-xl py-2 text-xs font-extrabold hover:bg-amber-600 transition shadow-sm">บันทึกและเผยแพร่ประกาศ</button>
+            <button onclick="saveAnnouncement()" class="flex-1 bg-amber-500 text-white rounded-xl py-2 text-xs font-extrabold hover:bg-amber-600 transition shadow-sm">บันทึกและเผยแพร่</button>
             <button onclick="toggleForm('announcement-form')" class="bg-slate-200 text-slate-600 px-3 rounded-xl py-2 text-xs font-bold">ยกเลิก</button>
           </div>
         </div>
@@ -319,7 +319,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.2.15)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.2.16)</span>
       </div>
     </div>
 
