@@ -319,7 +319,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.2.20)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.2.21)</span>
       </div>
     </div>
 
@@ -873,6 +873,12 @@ function createTaskCard(task) {
     </div>
   ` : '';
 
+  const pinButtonHTML = isAdmin() ? `
+    <button data-action="pin" class="text-amber-500 hover:text-amber-600 p-1" title="ปักหมุด">
+      <i class="fa-solid fa-thumbtack"></i>
+    </button>
+  ` : '';
+
   const adminControls = isAdmin() ? `
     <button data-action="edit" class="text-sky-500 hover:text-sky-600 p-1" title="แก้ไขการบ้าน">
       <i class="fa-solid fa-pen-to-square"></i>
@@ -895,9 +901,7 @@ function createTaskCard(task) {
       </div>
 
       <div class="flex gap-1.5">
-        <button data-action="pin" class="text-amber-500 hover:text-amber-600 p-1" title="ปักหมุด">
-          <i class="fa-solid fa-thumbtack"></i>
-        </button>
+        ${pinButtonHTML}
         ${adminControls}
         <button data-action="delete" class="text-rose-500 hover:text-rose-600 p-1" title="ลบ">
           <i class="fa-solid fa-trash"></i>
@@ -916,8 +920,8 @@ function createTaskCard(task) {
     </div>
   `;
 
-  div.querySelector('[data-action="pin"]').onclick = () => togglePin(task.id);
   if (isAdmin()) {
+    div.querySelector('[data-action="pin"]').onclick = () => togglePin(task.id);
     div.querySelector('[data-action="edit"]').onclick = () => openEditTaskModal(task.id);
   }
   div.querySelector('[data-action="delete"]').onclick = () => deleteTask(task.id);
@@ -959,6 +963,12 @@ function createTrackingCard(task) {
     </div>
   ` : '';
 
+  const pinButtonHTML = isAdmin() ? `
+    <button data-action="pin" class="text-amber-500 hover:text-amber-600 p-1" title="ปักหมุด">
+      <i class="fa-solid fa-thumbtack"></i>
+    </button>
+  ` : '';
+
   const adminControls = isAdmin() ? `
     <button data-action="edit" class="text-sky-500 hover:text-sky-600 p-1" title="แก้ไขการบ้าน">
       <i class="fa-solid fa-pen-to-square"></i>
@@ -980,9 +990,7 @@ function createTrackingCard(task) {
         </div>
       </div>
       <div class="flex gap-1.5">
-        <button data-action="pin" class="text-amber-500 hover:text-amber-600 p-1" title="ปักหมุด">
-          <i class="fa-solid fa-thumbtack"></i>
-        </button>
+        ${pinButtonHTML}
         ${adminControls}
         <button data-action="delete" class="text-rose-500 hover:text-rose-600 p-1" title="ลบ">
           <i class="fa-solid fa-trash"></i>
@@ -1002,8 +1010,8 @@ function createTrackingCard(task) {
     <div class="flex flex-wrap gap-1.5 pt-1" data-students></div>
   `;
 
-  div.querySelector('[data-action="pin"]').onclick = () => togglePin(task.id);
   if (isAdmin()) {
+    div.querySelector('[data-action="pin"]').onclick = () => togglePin(task.id);
     div.querySelector('[data-action="edit"]').onclick = () => openEditTaskModal(task.id);
   }
   div.querySelector('[data-action="delete"]').onclick = () => deleteTask(task.id);
@@ -1137,9 +1145,6 @@ async function addTask() {
   }
 }
 
-// ==========================================
-// ฟังก์ชันใหม่: แก้ไขการบ้าน (Edit Task Modal)
-// ==========================================
 function openEditTaskModal(id) {
   const task = tasks.find(t => String(t.id) === String(id));
   if (!task) return;
@@ -1687,7 +1692,7 @@ async function clearLogs() {
       </div>
       <div>
         <h4 class="font-extrabold text-sm text-slate-800">ยืนยันการล้างประวัติ</h4>
-        <p class="text-xs text-slate-500 mt-1">ต้องการล้างประวัติการใช้งานทั้งหมดใช่หรือไม่?</p>
+        <p class="text-xs text-slate-500 mt-1">ต้องการลบประวัติการใช้งานทั้งหมดใช่หรือไม่?</p>
       </div>
       <div class="grid grid-cols-2 gap-2 pt-2">
         <button onclick="closeModal()" class="w-full bg-slate-100 text-slate-600 py-2.5 rounded-xl text-xs font-extrabold hover:bg-slate-200 transition">
