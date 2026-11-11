@@ -319,7 +319,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.2.19)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.2.20)</span>
       </div>
     </div>
 
@@ -593,7 +593,6 @@ async function loadAllData(showMessage = false) {
     try {
       const parsed = JSON.parse(cachedData);
       tasks = parsed.tasks || [];
-      // กรอง ID ซ้ำใน Cache ทันที
       tasks = tasks.filter((task, index, self) => index === self.findIndex((t) => (t.id === task.id)));
       
       dailyEvents = parsed.events || {};
@@ -613,7 +612,6 @@ async function loadAllData(showMessage = false) {
     const res = await fetchJSON(`${SCRIPT_URL}?t=${Date.now()}`);
     if (res) {
       tasks = Array.isArray(res.tasks) ? res.tasks : [];
-      // กรอง ID ที่ซ้ำกันออกทันที ป้องกันข้อมูลซ้ำจากชีต
       tasks = tasks.filter((task, index, self) => index === self.findIndex((t) => (t.id === task.id)));
 
       dailyEvents = res.events || {};
@@ -875,6 +873,12 @@ function createTaskCard(task) {
     </div>
   ` : '';
 
+  const adminControls = isAdmin() ? `
+    <button data-action="edit" class="text-sky-500 hover:text-sky-600 p-1" title="แก้ไขการบ้าน">
+      <i class="fa-solid fa-pen-to-square"></i>
+    </button>
+  ` : '';
+
   div.innerHTML = `
     <div class="flex justify-between items-start gap-2">
       <div class="flex-1">
@@ -894,6 +898,7 @@ function createTaskCard(task) {
         <button data-action="pin" class="text-amber-500 hover:text-amber-600 p-1" title="ปักหมุด">
           <i class="fa-solid fa-thumbtack"></i>
         </button>
+        ${adminControls}
         <button data-action="delete" class="text-rose-500 hover:text-rose-600 p-1" title="ลบ">
           <i class="fa-solid fa-trash"></i>
         </button>
@@ -912,6 +917,9 @@ function createTaskCard(task) {
   `;
 
   div.querySelector('[data-action="pin"]').onclick = () => togglePin(task.id);
+  if (isAdmin()) {
+    div.querySelector('[data-action="edit"]').onclick = () => openEditTaskModal(task.id);
+  }
   div.querySelector('[data-action="delete"]').onclick = () => deleteTask(task.id);
 
   return div;
@@ -951,6 +959,12 @@ function createTrackingCard(task) {
     </div>
   ` : '';
 
+  const adminControls = isAdmin() ? `
+    <button data-action="edit" class="text-sky-500 hover:text-sky-600 p-1" title="แก้ไขการบ้าน">
+      <i class="fa-solid fa-pen-to-square"></i>
+    </button>
+  ` : '';
+
   div.innerHTML = `
     <div class="flex justify-between items-start gap-2">
       <div class="flex-1">
@@ -969,6 +983,7 @@ function createTrackingCard(task) {
         <button data-action="pin" class="text-amber-500 hover:text-amber-600 p-1" title="ปักหมุด">
           <i class="fa-solid fa-thumbtack"></i>
         </button>
+        ${adminControls}
         <button data-action="delete" class="text-rose-500 hover:text-rose-600 p-1" title="ลบ">
           <i class="fa-solid fa-trash"></i>
         </button>
@@ -988,6 +1003,9 @@ function createTrackingCard(task) {
   `;
 
   div.querySelector('[data-action="pin"]').onclick = () => togglePin(task.id);
+  if (isAdmin()) {
+    div.querySelector('[data-action="edit"]').onclick = () => openEditTaskModal(task.id);
+  }
   div.querySelector('[data-action="delete"]').onclick = () => deleteTask(task.id);
 
   const students = div.querySelector('[data-students]');
@@ -1117,6 +1135,88 @@ async function addTask() {
     logActivity('เพิ่มการบ้าน', `วิชา ${task.subject} (${task.code}) - ${task.detail}`);
     showAlert('บันทึกการบ้านสำเร็จแล้ว');
   }
+}
+
+// ==========================================
+// ฟังก์ชันใหม่: แก้ไขการบ้าน (Edit Task Modal)
+// ==========================================
+function openEditTaskModal(id) {
+  const task = tasks.find(t => String(t.id) === String(id));
+  if (!task) return;
+
+  const modalContent = `
+    <div class="space-y-3 text-left">
+      <div>
+        <label class="block text-[10px] font-bold text-slate-500 mb-1">รหัสวิชา:</label>
+        <input id="edit-task-code" type="text" value="${escapeHtml(task.code)}" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-semibold text-slate-700">
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-slate-500 mb-1">ชื่อวิชา:</label>
+        <input id="edit-task-subject" type="text" value="${escapeHtml(task.subject)}" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-semibold text-slate-700">
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-slate-500 mb-1">รายละเอียดการบ้าน:</label>
+        <textarea id="edit-task-detail" rows="3" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-medium text-slate-700">${escapeHtml(task.detail)}</textarea>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="block text-[10px] font-bold text-slate-500 mb-1">วันสั่ง:</label>
+          <input id="edit-task-assign-date" type="date" value="${normalizeDateStr(task.assignDate)}" class="w-full p-2 border border-slate-200 rounded-xl text-xs bg-white">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-500 mb-1">วันส่ง:</label>
+          <input id="edit-task-due-date" type="date" value="${normalizeDateStr(task.dueDate)}" class="w-full p-2 border border-slate-200 rounded-xl text-xs bg-white">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-2 pt-2">
+        <button onclick="closeModal()" class="w-full bg-slate-100 text-slate-600 py-2.5 rounded-xl text-xs font-extrabold hover:bg-slate-200 transition">
+          ยกเลิก
+        </button>
+        <button onclick="saveEditTask('${task.id}')" class="w-full bg-sky-500 text-white py-2.5 rounded-xl text-xs font-extrabold hover:bg-sky-600 transition shadow-sm">
+          บันทึกการแก้ไข
+        </button>
+      </div>
+    </div>
+  `;
+
+  openModal('แก้ไขรายการการบ้าน', modalContent);
+}
+
+async function saveEditTask(id) {
+  const task = tasks.find(t => String(t.id) === String(id));
+  if (!task) return;
+
+  const code = el('edit-task-code').value.trim();
+  const subject = el('edit-task-subject').value.trim();
+  const detail = el('edit-task-detail').value.trim();
+  const assignDate = el('edit-task-assign-date').value;
+  const dueDate = el('edit-task-due-date').value;
+
+  if (!code || !subject || !detail || !dueDate) {
+    showAlert('กรุณากรอกข้อมูลให้ครบถ้วน');
+    return;
+  }
+
+  task.code = code;
+  task.subject = subject;
+  task.detail = detail;
+  task.assignDate = assignDate;
+  task.dueDate = dueDate;
+
+  closeModal();
+
+  renderTasks();
+  renderCalendar();
+  selectDate(selectedDate);
+
+  const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
+  cachedData.tasks = tasks;
+  localStorage.setItem('homeworkCacheData', JSON.stringify(cachedData));
+
+  sendSaveRequest('saveTasks', tasks);
+
+  logActivity('แก้ไขการบ้าน', `วิชา ${task.subject} (${task.code}) - ${task.detail}`);
+  showAlert('แก้ไขการบ้านเรียบร้อยแล้ว');
 }
 
 async function togglePin(id) {
@@ -1587,7 +1687,7 @@ async function clearLogs() {
       </div>
       <div>
         <h4 class="font-extrabold text-sm text-slate-800">ยืนยันการล้างประวัติ</h4>
-        <p class="text-xs text-slate-500 mt-1">ต้องการลบประวัติการใช้งานทั้งหมดใช่หรือไม่?</p>
+        <p class="text-xs text-slate-500 mt-1">ต้องการล้างประวัติการใช้งานทั้งหมดใช่หรือไม่?</p>
       </div>
       <div class="grid grid-cols-2 gap-2 pt-2">
         <button onclick="closeModal()" class="w-full bg-slate-100 text-slate-600 py-2.5 rounded-xl text-xs font-extrabold hover:bg-slate-200 transition">
