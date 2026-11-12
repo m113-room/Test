@@ -1152,28 +1152,28 @@ function openEditTaskModal(id) {
   const modalContent = `
     <div class="space-y-3 text-left">
       <div>
-        <label class="block text-[10px] font-bold text-slate-500 mb-1">รหัสวิชา:</label>
+        <label class="block text-xs font-extrabold text-slate-600 mb-1">รหัสวิชา:</label>
         <input id="edit-task-code" type="text" value="${escapeHtml(task.code)}" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-semibold text-slate-700">
       </div>
       <div>
-        <label class="block text-[10px] font-bold text-slate-500 mb-1">ชื่อวิชา:</label>
+        <label class="block text-xs font-extrabold text-slate-600 mb-1">ชื่อวิชา:</label>
         <input id="edit-task-subject" type="text" value="${escapeHtml(task.subject)}" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-semibold text-slate-700">
       </div>
       <div>
-        <label class="block text-[10px] font-bold text-slate-500 mb-1">รายละเอียดการบ้าน:</label>
+        <label class="block text-xs font-extrabold text-slate-600 mb-1">รายละเอียดการบ้าน:</label>
         <textarea id="edit-task-detail" rows="3" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-medium text-slate-700">${escapeHtml(task.detail)}</textarea>
       </div>
       <div class="grid grid-cols-2 gap-2 pt-1">
-        <div>
-          <label class="block text-[10px] font-bold text-slate-500 mb-1">วันสั่ง:</label>
+        <div class="flex flex-col">
+          <label class="text-xs font-extrabold text-slate-600 mb-1">วันสั่ง:</label>
           <input id="edit-task-assign-date" type="date" value="${normalizeDateStr(task.assignDate)}" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white text-slate-700">
         </div>
-        <div>
-          <label class="block text-[10px] font-bold text-slate-500 mb-1">วันส่ง:</label>
+        <div class="flex flex-col">
+          <label class="text-xs font-extrabold text-slate-600 mb-1">วันส่ง:</label>
           <input id="edit-task-due-date" type="date" value="${normalizeDateStr(task.dueDate)}" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white text-slate-700">
         </div>
       </div>
-      <div class="grid grid-cols-2 gap-2 pt-2">
+      <div class="grid grid-cols-2 gap-2 pt-3">
         <button onclick="closeModal()" class="w-full bg-slate-100 text-slate-600 py-2.5 rounded-xl text-xs font-extrabold hover:bg-slate-200 transition">
           ยกเลิก
         </button>
