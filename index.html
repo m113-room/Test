@@ -97,7 +97,6 @@
     <!-- Main Page -->
     <main id="main-page" class="app-card hidden bg-white rounded-3xl shadow-xl p-6 border border-slate-100">
 
-      <!-- Top Navigation Tabs (เหมือนในรูปที่ 2) -->
       <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
         <div class="flex items-center gap-4 text-xs font-bold text-slate-500">
           <span class="text-slate-800 font-extrabold flex items-center gap-1.5"><i class="fa-solid fa-house text-sky-500"></i> <span id="user-display"></span></span>
@@ -112,7 +111,7 @@
       <header class="flex items-center justify-between mb-4">
         <div>
           <h1 class="font-extrabold text-slate-800 text-lg">การบ้าน</h1>
-          <p class="text-xs text-slate-400 font-medium">กดที่การบ้านเพื่อดูรายละเอียดและไฟล์งาน</p>
+          <p class="text-xs text-slate-400 font-medium">กดที่การบ้านเพื่อดูรายละเอียดและเช็คชื่อส่งงาน</p>
         </div>
 
         <div class="flex items-center gap-1.5">
@@ -142,7 +141,6 @@
         </div>
       </div>
 
-      <!-- ปุ่มเพิ่มประกาศ (สำหรับ Admin/Founder) -->
       <div id="admin-announcement-control" class="hidden mb-4">
         <button onclick="toggleForm('announcement-form')" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:opacity-95 transition">
           <i class="fa-solid fa-bullhorn"></i> + ประกาศ
@@ -161,7 +159,6 @@
         <i class="fa-solid fa-circle-info"></i> พร้อมใช้งาน
       </div>
 
-      <!-- แถบเมนูย่อย (ภาพรวม / ปฏิทิน / จัดการงาน) -->
       <nav class="grid grid-cols-3 gap-1 bg-slate-100 rounded-2xl p-1 mb-4 text-center">
         <button id="tab-pending" onclick="switchTab('pending')" class="py-2.5 rounded-xl text-xs font-extrabold transition">การบ้านทั้งหมด</button>
         <button id="tab-calendar" onclick="switchTab('calendar')" class="py-2.5 rounded-xl text-xs font-extrabold transition">ปฏิทิน</button>
@@ -193,9 +190,8 @@
         </div>
       </div>
 
-      <!-- Tab: Pending / การบ้านทั้งหมด -->
+      <!-- Tab: Pending -->
       <section id="view-pending">
-        <!-- ปักหมุด -->
         <div id="pinned-section" class="mb-4">
           <h2 class="text-xs font-extrabold text-amber-600 mb-2 flex items-center gap-1.5">
             <i class="fa-solid fa-thumbtack"></i> ปักหมุดไว้
@@ -333,17 +329,17 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-400 font-bold">(V.2.24)</span>
+        <span class="text-[10px] text-slate-400 font-bold">(V.2.26)</span>
       </div>
     </div>
 
   </div>
 
   <div id="modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-5 w-full max-w-sm max-h-[85vh] overflow-y-auto animate-pop shadow-2xl">
-      <div class="flex justify-between items-center mb-4 pb-2 border-b">
-        <h3 id="modal-title" class="font-extrabold text-xs text-slate-700"></h3>
-        <button onclick="closeModal()" class="text-slate-500 font-bold hover:text-slate-700">✕</button>
+    <div class="bg-white rounded-3xl p-5 w-full max-w-lg max-h-[90vh] overflow-y-auto animate-pop shadow-2xl relative">
+      <div class="flex justify-between items-center mb-3 pb-2 border-b">
+        <h3 id="modal-title" class="font-extrabold text-xs text-slate-700">รายละเอียดการบ้าน</h3>
+        <button onclick="closeModal()" class="bg-slate-100 text-slate-500 w-7 h-7 rounded-full font-bold hover:bg-slate-200 transition flex items-center justify-center text-xs">✕</button>
       </div>
       <div id="modal-content"></div>
     </div>
@@ -915,39 +911,34 @@ function renderTasks() {
 
 function createTaskCard(task, isPinned) {
   const div = document.createElement('div');
-  // ดีไซน์การ์ดโค้งมน ขอบบาง พร้อมแถบสีเขียวซ้ายมือตามรูปตัวอย่าง
-  div.className = 'bg-white border border-slate-100 rounded-2xl p-4 shadow-sm relative overflow-hidden flex gap-3 transition hover:shadow-md';
+  div.className = 'bg-white border border-slate-100 rounded-2xl p-4 shadow-sm relative overflow-hidden flex gap-3 transition hover:shadow-md cursor-pointer';
 
   const unsubmitted = getUnsubmitted(task);
   const total = TOTAL_STUDENTS + (task.extraUnsubmitted || []).filter(n => Number(n) > TOTAL_STUDENTS).length;
   const completed = Math.max(0, total - unsubmitted.length);
   const percent = total ? Math.round(completed / total * 100) : 0;
-
   const dueStatus = getDueDateStatus(task.dueDate);
 
   const hasImage = task.imageUrl && String(task.imageUrl).trim() !== "" && String(task.imageUrl).startsWith('http');
   const imageHTML = hasImage ? `
     <div class="mt-2">
-      <a href="${task.imageUrl}" target="_blank">
-        <img src="${task.imageUrl}" alt="รูปการบ้าน" class="max-h-36 rounded-xl border border-slate-200 object-cover">
-      </a>
+      <img src="${task.imageUrl}" alt="รูปการบ้าน" class="max-h-36 rounded-xl border border-slate-200 object-cover">
     </div>
   ` : '';
 
   const pinButtonHTML = isAdmin() ? `
-    <button data-action="pin" class="text-amber-500 hover:text-amber-600 p-1" title="ปักหมุด">
+    <button data-action="pin" class="text-amber-500 hover:text-amber-600 p-1" title="ปักหมุด" onclick="event.stopPropagation()">
       <i class="fa-solid fa-thumbtack"></i>
     </button>
   ` : '';
 
   const adminControls = isAdmin() ? `
-    <button data-action="edit" class="text-sky-500 hover:text-sky-600 p-1" title="แก้ไขการบ้าน">
+    <button data-action="edit" class="text-sky-500 hover:text-sky-600 p-1" title="แก้ไขการบ้าน" onclick="event.stopPropagation()">
       <i class="fa-solid fa-pen-to-square"></i>
     </button>
   ` : '';
 
   div.innerHTML = `
-    <!-- แถบเส้นสีเขียวด้านซ้ายการ์ดแบบในรูป -->
     <div class="w-1.5 bg-emerald-500 rounded-full shrink-0"></div>
 
     <div class="flex-1">
@@ -962,42 +953,47 @@ function createTaskCard(task, isPinned) {
           <div class="flex gap-1">
             ${pinButtonHTML}
             ${adminControls}
-            <button data-action="delete" class="text-rose-400 hover:text-rose-600 p-1" title="ลบ"><i class="fa-solid fa-trash"></i></button>
+            <button data-action="delete" class="text-rose-400 hover:text-rose-600 p-1" title="ลบ" onclick="event.stopPropagation()"><i class="fa-solid fa-trash"></i></button>
           </div>
         </div>
       </div>
 
       ${imageHTML}
 
-      <!-- Progress Bar สีเขียว -->
-      <div class="mt-3 space-y-1.5">
+      <!-- แสดงทั้งวันสั่งและวันส่งในการ์ดหน้าการบ้านทั้งหมด -->
+      <div class="flex items-center gap-4 mt-2 text-[10px] font-extrabold text-slate-400">
+        <span>วันสั่ง: ${formatDate(task.assignDate)}</span>
+        <span>กำหนดส่ง: ${formatDate(task.dueDate)}</span>
+      </div>
+
+      <div class="mt-2 space-y-1.5">
         <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
           <div class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width:${percent}%"></div>
         </div>
         <div class="flex justify-between items-center text-[10px] font-extrabold">
-          <span class="text-slate-400">วันสั่ง: ${formatDate(task.assignDate)}</span>
+          <span class="text-slate-400">สถานะการส่ง</span>
           <span class="text-slate-600">${completed}/${total} ส่งแล้ว</span>
         </div>
       </div>
 
-      <!-- ปุ่มเลขที่เช็คชื่อแบบย่อในตัวการ์ด -->
       <div class="flex flex-wrap gap-1 mt-3 pt-2 border-t border-slate-50" data-students-card></div>
     </div>
   `;
 
-  if (isAdmin()) {
-    div.querySelector('[data-action="pin"]').onclick = () => togglePin(task.id);
-    div.querySelector('[data-action="edit"]').onclick = () => openEditTaskModal(task.id);
-  }
-  div.querySelector('[data-action="delete"]').onclick = () => deleteTask(task.id);
+  div.onclick = () => openTaskDetailModal(task);
 
-  // แสดงปุ่มเลขที่ยังไม่ส่งแบบยุบ/ย่อ (แสดง 1-12 ตัวแรก หรือกดดูทั้งหมด)
+  if (isAdmin()) {
+    div.querySelector('[data-action="pin"]').onclick = (e) => { e.stopPropagation(); togglePin(task.id); };
+    div.querySelector('[data-action="edit"]').onclick = (e) => { e.stopPropagation(); openEditTaskModal(task.id); };
+  }
+  div.querySelector('[data-action="delete"]').onclick = (e) => { e.stopPropagation(); deleteTask(task.id); };
+
   const studentsCard = div.querySelector('[data-students-card]');
   unsubmitted.slice(0, 12).forEach(number => {
     const btn = document.createElement('button');
     btn.className = 'bg-slate-50 text-slate-600 px-2 py-0.5 rounded-lg text-[10px] font-bold border border-slate-200 hover:bg-rose-50 hover:text-rose-600 transition';
     btn.textContent = number;
-    btn.onclick = () => toggleStudent(task.id, number);
+    btn.onclick = (e) => { e.stopPropagation(); toggleStudent(task.id, number); };
     studentsCard.appendChild(btn);
   });
 
@@ -1009,6 +1005,81 @@ function createTaskCard(task, isPinned) {
   }
 
   return div;
+}
+
+function openTaskDetailModal(task) {
+  const unsubmitted = getUnsubmitted(task);
+  const total = TOTAL_STUDENTS + (task.extraUnsubmitted || []).filter(n => Number(n) > TOTAL_STUDENTS).length;
+  const completed = Math.max(0, total - unsubmitted.length);
+  const percent = total ? Math.round(completed / total * 100) : 0;
+  const dueStatus = getDueDateStatus(task.dueDate);
+
+  const hasImage = task.imageUrl && String(task.imageUrl).trim() !== "" && String(task.imageUrl).startsWith('http');
+  const imageHTML = hasImage ? `
+    <div class="my-3">
+      <a href="${task.imageUrl}" target="_blank">
+        <img src="${task.imageUrl}" alt="รูปการบ้าน" class="max-h-48 rounded-xl border border-slate-200 object-cover mx-auto">
+      </a>
+    </div>
+  ` : '';
+
+  let studentsButtonsHTML = '';
+  for (let i = 1; i <= TOTAL_STUDENTS; i++) {
+    const isNotSent = unsubmitted.includes(String(i));
+    const btnClass = isNotSent 
+      ? 'bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100' 
+      : 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100';
+    studentsButtonsHTML += `<button onclick="toggleStudentInModal('${task.id}', '${i}')" class="py-2 rounded-xl text-xs font-extrabold ${btnClass} transition">${i}</button>`;
+  }
+
+  const modalHTML = `
+    <div class="space-y-4 text-left">
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[11px] font-extrabold text-sky-600 bg-sky-50 px-2.5 py-0.5 rounded-md border border-sky-100">${escapeHtml(task.code || 'รหัสวิชา')}</span>
+          <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-full ${dueStatus.className}">${dueStatus.text}</span>
+        </div>
+        <h3 class="font-extrabold text-sm text-slate-800 mt-1">${escapeHtml(task.subject)}</h3>
+        <p class="text-xs text-slate-600 mt-0.5 font-medium">${escapeHtml(task.detail)}</p>
+        ${imageHTML}
+        <div class="flex gap-4 mt-2 text-[11px] font-bold text-slate-400">
+          <span>สั่งเมื่อ: ${formatDate(task.assignDate)}</span>
+          <span>กำหนดส่ง: ${formatDate(task.dueDate)}</span>
+        </div>
+      </div>
+
+      <div class="bg-slate-50 border border-slate-100 rounded-2xl p-3.5 space-y-2">
+        <div class="flex justify-between items-center text-xs font-extrabold">
+          <span class="text-slate-700">ส่งแล้ว ${completed}/${total} คน (${percent}%)</span>
+          <span class="text-rose-500">ยังไม่ส่ง (${unsubmitted.length})</span>
+        </div>
+        <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+          <div class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width:${percent}%"></div>
+        </div>
+
+        <div class="pt-2">
+          <span class="text-[11px] font-extrabold text-slate-600 block mb-2">เลขที่ยังไม่ได้ส่ง (คลิกเพื่อเปลี่ยนสถานะ):</span>
+          <div class="grid grid-cols-8 gap-1.5 max-h-[180px] overflow-y-auto pr-1">
+            ${studentsButtonsHTML}
+          </div>
+        </div>
+      </div>
+
+      <button onclick="closeModal()" class="w-full bg-slate-100 text-slate-600 py-2.5 rounded-xl text-xs font-extrabold hover:bg-slate-200 transition">
+        ปิด
+      </button>
+    </div>
+  `;
+
+  openModal(task.subject, modalHTML);
+}
+
+async function toggleStudentInModal(taskId, number) {
+  await toggleStudent(taskId, number);
+  const task = tasks.find(t => String(t.id) === String(taskId));
+  if (task) {
+    openTaskDetailModal(task);
+  }
 }
 
 function getUnsubmitted(task) {
