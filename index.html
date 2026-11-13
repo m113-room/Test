@@ -329,7 +329,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-400 font-bold">(V.2.26)</span>
+        <span class="text-[10px] text-slate-400 font-bold">(V.2.27)</span>
       </div>
     </div>
 
@@ -960,10 +960,10 @@ function createTaskCard(task, isPinned) {
 
       ${imageHTML}
 
-      <!-- แสดงทั้งวันสั่งและวันส่งในการ์ดหน้าการบ้านทั้งหมด -->
-      <div class="flex items-center gap-4 mt-2 text-[10px] font-extrabold text-slate-400">
-        <span>วันสั่ง: ${formatDate(task.assignDate)}</span>
-        <span>กำหนดส่ง: ${formatDate(task.dueDate)}</span>
+      <!-- แสดงวันสั่ง และวันส่ง (สีแดง) ในการ์ดหน้าการบ้านทั้งหมด -->
+      <div class="flex items-center gap-4 mt-2 text-[10px] font-extrabold">
+        <span class="text-slate-400">วันสั่ง: ${formatDate(task.assignDate)}</span>
+        <span class="text-rose-500">กำหนดส่ง: ${formatDate(task.dueDate)}</span>
       </div>
 
       <div class="mt-2 space-y-1.5">
@@ -1042,9 +1042,9 @@ function openTaskDetailModal(task) {
         <h3 class="font-extrabold text-sm text-slate-800 mt-1">${escapeHtml(task.subject)}</h3>
         <p class="text-xs text-slate-600 mt-0.5 font-medium">${escapeHtml(task.detail)}</p>
         ${imageHTML}
-        <div class="flex gap-4 mt-2 text-[11px] font-bold text-slate-400">
-          <span>สั่งเมื่อ: ${formatDate(task.assignDate)}</span>
-          <span>กำหนดส่ง: ${formatDate(task.dueDate)}</span>
+        <div class="flex gap-4 mt-2 text-[11px] font-bold">
+          <span class="text-slate-400">สั่งเมื่อ: ${formatDate(task.assignDate)}</span>
+          <span class="text-rose-500">กำหนดส่ง: ${formatDate(task.dueDate)}</span>
         </div>
       </div>
 
@@ -1113,8 +1113,8 @@ function createTrackingCard(task) {
       <div>
         <span class="text-[10px] font-extrabold text-slate-700">${escapeHtml(task.subject)}</span>
         <h3 class="font-extrabold text-xs text-slate-800 mt-0.5">${escapeHtml(task.detail)}</h3>
-        <div class="flex gap-3 mt-1 text-[10px] font-bold text-slate-400">
-          <span>วันสั่ง: ${formatDate(task.assignDate)}</span>
+        <div class="flex gap-3 mt-1 text-[10px] font-bold">
+          <span class="text-slate-400">วันสั่ง: ${formatDate(task.assignDate)}</span>
           <span class="text-rose-500">กำหนดส่ง: ${formatDate(task.dueDate)}</span>
         </div>
       </div>
