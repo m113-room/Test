@@ -300,6 +300,12 @@
             </div>
           </div>
 
+          <!-- ตัวเลือกงานที่ไม่ต้องใช้เลขที่ -->
+          <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-xl p-2.5">
+            <input type="checkbox" id="task-no-student" class="rounded text-sky-500 focus:ring-0 w-4 h-4">
+            <label for="task-no-student" class="text-xs font-bold text-slate-600 cursor-pointer">งานนี้ไม่ต้องเช็คชื่อส่งงาน (ไม่ต้องใช้เลขที่)</label>
+          </div>
+
           <div>
             <label class="block text-[10px] font-bold text-slate-500 mb-1">แนบรูปภาพประกอบ (ถ้ามี):</label>
             <input id="task-image" type="file" accept="image/*" class="w-full text-xs p-1.5 border border-slate-200 rounded-xl bg-white">
@@ -925,12 +931,7 @@ function createTaskCard(task, isPinned) {
     div.className = 'bg-white border border-slate-100 rounded-2xl p-4 shadow-sm relative overflow-hidden flex gap-3 transition hover:shadow-md cursor-pointer';
   }
 
-  const unsubmitted = getUnsubmitted(task);
-  const total = TOTAL_STUDENTS + (task.extraUnsubmitted || []).filter(n => Number(n) > TOTAL_STUDENTS).length;
-  const completed = Math.max(0, total - unsubmitted.length);
-  const percent = total ? Math.round(completed / total * 100) : 0;
   const dueStatus = getDueDateStatus(task.dueDate);
-
   const hasImage = task.imageUrl && String(task.imageUrl).trim() !== "" && String(task.imageUrl).startsWith('http');
   const imageHTML = hasImage ? `
     <div class="mt-2">
@@ -951,6 +952,33 @@ function createTaskCard(task, isPinned) {
   ` : '';
 
   const sideBarColor = isPinned ? 'bg-amber-400' : 'bg-emerald-500';
+
+  let progressSectionHTML = '';
+  if (task.noStudent) {
+    progressSectionHTML = `
+      <div class="mt-2 text-[10px] font-bold text-slate-400 bg-slate-50 p-2 rounded-xl text-center border border-slate-100">
+        <i class="fa-solid fa-circle-info"></i> งานนี้ไม่มีการเช็คชื่อส่งงานรายบุคคล
+      </div>
+    `;
+  } else {
+    const unsubmitted = getUnsubmitted(task);
+    const total = TOTAL_STUDENTS + (task.extraUnsubmitted || []).filter(n => Number(n) > TOTAL_STUDENTS).length;
+    const completed = Math.max(0, total - unsubmitted.length);
+    const percent = total ? Math.round(completed / total * 100) : 0;
+
+    progressSectionHTML = `
+      <div class="mt-2 space-y-1.5">
+        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+          <div class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width:${percent}%"></div>
+        </div>
+        <div class="flex justify-between items-center text-[10px] font-extrabold">
+          <span class="text-slate-400">สถานะการส่ง</span>
+          <span class="text-slate-600">${completed}/${total} ส่งแล้ว</span>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-1 mt-3 pt-2 border-t border-slate-50/60" data-students-card></div>
+    `;
+  }
 
   div.innerHTML = `
     <div class="w-1.5 ${sideBarColor} rounded-full shrink-0"></div>
@@ -979,17 +1007,7 @@ function createTaskCard(task, isPinned) {
         <span class="text-rose-500">กำหนดส่ง: ${formatDate(task.dueDate)}</span>
       </div>
 
-      <div class="mt-2 space-y-1.5">
-        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-          <div class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width:${percent}%"></div>
-        </div>
-        <div class="flex justify-between items-center text-[10px] font-extrabold">
-          <span class="text-slate-400">สถานะการส่ง</span>
-          <span class="text-slate-600">${completed}/${total} ส่งแล้ว</span>
-        </div>
-      </div>
-
-      <div class="flex flex-wrap gap-1 mt-3 pt-2 border-t border-slate-50/60" data-students-card></div>
+      ${progressSectionHTML}
     </div>
   `;
 
@@ -1001,32 +1019,32 @@ function createTaskCard(task, isPinned) {
   }
   div.querySelector('[data-action="delete"]').onclick = (e) => { e.stopPropagation(); deleteTask(task.id); };
 
-  const studentsCard = div.querySelector('[data-students-card]');
-  unsubmitted.slice(0, 12).forEach(number => {
-    const btn = document.createElement('button');
-    btn.className = 'bg-slate-50 text-slate-600 px-2 py-0.5 rounded-lg text-[10px] font-bold border border-slate-200 hover:bg-rose-50 hover:text-rose-600 transition';
-    btn.textContent = number;
-    btn.onclick = (e) => { e.stopPropagation(); toggleStudent(task.id, number); };
-    studentsCard.appendChild(btn);
-  });
+  if (!task.noStudent) {
+    const unsubmitted = getUnsubmitted(task);
+    const studentsCard = div.querySelector('[data-students-card]');
+    if (studentsCard) {
+      unsubmitted.slice(0, 12).forEach(number => {
+        const btn = document.createElement('button');
+        btn.className = 'bg-slate-50 text-slate-600 px-2 py-0.5 rounded-lg text-[10px] font-bold border border-slate-200 hover:bg-rose-50 hover:text-rose-600 transition';
+        btn.textContent = number;
+        btn.onclick = (e) => { e.stopPropagation(); toggleStudent(task.id, number); };
+        studentsCard.appendChild(btn);
+      });
 
-  if (unsubmitted.length > 12) {
-    const moreBtn = document.createElement('span');
-    moreBtn.className = 'text-[10px] text-slate-400 font-bold self-center px-1';
-    moreBtn.textContent = `+${unsubmitted.length - 12}`;
-    studentsCard.appendChild(moreBtn);
+      if (unsubmitted.length > 12) {
+        const moreBtn = document.createElement('span');
+        moreBtn.className = 'text-[10px] text-slate-400 font-bold self-center px-1';
+        moreBtn.textContent = `+${unsubmitted.length - 12}`;
+        studentsCard.appendChild(moreBtn);
+      }
+    }
   }
 
   return div;
 }
 
 function openTaskDetailModal(task) {
-  const unsubmitted = getUnsubmitted(task);
-  const total = TOTAL_STUDENTS + (task.extraUnsubmitted || []).filter(n => Number(n) > TOTAL_STUDENTS).length;
-  const completed = Math.max(0, total - unsubmitted.length);
-  const percent = total ? Math.round(completed / total * 100) : 0;
   const dueStatus = getDueDateStatus(task.dueDate);
-
   const hasImage = task.imageUrl && String(task.imageUrl).trim() !== "" && String(task.imageUrl).startsWith('http');
   const imageHTML = hasImage ? `
     <div class="my-3">
@@ -1036,13 +1054,47 @@ function openTaskDetailModal(task) {
     </div>
   ` : '';
 
-  let studentsButtonsHTML = '';
-  for (let i = 1; i <= TOTAL_STUDENTS; i++) {
-    const isNotSent = unsubmitted.includes(String(i));
-    const btnClass = isNotSent 
-      ? 'bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100' 
-      : 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100';
-    studentsButtonsHTML += `<button onclick="toggleStudentInModal('${task.id}', '${i}')" class="py-2 rounded-xl text-xs font-extrabold ${btnClass} transition">${i}</button>`;
+  let detailBottomHTML = '';
+  if (task.noStudent) {
+    detailBottomHTML = `
+      <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-center text-xs text-slate-500 font-bold">
+        <i class="fa-solid fa-circle-info text-sky-500 mb-1 block text-base"></i>
+        งานนี้เป็นประกาศหรือกิจกรรมทั่วไป ไม่มีการเช็คชื่อส่งงานรายบุคคล
+      </div>
+    `;
+  } else {
+    const unsubmitted = getUnsubmitted(task);
+    const total = TOTAL_STUDENTS + (task.extraUnsubmitted || []).filter(n => Number(n) > TOTAL_STUDENTS).length;
+    const completed = Math.max(0, total - unsubmitted.length);
+    const percent = total ? Math.round(completed / total * 100) : 0;
+
+    let studentsButtonsHTML = '';
+    for (let i = 1; i <= TOTAL_STUDENTS; i++) {
+      const isNotSent = unsubmitted.includes(String(i));
+      const btnClass = isNotSent 
+        ? 'bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100' 
+        : 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100';
+      studentsButtonsHTML += `<button onclick="toggleStudentInModal('${task.id}', '${i}')" class="py-2 rounded-xl text-xs font-extrabold ${btnClass} transition">${i}</button>`;
+    }
+
+    detailBottomHTML = `
+      <div class="bg-slate-50 border border-slate-100 rounded-2xl p-3.5 space-y-2">
+        <div class="flex justify-between items-center text-xs font-extrabold">
+          <span class="text-slate-700">ส่งแล้ว ${completed}/${total} คน (${percent}%)</span>
+          <span class="text-rose-500">ยังไม่ส่ง (${unsubmitted.length})</span>
+        </div>
+        <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+          <div class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width:${percent}%"></div>
+        </div>
+
+        <div class="pt-2">
+          <span class="text-[11px] font-extrabold text-slate-600 block mb-2">เลขที่ยังไม่ได้ส่ง (คลิกเพื่อเปลี่ยนสถานะ):</span>
+          <div class="grid grid-cols-8 gap-1.5 max-h-[180px] overflow-y-auto pr-1">
+            ${studentsButtonsHTML}
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   const modalHTML = `
@@ -1061,22 +1113,7 @@ function openTaskDetailModal(task) {
         </div>
       </div>
 
-      <div class="bg-slate-50 border border-slate-100 rounded-2xl p-3.5 space-y-2">
-        <div class="flex justify-between items-center text-xs font-extrabold">
-          <span class="text-slate-700">ส่งแล้ว ${completed}/${total} คน (${percent}%)</span>
-          <span class="text-rose-500">ยังไม่ส่ง (${unsubmitted.length})</span>
-        </div>
-        <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-          <div class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width:${percent}%"></div>
-        </div>
-
-        <div class="pt-2">
-          <span class="text-[11px] font-extrabold text-slate-600 block mb-2">เลขที่ยังไม่ได้ส่ง (คลิกเพื่อเปลี่ยนสถานะ):</span>
-          <div class="grid grid-cols-8 gap-1.5 max-h-[180px] overflow-y-auto pr-1">
-            ${studentsButtonsHTML}
-          </div>
-        </div>
-      </div>
+      ${detailBottomHTML}
 
       <button onclick="closeModal()" class="w-full bg-slate-100 text-slate-600 py-2.5 rounded-xl text-xs font-extrabold hover:bg-slate-200 transition">
         ปิด
@@ -1096,6 +1133,7 @@ async function toggleStudentInModal(taskId, number) {
 }
 
 function getUnsubmitted(task) {
+  if (task.noStudent) return [];
   const submitted = new Set((task.submitted || []).map(String));
   const extra = new Set((task.extraUnsubmitted || []).map(String));
   const result = [];
@@ -1115,11 +1153,32 @@ function createTrackingCard(task) {
   const div = document.createElement('div');
   div.className = 'bg-white rounded-2xl border border-slate-100 p-4 space-y-3 shadow-sm';
 
+  const dueStatus = getDueDateStatus(task.dueDate);
+
+  if (task.noStudent) {
+    div.innerHTML = `
+      <div class="flex justify-between items-start gap-2">
+        <div>
+          <span class="text-[10px] font-extrabold text-slate-700">${escapeHtml(task.subject)}</span>
+          <h3 class="font-extrabold text-xs text-slate-800 mt-0.5">${escapeHtml(task.detail)}</h3>
+          <div class="flex gap-3 mt-1 text-[10px] font-bold">
+            <span class="text-slate-400">วันสั่ง: ${formatDate(task.assignDate)}</span>
+            <span class="text-rose-500">กำหนดส่ง: ${formatDate(task.dueDate)}</span>
+          </div>
+        </div>
+        <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-full ${dueStatus.className}">${dueStatus.text}</span>
+      </div>
+      <div class="text-[10px] font-bold text-slate-400 bg-slate-50 p-2 rounded-xl text-center border border-slate-100">
+        <i class="fa-solid fa-circle-info"></i> งานนี้ไม่มีการเช็คชื่อส่งงานรายบุคคล
+      </div>
+    `;
+    return div;
+  }
+
   const unsubmitted = getUnsubmitted(task);
   const total = TOTAL_STUDENTS + (task.extraUnsubmitted || []).filter(n => Number(n) > TOTAL_STUDENTS).length;
   const completed = Math.max(0, total - unsubmitted.length);
   const percent = total ? Math.round(completed / total * 100) : 0;
-  const dueStatus = getDueDateStatus(task.dueDate);
 
   div.innerHTML = `
     <div class="flex justify-between items-start gap-2">
@@ -1202,6 +1261,7 @@ async function addTask() {
   const detail = el('task-detail').value.trim();
   const noDueChecked = el('task-no-due').checked;
   const dueDate = noDueChecked ? 'ยังไม่กำหนด' : el('task-due-date').value;
+  const noStudent = el('task-no-student').checked;
 
   if (!code || !subject || !detail || (!noDueChecked && !dueDate)) {
     showAlert('กรุณากรอกข้อมูลให้ครบ');
@@ -1218,6 +1278,7 @@ async function addTask() {
     detail: detail,
     assignDate: el('task-assign-date').value,
     dueDate: dueDate,
+    noStudent: noStudent,
     isPinned: false,
     submitted: [],
     extraUnsubmitted: [],
@@ -1239,6 +1300,7 @@ async function addTask() {
     el('task-code').value = '';
     el('task-subject').value = '';
     el('task-no-due').checked = false;
+    el('task-no-student').checked = false;
     el('task-due-date').disabled = false;
     ['task-detail', 'task-assign-date', 'task-due-date', 'task-image'].forEach(id => { if(el(id)) el(id).value = ''; });
     el('task-form').classList.add('hidden');
@@ -1287,6 +1349,11 @@ function openEditTaskModal(id) {
         </div>
       </div>
 
+      <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-xl p-2.5">
+        <input type="checkbox" id="edit-task-no-student" ${task.noStudent ? 'checked' : ''} class="rounded text-sky-500 focus:ring-0 w-4 h-4">
+        <label for="edit-task-no-student" class="text-xs font-bold text-slate-600 cursor-pointer">งานนี้ไม่ต้องเช็คชื่อส่งงาน (ไม่ต้องใช้เลขที่)</label>
+      </div>
+
       <div class="grid grid-cols-2 gap-2 pt-3">
         <button onclick="closeModal()" class="w-full bg-slate-100 text-slate-600 py-2.5 rounded-xl text-xs font-extrabold hover:bg-slate-200 transition">ยกเลิก</button>
         <button onclick="saveEditTask('${task.id}')" class="w-full bg-sky-500 text-white py-2.5 rounded-xl text-xs font-extrabold hover:bg-sky-600 transition shadow-sm">บันทึกการแก้ไข</button>
@@ -1306,6 +1373,7 @@ async function saveEditTask(id) {
   task.assignDate = el('edit-task-assign-date').value;
   const noDueChecked = el('edit-task-no-due').checked;
   task.dueDate = noDueChecked ? 'ยังไม่กำหนด' : el('edit-task-due-date').value;
+  task.noStudent = el('edit-task-no-student').checked;
 
   closeModal();
   renderTasks();
@@ -1369,7 +1437,7 @@ async function deleteTask(id) {
 
 async function toggleStudent(taskId, number) {
   const task = tasks.find(t => String(t.id) === String(taskId));
-  if (!task) return;
+  if (!task || task.noStudent) return;
   if (!Array.isArray(task.submitted)) task.submitted = [];
 
   const numStr = String(number);
@@ -1393,7 +1461,7 @@ async function addExtraStudent() {
   const number = el('student-number').value.trim();
   if (!taskId || !number) return;
   const task = tasks.find(t => String(t.id) === String(taskId));
-  if (!task) return;
+  if (!task || task.noStudent) return;
 
   if (!Array.isArray(task.extraUnsubmitted)) task.extraUnsubmitted = [];
   if (task.extraUnsubmitted.includes(number)) {
