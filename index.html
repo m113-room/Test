@@ -97,19 +97,20 @@
     <!-- Main Page -->
     <main id="main-page" class="app-card hidden bg-white rounded-3xl shadow-xl p-6 border border-slate-100">
 
+      <!-- ย้ายหัวข้อการบ้านมาไว้ที่แถบด้านบนสุดร่วมกับชื่อผู้ใช้และปุ่ม Logout -->
       <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
-        <div class="flex items-center gap-4 text-xs font-bold text-slate-500">
+        <div class="flex items-center gap-3 text-xs font-bold text-slate-500">
           <span class="text-slate-800 font-extrabold flex items-center gap-1.5"><i class="fa-solid fa-house text-sky-500"></i> <span id="user-display"></span></span>
+          <span class="text-slate-300">|</span>
+          <h1 class="font-extrabold text-slate-800 text-base">การบ้าน</h1>
         </div>
         <div class="flex items-center gap-2">
-          <!-- เอาปุ่ม การบ้าน สีฟ้าออกแล้ว เหลือเฉพาะปุ่ม LOGOUT -->
           <button onclick="logout()" class="px-3 py-1.5 bg-rose-50 text-rose-500 rounded-xl text-[11px] font-extrabold hover:bg-rose-100 transition ml-1">LOGOUT</button>
         </div>
       </div>
 
       <header class="flex items-center justify-between mb-4">
         <div>
-          <h1 class="font-extrabold text-slate-800 text-lg">การบ้าน</h1>
           <p class="text-xs text-slate-400 font-medium">กดที่การบ้านเพื่อดูรายละเอียดและเช็คชื่อส่งงาน</p>
         </div>
 
