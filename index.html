@@ -209,15 +209,6 @@
 
       <!-- Tab: Calendar -->
       <section id="view-calendar" class="hidden">
-        <button onclick="toggleForm('event-form')" class="w-full bg-sky-500 text-white font-extrabold py-3 rounded-2xl text-xs mb-4 shadow-sm hover:bg-sky-600 transition">
-          + เพิ่มกิจกรรม
-        </button>
-
-        <div id="event-form" class="hidden bg-sky-50 border border-sky-100 rounded-2xl p-3.5 mb-4 space-y-2.5">
-          <input id="event-input" class="w-full border rounded-xl p-2.5 text-xs bg-white" placeholder="ชื่อกิจกรรม">
-          <button onclick="addEvent()" class="w-full bg-sky-500 text-white rounded-xl py-2 text-xs font-bold">บันทึกกิจกรรม</button>
-        </div>
-
         <div class="flex justify-between items-center mb-3">
           <h2 id="calendar-month-year" class="text-xs font-extrabold text-slate-700"></h2>
           <div class="flex gap-1 text-[10px] font-bold">
@@ -251,13 +242,26 @@
       <!-- Tab: Tracking / จัดการงาน -->
       <section id="view-tracking" class="hidden">
         <div class="grid grid-cols-2 gap-2 mb-4">
-          <button onclick="toggleForm('task-form')" class="w-full bg-sky-500 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:bg-sky-600 transition">
+          <button onclick="toggleForm('task-form')" class="bg-sky-500 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:bg-sky-600 transition">
             + เพิ่มการบ้าน
           </button>
-          <!-- ซ่อนปุ่มเพิ่มรายชื่อคนค้างงานชั่วคราวโดยใส่คลาส hidden -->
-          <button onclick="toggleForm('student-form')" class="hidden bg-indigo-600 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:bg-indigo-700 transition">
-            <i class="fa-solid fa-user-plus"></i> เพิ่มรายชื่อคนค้าง
+          <button onclick="toggleForm('event-form')" class="bg-amber-500 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:bg-amber-600 transition">
+            + เพิ่มกิจกรรม
           </button>
+        </div>
+
+        <!-- ฟอร์มเพิ่มกิจกรรม -->
+        <div id="event-form" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-4 space-y-3 shadow-sm">
+          <h3 class="text-xs font-bold text-amber-700 mb-1">เพิ่มกิจกรรมพิเศษ</h3>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 mb-1">วันที่จัดกิจกรรม:</label>
+            <input id="event-date" type="date" class="w-full p-2.5 border border-amber-300 rounded-xl text-xs bg-white font-semibold text-slate-700">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 mb-1">ชื่อกิจกรรม:</label>
+            <input id="event-input" class="w-full p-2.5 border border-amber-300 rounded-xl text-xs bg-white" placeholder="พิมพ์ชื่อกิจกรรมที่นี่...">
+          </div>
+          <button onclick="addEventFromTracking()" class="w-full bg-amber-500 text-white rounded-xl py-2.5 text-xs font-extrabold hover:bg-amber-600 transition shadow-sm">บันทึกกิจกรรม</button>
         </div>
 
         <div id="task-form" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-4 space-y-3 shadow-sm">
@@ -915,7 +919,6 @@ function renderTasks() {
 function createTaskCard(task, isPinned) {
   const div = document.createElement('div');
   
-  // ปรับแต่ง UI การ์ดที่ปักหมุด (isPinned) ให้มีกรอบสีเหลือง (border-amber-300), พื้นหลังเหลืองอ่อนๆ (bg-amber-50/40) และมีแถบขีดสีเหลืองด้านซ้าย
   if (isPinned) {
     div.className = 'bg-amber-50/40 border-2 border-amber-300 rounded-2xl p-4 shadow-sm relative overflow-hidden flex gap-3 transition hover:shadow-md cursor-pointer';
   } else {
@@ -947,7 +950,6 @@ function createTaskCard(task, isPinned) {
     </button>
   ` : '';
 
-  // แถบขีดด้านซ้าย: สีเหลืองสำหรับงานปักหมุด / สีเขียวสำหรับงานปกติ
   const sideBarColor = isPinned ? 'bg-amber-400' : 'bg-emerald-500';
 
   div.innerHTML = `
@@ -1512,16 +1514,25 @@ function selectDate(key) {
   if (!eventList.children.length) eventList.innerHTML = '<p class="text-[11px] text-slate-400 font-semibold">ไม่มีกิจกรรมพิเศษ</p>';
 }
 
-async function addEvent() {
-  const event = el('event-input').value.trim();
-  if (!event) return;
-  if (!dailyEvents[selectedDate]) dailyEvents[selectedDate] = [];
-  else if (!Array.isArray(dailyEvents[selectedDate])) dailyEvents[selectedDate] = [dailyEvents[selectedDate]];
+async function addEventFromTracking() {
+  const dateVal = el('event-date').value;
+  const eventText = el('event-input').value.trim();
+  if (!dateVal || !eventText) {
+    showAlert('กรุณากรอกวันที่และชื่อกิจกรรมให้ครบถ้วน');
+    return;
+  }
 
-  dailyEvents[selectedDate].push(event);
-  selectDate(selectedDate);
+  if (!dailyEvents[dateVal]) dailyEvents[dateVal] = [];
+  else if (!Array.isArray(dailyEvents[dateVal])) dailyEvents[dateVal] = [dailyEvents[dateVal]];
+
+  dailyEvents[dateVal].push(eventText);
+  
   el('event-input').value = '';
+  el('event-date').value = '';
   el('event-form').classList.add('hidden');
+
+  renderCalendar();
+  selectDate(selectedDate);
 
   const cachedData = JSON.parse(localStorage.getItem('homeworkCacheData') || '{}');
   cachedData.events = dailyEvents;
