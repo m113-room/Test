@@ -282,7 +282,7 @@
               <div class="flex items-center justify-between">
                 <span class="text-[10px] font-bold text-slate-500 leading-tight">วันส่ง:</span>
                 <label class="text-[10px] text-pink-600 font-bold flex items-center gap-1 cursor-pointer">
-                  <input type="checkbox" id="task-no-due" onchange="toggleNoDueDateInput('task')" class="rounded text-pink-500 focus:ring-0"> ไม่กำหนด
+                  <input type="checkbox" id="task-no-due" onchange="toggleNoDueDateInput('task')" class="rounded text-pink-500 focus:ring-0"> ยังไม่กำหนด
                 </label>
               </div>
               <input id="task-due-date" type="date" class="w-full text-xs bg-transparent border-0 p-0 mt-1">
@@ -401,7 +401,7 @@ function dateKey(date) {
 function normalizeDateStr(value) {
   if (!value) return '';
   const str = String(value).trim();
-  if (str === 'ไม่กำหนด' || str === '-') return '';
+  if (str === 'ยังไม่กำหนด' || str === 'ไม่กำหนด' || str === '-') return '';
   if (str.length === 10 && str.charAt(4) === '-' && str.charAt(7) === '-') {
     return str;
   }
@@ -415,7 +415,7 @@ function normalizeDateStr(value) {
 }
 
 function formatDate(value) {
-  if (!value || value === 'ไม่กำหนด' || value === '-') return 'ไม่กำหนดส่ง';
+  if (!value || value === 'ยังไม่กำหนด' || value === 'ไม่กำหนด' || value === '-') return 'ยังไม่กำหนดส่ง';
   const str = String(value).trim();
   
   const monthMap = {
@@ -843,8 +843,8 @@ function renderTasks() {
 
   filteredTasks.sort((a, b) => {
     if (dateMode === 'due-soon') {
-      const dateA = (!a.dueDate || a.dueDate === 'ไม่กำหนด') ? 8640000000000000 : new Date(a.dueDate).getTime();
-      const dateB = (!b.dueDate || b.dueDate === 'ไม่กำหนด') ? 8640000000000000 : new Date(b.dueDate).getTime();
+      const dateA = (!a.dueDate || a.dueDate === 'ยังไม่กำหนด' || a.dueDate === 'ไม่กำหนด') ? 8640000000000000 : new Date(a.dueDate).getTime();
+      const dateB = (!b.dueDate || b.dueDate === 'ยังไม่กำหนด' || b.dueDate === 'ไม่กำหนด') ? 8640000000000000 : new Date(b.dueDate).getTime();
       return dateA - dateB;
     } else if (dateMode === 'assign-new') {
       const dateA = a.assignDate ? new Date(a.assignDate).getTime() : 0;
@@ -1100,7 +1100,7 @@ async function addTask() {
   const detail = el('task-detail').value.trim();
   
   const noDueChecked = el('task-no-due').checked;
-  const dueDate = noDueChecked ? 'ไม่กำหนด' : el('task-due-date').value;
+  const dueDate = noDueChecked ? 'ยังไม่กำหนด' : el('task-due-date').value;
 
   if (!code || !subject || !detail || (!noDueChecked && !dueDate)) {
     showAlert('กรุณากรอกข้อมูลให้ครบ');
@@ -1174,7 +1174,7 @@ function openEditTaskModal(id) {
   const task = tasks.find(t => String(t.id) === String(id));
   if (!task) return;
 
-  const isNoDue = !task.dueDate || task.dueDate === 'ไม่กำหนด';
+  const isNoDue = !task.dueDate || task.dueDate === 'ยังไม่กำหนด' || task.dueDate === 'ไม่กำหนด';
   const formattedDueDate = isNoDue ? '' : normalizeDateStr(task.dueDate);
 
   const modalContent = `
@@ -1200,7 +1200,7 @@ function openEditTaskModal(id) {
           <div class="flex items-center justify-between mb-1">
             <label class="text-xs font-extrabold text-slate-600">วันส่ง:</label>
             <label class="text-[10px] text-pink-600 font-bold flex items-center gap-1 cursor-pointer">
-              <input type="checkbox" id="edit-task-no-due" ${isNoDue ? 'checked' : ''} onchange="toggleNoDueDateInput('edit-task')" class="rounded text-pink-500 focus:ring-0"> ไม่กำหนด
+              <input type="checkbox" id="edit-task-no-due" ${isNoDue ? 'checked' : ''} onchange="toggleNoDueDateInput('edit-task')" class="rounded text-pink-500 focus:ring-0"> ยังไม่กำหนด
             </label>
           </div>
           <input id="edit-task-due-date" type="date" value="${formattedDueDate}" ${isNoDue ? 'disabled' : ''} class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white text-slate-700 ${isNoDue ? 'opacity-40' : ''}">
@@ -1230,7 +1230,7 @@ async function saveEditTask(id) {
   const assignDate = el('edit-task-assign-date').value;
   
   const noDueChecked = el('edit-task-no-due').checked;
-  const dueDate = noDueChecked ? 'ไม่กำหนด' : el('edit-task-due-date').value;
+  const dueDate = noDueChecked ? 'ยังไม่กำหนด' : el('edit-task-due-date').value;
 
   if (!code || !subject || !detail || (!noDueChecked && !dueDate)) {
     showAlert('กรุณากรอกข้อมูลให้ครบถ้วน');
