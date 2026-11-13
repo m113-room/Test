@@ -262,12 +262,15 @@
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-[10px] font-bold text-slate-500 mb-1">รหัสวิชา:</label>
-              <input id="task-code" type="text" list="code-suggestions" oninput="onCodeInput()" placeholder="พิมพ์รหัสวิชา" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-semibold text-slate-700">
-              <datalist id="code-suggestions"></datalist>
+              <select id="task-code" onchange="onCodeSelect()" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-semibold text-slate-700">
+                <option value="">เลือกรหัสวิชา</option>
+              </select>
             </div>
             <div>
               <label class="block text-[10px] font-bold text-slate-500 mb-1">ชื่อวิชา:</label>
-              <input id="task-subject" type="text" placeholder="พิมพ์ชื่อวิชา" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-semibold text-slate-700">
+              <select id="task-subject" onchange="onSubjectSelect()" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-semibold text-slate-700">
+                <option value="">เลือกชื่อวิชา</option>
+              </select>
             </div>
           </div>
 
@@ -280,8 +283,8 @@
             </div>
             <div class="flex flex-col bg-white border border-slate-200 rounded-xl px-2.5 py-1.5">
               <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-slate-500 leading-tight">วันส่ง:</span>
-                <label class="text-[10px] text-pink-600 font-bold flex items-center gap-1 cursor-pointer">
+                <span class="text-[10px] font-bold text-slate-500 leading-tight shrink-0">วันส่ง:</span>
+                <label class="text-[10px] text-pink-600 font-bold flex items-center gap-1 cursor-pointer shrink-0">
                   <input type="checkbox" id="task-no-due" onchange="toggleNoDueDateInput('task')" class="rounded text-pink-500 focus:ring-0"> ยังไม่กำหนด
                 </label>
               </div>
@@ -324,7 +327,7 @@
         การส่งการบ้าน
       </button>
       <div>
-        <span class="text-[10px] text-slate-500 font-bold">(V.2.22)</span>
+        <span class="text-[10px] text-slate-500 font-bold">(V.2.23)</span>
       </div>
     </div>
 
@@ -763,22 +766,25 @@ function buildSubjectMap(options) {
   });
 }
 
-function onCodeInput() {
+function onCodeSelect() {
   const codeVal = el('task-code').value.toLowerCase().trim();
-  const subjectInput = el('task-subject');
-
+  const subjectSelect = el('task-subject');
   if (!codeVal) return;
 
-  let found = null;
-  for (let key in subjectMap) {
-    if (key === codeVal) {
-      found = subjectMap[key];
-      break;
-    }
-  }
-
+  const found = subjectMap[codeVal];
   if (found && found.subject) {
-    subjectInput.value = found.subject;
+    subjectSelect.value = found.subject;
+  }
+}
+
+function onSubjectSelect() {
+  const subjVal = el('task-subject').value.toLowerCase().trim();
+  const codeSelect = el('task-code');
+  if (!subjVal) return;
+
+  const found = subjectMap[subjVal];
+  if (found && found.code) {
+    codeSelect.value = found.code;
   }
 }
 
@@ -1198,8 +1204,8 @@ function openEditTaskModal(id) {
         </div>
         <div class="flex flex-col">
           <div class="flex items-center justify-between mb-1">
-            <label class="text-xs font-extrabold text-slate-600">วันส่ง:</label>
-            <label class="text-[10px] text-pink-600 font-bold flex items-center gap-1 cursor-pointer">
+            <label class="text-xs font-extrabold text-slate-600 shrink-0">วันส่ง:</label>
+            <label class="text-[10px] text-pink-600 font-bold flex items-center gap-1 cursor-pointer shrink-0">
               <input type="checkbox" id="edit-task-no-due" ${isNoDue ? 'checked' : ''} onchange="toggleNoDueDateInput('edit-task')" class="rounded text-pink-500 focus:ring-0"> ยังไม่กำหนด
             </label>
           </div>
@@ -1573,29 +1579,47 @@ async function deleteEvent(key, index) {
 
 function updateOptions() {
   const filterSubjSelect = el('filter-subject');
-  const codeDatalist = el('code-suggestions');
+  const taskCodeSelect = el('task-code');
+  const taskSubjSelect = el('task-subject');
   
   const currentSelectedFilter = filterSubjSelect.value;
+  const currentTaskCode = taskCodeSelect ? taskCodeSelect.value : '';
+  const currentTaskSubj = taskSubjSelect ? taskSubjSelect.value : '';
 
   filterSubjSelect.innerHTML = '<option value="">ทุกวิชา</option>';
-  if (codeDatalist) codeDatalist.innerHTML = '';
+  if (taskCodeSelect) taskCodeSelect.innerHTML = '<option value="">เลือกรหัสวิชา</option>';
+  if (taskSubjSelect) taskSubjSelect.innerHTML = '<option value="">เลือกชื่อวิชา</option>';
 
-  codes.forEach(code => {
-    if (codeDatalist) {
+  codes.forEach(c => {
+    const val = typeof c === 'object' ? (c.code || c.val || '') : String(c || '');
+    if (val && taskCodeSelect) {
       const option = document.createElement('option');
-      option.value = code;
-      codeDatalist.appendChild(option);
+      option.value = val;
+      option.textContent = val;
+      taskCodeSelect.appendChild(option);
     }
   });
 
-  subjects.forEach(subject => {
-    const filterOpt = document.createElement('option');
-    filterOpt.value = subject;
-    filterOpt.textContent = subject;
-    filterSubjSelect.appendChild(filterOpt);
+  subjects.forEach(s => {
+    const val = typeof s === 'object' ? (s.subject || s.name || s.val || '') : String(s || '');
+    if (val) {
+      const filterOpt = document.createElement('option');
+      filterOpt.value = val;
+      filterOpt.textContent = val;
+      filterSubjSelect.appendChild(filterOpt);
+
+      if (taskSubjSelect) {
+        const taskOpt = document.createElement('option');
+        taskOpt.value = val;
+        taskOpt.textContent = val;
+        taskSubjSelect.appendChild(taskOpt);
+      }
+    }
   });
 
   filterSubjSelect.value = currentSelectedFilter;
+  if (taskCodeSelect && currentTaskCode) taskCodeSelect.value = currentTaskCode;
+  if (taskSubjSelect && currentTaskSubj) taskSubjSelect.value = currentTaskSubj;
 }
 
 function openModal(title, content) {
@@ -1644,9 +1668,10 @@ function openOptions() {
 
   if (codes.length) {
     codes.forEach(c => {
+      const val = typeof c === 'object' ? (c.code || c.val || '') : String(c || '');
       const row = document.createElement('div');
       row.className = 'bg-white p-1.5 rounded-lg border border-slate-100 mb-1 text-[11px]';
-      row.textContent = c;
+      row.textContent = val;
       cBox.appendChild(row);
     });
   } else {
@@ -1655,9 +1680,10 @@ function openOptions() {
 
   if (subjects.length) {
     subjects.forEach(s => {
+      const val = typeof s === 'object' ? (s.subject || s.name || s.val || '') : String(s || '');
       const row = document.createElement('div');
       row.className = 'bg-white p-1.5 rounded-lg border border-slate-100 mb-1 text-[11px]';
-      row.textContent = s;
+      row.textContent = val;
       sBox.appendChild(row);
     });
   } else {
