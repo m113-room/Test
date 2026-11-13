@@ -251,10 +251,11 @@
       <!-- Tab: Tracking / จัดการงาน -->
       <section id="view-tracking" class="hidden">
         <div class="grid grid-cols-2 gap-2 mb-4">
-          <button onclick="toggleForm('task-form')" class="bg-sky-500 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:bg-sky-600 transition">
+          <button onclick="toggleForm('task-form')" class="w-full bg-sky-500 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:bg-sky-600 transition">
             + เพิ่มการบ้าน
           </button>
-          <button onclick="toggleForm('student-form')" class="bg-indigo-600 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:bg-indigo-700 transition">
+          <!-- ซ่อนปุ่มเพิ่มรายชื่อคนค้างงานชั่วคราวโดยใส่คลาส hidden -->
+          <button onclick="toggleForm('student-form')" class="hidden bg-indigo-600 text-white font-extrabold py-2.5 rounded-2xl text-xs shadow-sm hover:bg-indigo-700 transition">
             <i class="fa-solid fa-user-plus"></i> เพิ่มรายชื่อคนค้าง
           </button>
         </div>
@@ -852,7 +853,7 @@ function renderTasks() {
   pinnedList.innerHTML = '';
   list.innerHTML = '';
   tracking.innerHTML = '';
-  selector.innerHTML = '';
+  if(selector) selector.innerHTML = '';
 
   const keyword = (el('search-keyword').value || '').toLowerCase().trim();
   const selectedSubject = el('filter-subject').value;
@@ -899,10 +900,12 @@ function renderTasks() {
   normalItems.forEach(task => list.appendChild(createTaskCard(task, false)));
   filteredTasks.forEach(task => {
     tracking.appendChild(createTrackingCard(task));
-    const option = document.createElement('option');
-    option.value = task.id;
-    option.textContent = task.subject + ' - ' + task.detail;
-    selector.appendChild(option);
+    if(selector) {
+      const option = document.createElement('option');
+      option.value = task.id;
+      option.textContent = task.subject + ' - ' + task.detail;
+      selector.appendChild(option);
+    }
   });
 
   if (!normalItems.length) list.innerHTML = '<p class="text-xs text-slate-400 text-center py-6 font-bold">ไม่พบรายการการบ้านที่เปิดรับ</p>';
@@ -960,7 +963,6 @@ function createTaskCard(task, isPinned) {
 
       ${imageHTML}
 
-      <!-- แสดงวันสั่ง และวันส่ง (สีแดง) ในการ์ดหน้าการบ้านทั้งหมด -->
       <div class="flex items-center gap-4 mt-2 text-[10px] font-extrabold">
         <span class="text-slate-400">วันสั่ง: ${formatDate(task.assignDate)}</span>
         <span class="text-rose-500">กำหนดส่ง: ${formatDate(task.dueDate)}</span>
