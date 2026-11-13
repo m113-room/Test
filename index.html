@@ -102,8 +102,8 @@
           <span class="text-slate-800 font-extrabold flex items-center gap-1.5"><i class="fa-solid fa-house text-sky-500"></i> <span id="user-display"></span></span>
         </div>
         <div class="flex items-center gap-2">
+          <!-- เอาปุ่ม ภาพรวมการส่ง ออกแล้ว เหลือเฉพาะปุ่ม การบ้าน -->
           <button id="tab-btn-pending" onclick="switchMainTab('pending')" class="px-3 py-1.5 rounded-full text-xs font-extrabold bg-sky-50 text-sky-600 transition">การบ้าน</button>
-          <button id="tab-btn-tracking" onclick="switchMainTab('tracking')" class="px-3 py-1.5 rounded-full text-xs font-extrabold text-slate-500 hover:bg-slate-50 transition">ภาพรวมการส่ง</button>
           <button onclick="logout()" class="px-3 py-1.5 bg-rose-50 text-rose-500 rounded-xl text-[11px] font-extrabold hover:bg-rose-100 transition ml-1">LOGOUT</button>
         </div>
       </div>
@@ -830,11 +830,6 @@ function switchMainTab(tab) {
   if (tab === 'pending') {
     switchTab('pending');
     el('tab-btn-pending').className = 'px-3 py-1.5 rounded-full text-xs font-extrabold bg-sky-50 text-sky-600 transition';
-    el('tab-btn-tracking').className = 'px-3 py-1.5 rounded-full text-xs font-extrabold text-slate-500 hover:bg-slate-50 transition';
-  } else if (tab === 'tracking') {
-    switchTab('tracking');
-    el('tab-btn-tracking').className = 'px-3 py-1.5 rounded-full text-xs font-extrabold bg-sky-50 text-sky-600 transition';
-    el('tab-btn-pending').className = 'px-3 py-1.5 rounded-full text-xs font-extrabold text-slate-500 hover:bg-slate-50 transition';
   }
 }
 
