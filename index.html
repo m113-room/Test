@@ -102,8 +102,7 @@
           <span class="text-slate-800 font-extrabold flex items-center gap-1.5"><i class="fa-solid fa-house text-sky-500"></i> <span id="user-display"></span></span>
         </div>
         <div class="flex items-center gap-2">
-          <!-- เอาปุ่ม ภาพรวมการส่ง ออกแล้ว เหลือเฉพาะปุ่ม การบ้าน -->
-          <button id="tab-btn-pending" onclick="switchMainTab('pending')" class="px-3 py-1.5 rounded-full text-xs font-extrabold bg-sky-50 text-sky-600 transition">การบ้าน</button>
+          <!-- เอาปุ่ม การบ้าน สีฟ้าออกแล้ว เหลือเฉพาะปุ่ม LOGOUT -->
           <button onclick="logout()" class="px-3 py-1.5 bg-rose-50 text-rose-500 rounded-xl text-[11px] font-extrabold hover:bg-rose-100 transition ml-1">LOGOUT</button>
         </div>
       </div>
@@ -823,13 +822,6 @@ function toggleNoDueDateInput(prefix) {
     } else {
       dateInput.classList.remove('opacity-40');
     }
-  }
-}
-
-function switchMainTab(tab) {
-  if (tab === 'pending') {
-    switchTab('pending');
-    el('tab-btn-pending').className = 'px-3 py-1.5 rounded-full text-xs font-extrabold bg-sky-50 text-sky-600 transition';
   }
 }
 
