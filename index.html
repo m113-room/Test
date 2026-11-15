@@ -106,7 +106,6 @@
     <!-- Main Page -->
     <main id="main-page" class="app-card expanded-view hidden bg-white rounded-3xl shadow-xl p-6 border border-slate-100">
 
-      <!-- หัวข้อปรับใหม่ตามที่ขอ: บรรทัดบน (รูปบ้าน | การบ้าน และปุ่มไอคอนขวา) บรรทัดล่างชิดซ้าย (ยศ) ตามด้วย user -->
       <div class="border-b border-slate-100 pb-4 mb-5 space-y-2">
         <div class="flex items-center justify-between flex-wrap gap-2">
           <div class="flex items-center gap-2">
@@ -125,8 +124,9 @@
             <button onclick="syncDataWithPopup()" title="รีเฟรชซิงค์" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs hover:bg-slate-200 transition">
               <i class="fa-solid fa-rotate"></i>
             </button>
-            <button onclick="logout()" title="ออกจากระบบ" class="w-8 h-8 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center text-xs hover:bg-rose-100 transition ml-1">
-              <i class="fa-solid fa-right-from-bracket"></i>
+            <!-- ปุ่ม Log out แบบมีไอคอนและข้อความ -->
+            <button onclick="logout()" title="ออกจากระบบ" class="px-3 py-1.5 bg-rose-50 text-rose-500 rounded-xl text-xs font-extrabold hover:bg-rose-100 transition flex items-center gap-1.5 ml-1">
+              <i class="fa-solid fa-right-from-bracket"></i> Log out
             </button>
           </div>
         </div>
