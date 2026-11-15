@@ -17,7 +17,6 @@
     body { 
       font-family: 'Plus Jakarta Sans', 'Sarabun', sans-serif;
       margin: 0;
-      /* พื้นหลังไล่เฉดสีชมพู-ฟ้า */
       background: linear-gradient(135deg, #fbcfe8 0%, #e0f2fe 50%, #bae6fd 100%);
       background-attachment: fixed;
       color: #1e293b;
@@ -35,6 +34,7 @@
       padding: 24px 14px 20px 14px;
     }
 
+    /* ปรับขนาดการแสดงผล: มือถือพอดีจอ / iPad หรือจอใหญ่ขยายกว้างเต็มตา */
     .app-card {
       width: 100%;
       max-width: 720px;
@@ -42,6 +42,13 @@
       margin-right: auto;
       overflow: hidden;
       transform: translateZ(0);
+      transition: max-width 0.3s ease;
+    }
+
+    @media (min-width: 1024px) {
+      .app-card.expanded-view {
+        max-width: 1280px;
+      }
     }
 
     @keyframes pop {
@@ -97,7 +104,7 @@
     </div>
 
     <!-- Main Page -->
-    <main id="main-page" class="app-card hidden bg-white rounded-3xl shadow-xl p-6 border border-slate-100">
+    <main id="main-page" class="app-card expanded-view hidden bg-white rounded-3xl shadow-xl p-6 border border-slate-100">
 
       <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5 flex-wrap gap-2">
         <div class="flex items-center gap-3 text-xs font-bold text-slate-500 flex-wrap">
@@ -145,6 +152,7 @@
         <i class="fa-solid fa-circle-info"></i> พร้อมใช้งาน
       </div>
 
+      <!-- 3 ปุ่มเมนูหลัก (การบ้านทั้งหมด=ชมพู, ปฏิทิน=ฟ้า, จัดการ/เพิ่มงาน=ม่วง) -->
       <nav class="grid grid-cols-3 gap-1 bg-slate-100 rounded-2xl p-1 mb-4 text-center">
         <button id="tab-pending" onclick="switchTab('pending')" class="py-2.5 rounded-xl text-xs font-extrabold transition">การบ้านทั้งหมด</button>
         <button id="tab-calendar" onclick="switchTab('calendar')" class="py-2.5 rounded-xl text-xs font-extrabold transition">ปฏิทิน</button>
@@ -190,7 +198,21 @@
           <span id="task-count" class="text-[10px] font-extrabold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">0 ITEMS</span>
         </div>
 
-        <div id="task-list" class="space-y-3"></div>
+        <!-- Layout 2 คอลัมน์สำหรับหน้าจอใหญ่ (iPad/Desktop) แบบในตัวอย่าง -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+          <div id="task-list" class="lg:col-span-7 space-y-3"></div>
+          <div id="desktop-sidebar-tracking" class="hidden lg:block lg:col-span-5 bg-slate-50 border border-slate-200/60 rounded-3xl p-4 sticky top-4 shadow-sm">
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="text-xs font-extrabold text-slate-700">สถานะรายคน กดที่เลขที่เพื่อดูงานที่ค้าง</h3>
+            </div>
+            <p class="text-[10px] text-slate-400 mb-3 flex items-center gap-2">
+              <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-white border border-slate-300"></span> ส่งครบ</span>
+              <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-200"></span> ค้าง 1 งาน</span>
+              <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-200"></span> ค้าง 2 งานขึ้นไป</span>
+            </p>
+            <div id="desktop-student-grid" class="grid grid-cols-7 gap-2"></div>
+          </div>
+        </div>
       </section>
 
       <!-- Tab: Calendar -->
@@ -239,7 +261,6 @@
           </button>
         </div>
 
-        <!-- ฟอร์มประกาศ -->
         <div id="admin-announcement-control" class="hidden mb-4">
           <div id="announcement-form" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-3.5 space-y-2.5 shadow-sm">
             <textarea id="announcement-input" rows="3" class="w-full border border-amber-300 rounded-xl p-2.5 text-xs bg-white font-medium text-slate-700" placeholder="พิมพ์ข้อความประกาศสำคัญที่นี่..."></textarea>
@@ -250,7 +271,6 @@
           </div>
         </div>
 
-        <!-- ฟอร์มเพิ่มกิจกรรม -->
         <div id="event-form" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-4 space-y-3 shadow-sm">
           <h3 class="text-xs font-bold text-amber-700 mb-1">เพิ่มกิจกรรมพิเศษ</h3>
           
@@ -852,6 +872,15 @@ function switchTab(tab) {
   if (filterContainer) {
     filterContainer.classList.toggle('hidden', tab === 'calendar');
   }
+
+  const mainPage = el('main-page');
+  if (mainPage) {
+    if (tab === 'pending') {
+      mainPage.classList.add('expanded-view');
+    } else {
+      mainPage.classList.remove('expanded-view');
+    }
+  }
 }
 
 function renderTasks() {
@@ -921,6 +950,59 @@ function renderTasks() {
 
   if (!normalItems.length) list.innerHTML = '<p class="text-xs text-slate-400 text-center py-6 font-bold">ไม่พบรายการการบ้านที่เปิดรับ</p>';
   if (!tracking.children.length) tracking.innerHTML = '<p class="text-xs text-slate-400 text-center py-6 font-bold">ไม่พบรายการงานค้างที่ค้นหา</p>';
+
+  renderDesktopStudentGrid();
+}
+
+function renderDesktopStudentGrid() {
+  const grid = el('desktop-student-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  for (let i = 1; i <= TOTAL_STUDENTS; i++) {
+    const numStr = String(i);
+    let unsubmittedCount = 0;
+    
+    tasks.forEach(t => {
+      if (!t.noStudent) {
+        const unsub = getUnsubmitted(t);
+        if (unsub.includes(numStr)) unsubmittedCount++;
+      }
+    });
+
+    let bgClass = 'bg-white border border-slate-200 text-slate-700';
+    if (unsubmittedCount === 1) bgClass = 'bg-amber-100 border border-amber-300 text-amber-800';
+    else if (unsubmittedCount >= 2) bgClass = 'bg-rose-100 border border-rose-300 text-rose-800';
+
+    const btn = document.createElement('button');
+    btn.className = `h-12 rounded-2xl flex flex-col items-center justify-center text-xs font-extrabold shadow-sm hover:scale-105 transition ${bgClass}`;
+    btn.innerHTML = `<span>${i}</span><span class="text-[9px] font-bold opacity-70">ค้าง ${unsubmittedCount}</span>`;
+    btn.onclick = () => openStudentDetailModal(i);
+    grid.appendChild(btn);
+  }
+}
+
+function openStudentDetailModal(studentNum) {
+  const unsubmittedTasks = tasks.filter(t => !t.noStudent && getUnsubmitted(t).includes(String(studentNum)));
+  
+  let content = `<div class="space-y-2 max-h-[300px] overflow-y-auto pr-1">`;
+  if (unsubmittedTasks.length > 0) {
+    unsubmittedTasks.forEach(t => {
+      content += `
+        <div class="bg-slate-50 border border-slate-100 p-3 rounded-2xl flex justify-between items-center">
+          <div>
+            <span class="text-[10px] font-extrabold text-pink-600">${escapeHtml(t.subject)}</span>
+            <h4 class="text-xs font-extrabold text-slate-800">${escapeHtml(t.detail)}</h4>
+          </div>
+          <button onclick="toggleStudent('${t.id}', '${studentNum}'); closeModal();" class="px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-xl text-xs font-extrabold hover:bg-emerald-100 transition">เช็คว่าส่งแล้ว</button>
+        </div>
+      `;
+    });
+  } else {
+    content += `<p class="text-xs text-slate-400 text-center py-6 font-bold">เลขที่ ${studentNum} ส่งงานครบหมดแล้วเยี่ยมมาก!</p>`;
+  }
+  content += `</div>`;
+  openModal(`รายการงานค้างของเลขที่ ${studentNum}`, content);
 }
 
 function createTaskCard(task, isPinned) {
@@ -952,7 +1034,7 @@ function createTaskCard(task, isPinned) {
     </button>
   ` : '';
 
-  const sideBarColor = isPinned ? 'bg-amber-400' : 'bg-pink-500';
+  const sideBarColor = isPinned ? 'bg-amber-400' : 'bg-emerald-500';
 
   let progressSectionHTML = '';
   if (task.noStudent) {
@@ -970,7 +1052,7 @@ function createTaskCard(task, isPinned) {
     progressSectionHTML = `
       <div class="mt-2 space-y-1.5">
         <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-          <div class="bg-pink-500 h-full rounded-full transition-all duration-300" style="width:${percent}%"></div>
+          <div class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width:${percent}%"></div>
         </div>
         <div class="flex justify-between items-center text-[10px] font-extrabold">
           <span class="text-slate-400">สถานะการส่ง</span>
@@ -1085,7 +1167,7 @@ function openTaskDetailModal(task) {
           <span class="text-rose-500">ยังไม่ส่ง (${unsubmitted.length})</span>
         </div>
         <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-          <div class="bg-pink-500 h-full rounded-full transition-all duration-300" style="width:${percent}%"></div>
+          <div class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width:${percent}%"></div>
         </div>
 
         <div class="pt-2">
@@ -1195,11 +1277,11 @@ function createTrackingCard(task) {
     </div>
 
     <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-      <div class="bg-pink-500 h-full rounded-full" style="width:${percent}%"></div>
+      <div class="bg-emerald-500 h-full rounded-full" style="width:${percent}%"></div>
     </div>
 
     <div class="flex justify-between items-center text-[10px] font-extrabold">
-      <span class="text-pink-600">ส่งแล้ว ${completed}/${total} (${percent}%)</span>
+      <span class="text-emerald-600">ส่งแล้ว ${completed}/${total} (${percent}%)</span>
       <span class="text-rose-500">ยังไม่ส่ง (${unsubmitted.length})</span>
     </div>
 
@@ -1525,7 +1607,7 @@ function renderCalendar() {
       dotsContainer.className = 'flex gap-1 items-center justify-center';
       if (hasTask) {
         const pinkDot = document.createElement('span');
-        pinkDot.className = 'w-1.5 h-1.5 rounded-full bg-pink-500 shadow-sm';
+        pinkDot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-sm';
         dotsContainer.appendChild(pinkDot);
       }
       if (hasEvent) {
