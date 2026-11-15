@@ -177,9 +177,9 @@
           <span class="text-[11px] font-bold text-slate-500"><i class="fa-solid fa-filter"></i> เรียงตาม:</span>
           <select id="filter-date-mode" onchange="renderTasks()"
             class="flex-1 py-2 px-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700">
-            <option value="all">ค่าเริ่มต้น (สร้างล่าสุด)</option>
-            <option value="due-soon">กำหนดส่งใกล้ที่สุด (เร็วไปช้า)</option>
+            <option value="due-soon" selected>กำหนดส่งใกล้ที่สุด (เร็วไปช้า)</option>
             <option value="assign-new">วันที่สั่งล่าสุด (ใหม่ไปเก่า)</option>
+            <option value="all">สร้างล่าสุด (ค่าเริ่มต้นเดิม)</option>
           </select>
         </div>
       </div>
@@ -1880,4 +1880,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
-
