@@ -121,10 +121,13 @@
             <button id="btn-options" onclick="openOptions()" title="จัดการวิชา" class="w-8 h-8 rounded-full bg-pink-50 text-pink-600 items-center justify-center text-xs hover:bg-pink-100 transition hidden">
               <i class="fa-solid fa-list-check"></i>
             </button>
+            <!-- ปุ่มเปิด-ปิด ตัวกรอง ย้ายมาอยู่กลุ่มเดียวกับปุ่มซิงค์ -->
+            <button id="btn-toggle-filter" onclick="toggleFilter()" title="ตัวกรองและค้นหา" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs hover:bg-slate-200 transition">
+              <i class="fa-solid fa-filter"></i>
+            </button>
             <button onclick="syncDataWithPopup()" title="รีเฟรชซิงค์" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs hover:bg-slate-200 transition">
               <i class="fa-solid fa-rotate"></i>
             </button>
-            <!-- ปุ่ม Log out แบบมีไอคอนและข้อความ -->
             <button onclick="logout()" title="ออกจากระบบ" class="px-3 py-1.5 bg-rose-50 text-rose-500 rounded-xl text-xs font-extrabold hover:bg-rose-100 transition flex items-center gap-1.5 ml-1">
               <i class="fa-solid fa-right-from-bracket"></i> Log out
             </button>
@@ -167,8 +170,8 @@
         <button id="tab-tracking" onclick="switchTab('tracking')" class="py-2.5 rounded-xl text-xs font-extrabold transition">จัดการ/เพิ่มงาน</button>
       </nav>
 
-      <!-- Filter & Search Bar -->
-      <div id="filter-container" class="bg-slate-50 border border-slate-200/60 rounded-2xl p-3.5 mb-4 space-y-3 shadow-sm">
+      <!-- Filter & Search Bar (ซ่อนไว้โดยค่าเริ่มต้น สามารถกดเปิดจากปุ่มรูปกรองด้านบนได้) -->
+      <div id="filter-container" class="hidden bg-slate-50 border border-slate-200/60 rounded-2xl p-3.5 mb-4 space-y-3 shadow-sm animate-pop">
         <div class="flex items-center gap-2">
           <div class="relative flex-1">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
@@ -425,6 +428,19 @@ function showAlert(message) {
 
 function closeAlert() {
   el('custom-alert').classList.add('hidden');
+}
+
+function toggleFilter() {
+  const container = el('filter-container');
+  const btn = el('btn-toggle-filter');
+  if (container) {
+    container.classList.toggle('hidden');
+    if (!container.classList.contains('hidden')) {
+      btn.className = 'w-8 h-8 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center text-xs hover:bg-pink-200 transition';
+    } else {
+      btn.className = 'w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs hover:bg-slate-200 transition';
+    }
+  }
 }
 
 function escapeHtml(value) {
@@ -877,8 +893,14 @@ function switchTab(tab) {
   });
 
   const filterContainer = el('filter-container');
-  if (filterContainer) {
-    filterContainer.classList.toggle('hidden', tab === 'calendar');
+  const btnToggleFilter = el('btn-toggle-filter');
+  if (filterContainer && btnToggleFilter) {
+    if (tab === 'calendar') {
+      filterContainer.classList.add('hidden');
+      btnToggleFilter.classList.add('hidden');
+    } else {
+      btnToggleFilter.classList.remove('hidden');
+    }
   }
 
   const mainPage = el('main-page');
