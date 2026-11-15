@@ -106,27 +106,35 @@
     <!-- Main Page -->
     <main id="main-page" class="app-card expanded-view hidden bg-white rounded-3xl shadow-xl p-6 border border-slate-100">
 
-      <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5 flex-wrap gap-2">
-        <div class="flex items-center gap-3 text-xs font-bold text-slate-500 flex-wrap">
-          <span class="text-slate-800 font-extrabold flex items-center gap-1.5"><i class="fa-solid fa-house text-pink-500"></i> <span id="user-display"></span></span>
-          <span class="text-slate-300">|</span>
-          <div class="flex items-baseline gap-2">
-            <h1 class="font-extrabold text-slate-800 text-base">การบ้าน</h1>
-            <span class="text-xs text-slate-400 font-medium hidden sm:inline">(กดที่การบ้านเพื่อดูรายละเอียดและเช็คชื่อส่งงาน)</span>
+      <!-- หัวข้อปรับใหม่ตามที่ขอ: บรรทัดบน (รูปบ้าน | การบ้าน และปุ่มไอคอนขวา) บรรทัดล่างชิดซ้าย (ยศ) ตามด้วย user -->
+      <div class="border-b border-slate-100 pb-4 mb-5 space-y-2">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <span class="text-slate-800 font-extrabold flex items-center gap-1.5 text-base">
+              <i class="fa-solid fa-house text-pink-500"></i> การบ้าน
+            </span>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <button id="btn-logs" onclick="openLogs()" title="ประวัติการใช้งาน" class="w-8 h-8 rounded-full bg-slate-50 text-slate-600 items-center justify-center text-xs hover:bg-slate-100 transition hidden">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+            </button>
+            <button id="btn-options" onclick="openOptions()" title="จัดการวิชา" class="w-8 h-8 rounded-full bg-pink-50 text-pink-600 items-center justify-center text-xs hover:bg-pink-100 transition hidden">
+              <i class="fa-solid fa-list-check"></i>
+            </button>
+            <button onclick="syncDataWithPopup()" title="รีเฟรชซิงค์" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs hover:bg-slate-200 transition">
+              <i class="fa-solid fa-rotate"></i>
+            </button>
+            <button onclick="logout()" title="ออกจากระบบ" class="w-8 h-8 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center text-xs hover:bg-rose-100 transition ml-1">
+              <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
           </div>
         </div>
 
-        <div class="flex items-center gap-1.5">
-          <button id="btn-logs" onclick="openLogs()" title="ประวัติการใช้งาน" class="w-8 h-8 rounded-full bg-slate-50 text-slate-600 items-center justify-center text-xs hover:bg-slate-100 transition hidden">
-            <i class="fa-solid fa-clock-rotate-left"></i>
-          </button>
-          <button id="btn-options" onclick="openOptions()" title="จัดการวิชา" class="w-8 h-8 rounded-full bg-pink-50 text-pink-600 items-center justify-center text-xs hover:bg-pink-100 transition hidden">
-            <i class="fa-solid fa-list-check"></i>
-          </button>
-          <button onclick="syncDataWithPopup()" title="รีเฟรช" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs hover:bg-slate-200 transition">
-            <i class="fa-solid fa-rotate"></i>
-          </button>
-          <button onclick="logout()" class="px-3 py-1.5 bg-rose-50 text-rose-500 rounded-xl text-[11px] font-extrabold hover:bg-rose-100 transition ml-1">LOGOUT</button>
+        <div class="text-xs font-bold text-slate-500 flex items-center gap-2">
+          <span id="user-display" class="text-slate-700 font-extrabold"></span>
+          <span class="text-slate-300">|</span>
+          <span class="text-slate-400 font-medium hidden sm:inline">(กดที่การบ้านเพื่อดูรายละเอียดและเช็คชื่อส่งงาน)</span>
         </div>
       </div>
 
@@ -618,7 +626,7 @@ async function login() {
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
       
-      el('user-display').textContent = `${currentUser.username} (${currentUser.role})`;
+      el('user-display').textContent = `(${currentUser.role}) ${currentUser.username}`;
 
       updateAdminUI();
       switchTab('pending');
@@ -1867,7 +1875,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       currentUser = JSON.parse(saved);
       el('login-page').classList.add('hidden');
       el('main-page').classList.remove('hidden');
-      el('user-display').textContent = `${currentUser.username} (${currentUser.role})`;
+      el('user-display').textContent = `(${currentUser.role}) ${currentUser.username}`;
       updateAdminUI();
       switchTab('pending');
       await loadAllData(false);
